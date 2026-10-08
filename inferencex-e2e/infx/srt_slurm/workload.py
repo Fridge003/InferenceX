@@ -18,6 +18,7 @@ from typing import Any
 
 import yaml
 
+from infx.clusters.slurm import FABRIC_REFERENCE
 from infx.config import repository_root
 from infx.srt_slurm.synthetic_acceptance import selected_recipes, spec_parameters
 
@@ -52,7 +53,6 @@ BOUND_ENV = {
     (True, False): ("MODEL", *_AGENTIC_ENV),
     (True, True): (*_AGENTIC_ENV, "AIPERF_DATASET_MMAP_CACHE_DIR"),
 }
-FABRIC_REFERENCE = "@fabric."
 
 
 def merge_blocks(shared: Mapping[str, Any], fragment: Mapping[str, Any]) -> dict[str, Any]:
