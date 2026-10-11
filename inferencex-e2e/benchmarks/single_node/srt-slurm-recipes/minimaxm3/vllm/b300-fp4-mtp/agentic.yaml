@@ -5,7 +5,7 @@ base:
   name: minimaxm3-fp4-b300-vllm-agentic
   model:
     path: hf:nvidia/MiniMax-M3-NVFP4
-    container: vllm/vllm-openai:cu129-nightly-2eb491e18b1ce5b8a25e4c88f32dbb5d028d525c@sha256:ac1bf0031cfa26cd6e4e6db0f70cd7730c5969de87335fd49cd940105a9d5ac5
+    container: vllm/vllm-openai:cu134-nightly-2eb491e18b1ce5b8a25e4c88f32dbb5d028d525c@sha256:a5ff8d915b8259c9d5ac005bf97392865efef0d2c9c2a7bbd91282070b3edf52
     precision: fp4
   resources:
     gpu_type: b300
