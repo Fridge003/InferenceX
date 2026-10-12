@@ -1,0 +1,1693 @@
+{
+  "repository": "SemiAnalysisAI/InferenceX",
+  "audit_date": "2026-10-12",
+  "cutoff": "2026-09-12T04:00:00Z",
+  "age_basis": "tip commit committer date; branch push/creation time unverified",
+  "before": {
+    "branches": 1304,
+    "open_prs": 221
+  },
+  "projected_after": {
+    "branches": 1090,
+    "open_prs": 191
+  },
+  "candidates": [
+    {
+      "name": "agent/capture-trtllm-server-metrics",
+      "sha": "5713868d043b64afdf5fb99a8b8a28cfde2696eb",
+      "committed_date": "2026-08-27T19:07:33Z",
+      "open_prs": [
+        {
+          "number": 2625,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2625"
+        }
+      ]
+    },
+    {
+      "name": "agent/mi300x-qwen35-2p1d-screen",
+      "sha": "3be8b97516cbc6e628d3225cec8ef2455d916855",
+      "committed_date": "2026-09-11T04:21:07Z",
+      "open_prs": []
+    },
+    {
+      "name": "agent/mi300x-qwen35-agentx-mori-frontier",
+      "sha": "0513c807dd7aaf8e4d2e04d4432741490ba12855",
+      "committed_date": "2026-09-11T03:44:55Z",
+      "open_prs": []
+    },
+    {
+      "name": "agent/port-dsv4-gb200-llmd-to-srt-vllm-router",
+      "sha": "69330f34215814586989081ea4f56829a5e455fe",
+      "committed_date": "2026-08-27T11:56:31Z",
+      "open_prs": []
+    },
+    {
+      "name": "agent/port-glm51-b200-tilert-fixed-srt-slurm",
+      "sha": "82d5e44c6e7aa2b913aa3f5a1e10c0006bdd3901",
+      "committed_date": "2026-08-27T15:21:47Z",
+      "open_prs": []
+    },
+    {
+      "name": "agent/vllm-router-upstream-native-validation",
+      "sha": "5d7b1641b70b260aeaa4e1dc170db3f5f696328f",
+      "committed_date": "2026-08-27T20:33:45Z",
+      "open_prs": []
+    },
+    {
+      "name": "albecheng/speedbench-al-qwen3.8",
+      "sha": "276933c8decb7b06cc7c477f301dd8653b328bb8",
+      "committed_date": "2026-09-08T20:08:41Z",
+      "open_prs": [
+        {
+          "number": 2780,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2780"
+        }
+      ]
+    },
+    {
+      "name": "amd/agentx_k3_vllm_0831_2",
+      "sha": "7558147513c00d9d044813654ddd49588e603fa3",
+      "committed_date": "2026-08-31T04:30:41Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/agentx_k3_vllm_0903",
+      "sha": "82b3e6025b067909c97fe3b72682df2ca0ab42a1",
+      "committed_date": "2026-09-03T00:00:24Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/agentx-v1.0-th-mtp-enhance-mtp1",
+      "sha": "a7e47596427c4fb4573580cf258ca660fc879959",
+      "committed_date": "2026-09-03T05:28:59Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/agentx-v1.0-th-mtp-enhance-plus-mz",
+      "sha": "a5f0898378f3b73229c30419b373b5599693c425",
+      "committed_date": "2026-09-12T02:07:01Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/glm52-fp4-mi355x-sglang-agentx-v519",
+      "sha": "6d0ef7538afcbbefcd2d3beadbe5cd49f21563a9",
+      "committed_date": "2026-09-11T13:46:43Z",
+      "open_prs": [
+        {
+          "number": 3014,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/3014"
+        }
+      ]
+    },
+    {
+      "name": "amd/k3-c1-aitermla-pr55966-56098-20260910",
+      "sha": "3dde5962ce017a6f6ca1daabe9e564011c1ddfe7",
+      "committed_date": "2026-09-10T14:23:18Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/k3-c1-dense-fp8-ci-20260908",
+      "sha": "1c27a290d73b190e54699c63656fa4a3ad249897",
+      "committed_date": "2026-09-08T09:48:16Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/k3-c1-g17-slurm-20260908",
+      "sha": "c5cd0fb4391ba1efa5886e16985faca488020fcf",
+      "committed_date": "2026-09-08T07:34:43Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/k3-c1-gpu-cache-20260908",
+      "sha": "b040772805d720e8afecf9b2de479656a719cfeb",
+      "committed_date": "2026-09-08T06:13:53Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/k3-fmha-v3-a4w4-c1-c14-20260908",
+      "sha": "175c0bd30477fc93861035a2b55de79811abdda9",
+      "committed_date": "2026-09-08T03:58:10Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/k3-fmha-v3-a8w4-c1-c14-20260908",
+      "sha": "8c6823cd6b8e727ca3a44c687f8370854ab0b5c3",
+      "committed_date": "2026-09-08T03:57:23Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/k3-mi355x-lmcache-dcp-retrieve-fix",
+      "sha": "cc0333833cb49c839d0200e0889e3ab27e752ebf",
+      "committed_date": "2026-09-11T01:43:48Z",
+      "open_prs": [
+        {
+          "number": 2831,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2831"
+        }
+      ]
+    },
+    {
+      "name": "amd/k3-v466-kvnone-c1-c16-c40-c52",
+      "sha": "b99dda569a5ae5d9d14567ccb54866c3e9f40753",
+      "committed_date": "2026-08-29T01:02:32Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-agentic-perf-tuning-2.0",
+      "sha": "11e83422051a805f5721ce408a0bcc3ed64dc057",
+      "committed_date": "2026-08-27T02:24:49Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-agentic-perf-tuning-3.0",
+      "sha": "45485eb9ee6e9bde5152d759deccfbaa97c4c497",
+      "committed_date": "2026-08-31T14:33:07Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-compile52190-final-20260831",
+      "sha": "3dd7a01f2ff25f8b10cb66a4c443477218e016d1",
+      "committed_date": "2026-08-31T00:00:22Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-current-baseline-20260831",
+      "sha": "76df33d74007c1cf1b046fab9f3fa3754e80926a",
+      "committed_date": "2026-08-30T17:12:13Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-dcp-51705",
+      "sha": "5d039f960b86ebcd616061dc6c35634d67f69f59",
+      "committed_date": "2026-08-26T10:54:45Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-mi355x-v466-c16-dcp8-kvnone",
+      "sha": "102a6346061b84fe51c19ac553e53c9cb6f55f4b",
+      "committed_date": "2026-08-27T16:31:22Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-mi355x-v466-full-sweep",
+      "sha": "15955d885c3f2c07d002e78861fbe3e3bc82bd59",
+      "committed_date": "2026-08-27T15:28:05Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-mi355x-v466-k3-sweep",
+      "sha": "862f6ebbf48393045b472a17c3ef82b787fca60c",
+      "committed_date": "2026-08-27T03:11:51Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-mi355x-v466-k3-tp8-baseline",
+      "sha": "5a1b6507a8e4917e80f302684f797a3928874ff1",
+      "committed_date": "2026-08-27T03:22:24Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-mi355x-v466-k6-tp8-baseline",
+      "sha": "f03e8628688ee0452403d9fdea408b3d844310df",
+      "committed_date": "2026-08-27T03:32:15Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-mi355x-v466-tuned",
+      "sha": "26969e0e3ec6d2421f55e00ae8448d10c85630a2",
+      "committed_date": "2026-08-27T01:20:05Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/kimi-k3-mi355x-v466-tuned_srok",
+      "sha": "a70e454375f97de29eec7c69e1a84cbd5d32c043",
+      "committed_date": "2026-08-28T02:04:29Z",
+      "open_prs": []
+    },
+    {
+      "name": "amd/mi355x-agentx-dsv4-sgl-Aug27",
+      "sha": "d5a2887a3b72756bd77e2cf5ff1f22082db6c002",
+      "committed_date": "2026-08-27T13:20:36Z",
+      "open_prs": []
+    },
+    {
+      "name": "b200-sgl-fp8-update",
+      "sha": "e3bd3e58ae46b1f84585c51e617f290c31e8ea55",
+      "committed_date": "2026-09-07T22:09:29Z",
+      "open_prs": []
+    },
+    {
+      "name": "chang/qwen3.5-fp4-mi355-sglang-agentic",
+      "sha": "7709643aef78478d75c592c3c9b17bd48e740025",
+      "committed_date": "2026-09-08T16:24:24Z",
+      "open_prs": []
+    },
+    {
+      "name": "chang/qwen3.5-fp4-mi355x-sglang-v0.5.19",
+      "sha": "0ec8ec67c45d48e5b39780f359d29b25c79449e2",
+      "committed_date": "2026-09-08T15:48:32Z",
+      "open_prs": []
+    },
+    {
+      "name": "chang/qwen3.8-flash-fp4-mi355x-sglang-agentic",
+      "sha": "7b576aba0950edde27c649f0ad2c9f53f890d747",
+      "committed_date": "2026-09-10T14:43:04Z",
+      "open_prs": []
+    },
+    {
+      "name": "chore/agentx-dsv4-b200-power-pilot",
+      "sha": "eed81d7809f3c719d8363806232fcf95921d5087",
+      "committed_date": "2026-09-09T18:44:18Z",
+      "open_prs": []
+    },
+    {
+      "name": "chore/preserve-kimik3-3030-full",
+      "sha": "2f3d637f62d85bccc9c9b41fc5c05eca5039796c",
+      "committed_date": "2026-09-12T02:05:32Z",
+      "open_prs": []
+    },
+    {
+      "name": "chore/slurm-probe-mi355x-oom-20260907",
+      "sha": "47155cce8e9eac150357802ddc51910cbc0bc5f0",
+      "committed_date": "2026-09-07T04:06:54Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex-dsv4-swa-cache-sources",
+      "sha": "6a822f912f8ae6755532be81fafe960b46522cf1",
+      "committed_date": "2026-09-10T00:20:22Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex-dsv4-swa-p2p",
+      "sha": "af21b9761f89085b05a3dbc5ffe0d2cb7b80d2ae",
+      "committed_date": "2026-09-09T21:21:24Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/h100-cache-source-validation",
+      "sha": "992df5d5a7925f680938aa21f4fc2b4cfbe6604c",
+      "committed_date": "2026-09-02T15:58:47Z",
+      "open_prs": [
+        {
+          "number": 2796,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2796"
+        }
+      ]
+    },
+    {
+      "name": "codex/h100-minimaxm3-disagg-source",
+      "sha": "b41d05864fa0f17674b36b8eb89cfaa21c58468b",
+      "committed_date": "2026-09-03T14:47:43Z",
+      "open_prs": [
+        {
+          "number": 2797,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2797"
+        }
+      ]
+    },
+    {
+      "name": "codex/h100-minimaxm3-nvme-agentx",
+      "sha": "cb0fec25d774e88abeae788e5d83f123f4238ef5",
+      "committed_date": "2026-09-01T05:39:23Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-atom-gap-c4-dcp8-20260828",
+      "sha": "e2562717208b1ee2cd0139c5ab278983f75c9880",
+      "committed_date": "2026-08-28T17:35:17Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-agentx-profile-20260831",
+      "sha": "0c90b7b0c86518e1d5aa482686e433e50674aa0a",
+      "committed_date": "2026-09-01T04:13:07Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-b300-selected-depth-20260902",
+      "sha": "b5d3789313701a75c2d58a9a5b1eb96bef275ca8",
+      "committed_date": "2026-09-02T08:30:34Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-deferred-finalize-aba-20260902",
+      "sha": "59fcf607833e69a7e72977529175f6f9fc0d83e2",
+      "committed_date": "2026-09-02T14:19:21Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-fused-ar-rms-diag-20260902",
+      "sha": "6dd2cc8260a13fc9694ea1a0043d68810e7da17d",
+      "committed_date": "2026-09-02T11:28:07Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-gap-close-20260901",
+      "sha": "47ab77233c5c89dbea646fc92ce94f9fd2ae8b6a",
+      "committed_date": "2026-09-01T20:56:39Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-m4-gemm-diag-20260901",
+      "sha": "80c8eee729eddee17e237318715b9538c9a116b1",
+      "committed_date": "2026-09-02T03:57:52Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-m456-gemm-diag-20260901",
+      "sha": "b9d58cea80b19606cacf6cae3fb9d9e6f27f8f48",
+      "committed_date": "2026-09-02T04:43:48Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-m7-gemm-natural-20260901",
+      "sha": "d5425ca6519e48823a81ceff02b08756839e7836",
+      "committed_date": "2026-09-02T00:05:10Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-m7-token-tiled-ab-20260901",
+      "sha": "33c1c400e64d9c29203717d14aa7684835d2aa59",
+      "committed_date": "2026-09-01T19:04:28Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-metadata-isolation-20260902",
+      "sha": "466fb87ead1e4c022f7136d84e1976697d4aecd6",
+      "committed_date": "2026-09-02T16:22:19Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-metadata-reuse-aba-20260902",
+      "sha": "e15d3819682a9841b2dbaee83a51327aec7252a2",
+      "committed_date": "2026-09-02T10:48:59Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-radix-router-aba-20260902",
+      "sha": "2b23cd9257005d10217dc17812aaca7510d98412",
+      "committed_date": "2026-09-02T18:13:50Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-radix-router-diag-20260901",
+      "sha": "82ca2128342ccf748f41179cd7bd1f036c1601cb",
+      "committed_date": "2026-09-02T16:02:37Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-rocm-shared-expert-stream-aba-20260902",
+      "sha": "83680bfe64522a6a916dddbb8261e20b39a3f590",
+      "committed_date": "2026-09-02T15:19:47Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-same-node-aba-20260901",
+      "sha": "36d646f26f15fd4c63f666eff8606319bc2f697c",
+      "committed_date": "2026-09-02T03:30:17Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-selected-depth-profile-20260901",
+      "sha": "0e080fd400b16aa2c87037ec1dd649203f14bfb0",
+      "committed_date": "2026-09-02T08:29:55Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-spec4-golden-aba-20260901",
+      "sha": "dc709df84b55fd620187b51491e35ca37d3fd064",
+      "committed_date": "2026-09-02T08:25:50Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-spec45-golden-aba-20260901",
+      "sha": "9467bf2f04f98f2bda73043a276689c3ff6e762d",
+      "committed_date": "2026-09-02T04:56:50Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-spec5-golden-aba-20260901",
+      "sha": "b30a6886693d8e8dcbe4326ad53cee2cfb32fe18",
+      "committed_date": "2026-09-02T05:48:55Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-spec5-m6-gemm-aba-20260902",
+      "sha": "f37f1440500b9c99a9a154c05344d0bfbe52a3e7",
+      "committed_date": "2026-09-02T06:19:04Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-spec5-m6-profile-20260902",
+      "sha": "7e5e78699570cc76c137bc7e2b849ccf56c3a8fc",
+      "committed_date": "2026-09-02T06:25:05Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-tier0-collective-diag-main-20260901",
+      "sha": "1a825a7bc4934e1fd07fd85f371ffd8f998d6d39",
+      "committed_date": "2026-09-02T00:11:33Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-c1-triton-mla-20260901",
+      "sha": "6dfa40ee9d038d24a1a1262c27a9cfd7d9b5ffc9",
+      "committed_date": "2026-09-02T00:53:19Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-gap-c1-atom-dcp8-20260828",
+      "sha": "4f4c2ebe35c2293183c84182cb2e7ac89e1051ab",
+      "committed_date": "2026-08-28T20:16:11Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-gap-c1-vllm-route-diag-20260828",
+      "sha": "4fdd06ed9c4b7c27b0adcd5c1aba9704bf6f3ce9",
+      "committed_date": "2026-08-28T21:02:20Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-gap-c56-mbt8192-20260828",
+      "sha": "353214a0594804118ea0792e5dda603a1abda0ff",
+      "committed_date": "2026-08-28T20:33:36Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-gap-c56-state64-20260828",
+      "sha": "3ecc0c87254c4a2a752b052364c528902e435d5c",
+      "committed_date": "2026-08-28T19:05:43Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-gap-vllm-c1-matched-20260828",
+      "sha": "15055feb22f9fd26e9a8536aa497a61bb819475d",
+      "committed_date": "2026-08-28T18:58:15Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/k3-pr52968-pr53166-ab-20260828",
+      "sha": "09d1235505bfcf2c879028df5cf93746ab50ab54",
+      "committed_date": "2026-08-28T13:50:17Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/kimi-k3-fhmoe-agentx-ab",
+      "sha": "0734059def4c92f5c22bee7c1b8c99912384193d",
+      "committed_date": "2026-09-04T08:20:37Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/mi300x-amd-cutover",
+      "sha": "c228d68c247905ed9d571ef0ac2272cf7019b1fc",
+      "committed_date": "2026-08-31T16:58:18Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/mr805-validate-dsv4-source",
+      "sha": "1ce6f5be2c2247aa49c29ce768134666ccc9bf93",
+      "committed_date": "2026-07-14T08:05:06Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/mr805-validate-minimaxm3-source",
+      "sha": "e3e3f0716c3adf1d1efc032e3dfc92a938bccf00",
+      "committed_date": "2026-06-14T22:03:00Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/optimal-priority-packing",
+      "sha": "7086474d7bc3673426a5735099e4a1b1b4bd94cf",
+      "committed_date": "2026-08-27T21:44:05Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/powerx-agentx-data-20260904",
+      "sha": "136857c19583335f76772be33ab4725e35c9bfe9",
+      "committed_date": "2026-09-09T06:45:45Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/powerx-agentx-fp8-three-platforms",
+      "sha": "1c0103f93cbf1ba6c046694b39cc132eec7bc325",
+      "committed_date": "2026-09-04T21:31:19Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/qwen35-36330-agentx-ab-a-20260828",
+      "sha": "676cbfca65d0f9170a6aac467a29df0062f8faf6",
+      "committed_date": "2026-08-28T00:36:37Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/qwen35-36330-agentx-ab-b-20260828",
+      "sha": "312e17dd482d1cf623aabd1fa5a8ecbec77ee36c",
+      "committed_date": "2026-08-28T00:36:15Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/sync-h100-runner-capacity",
+      "sha": "59e6220c5de5de83596b1af589fc9e444fabdcc0",
+      "committed_date": "2026-08-26T16:07:39Z",
+      "open_prs": []
+    },
+    {
+      "name": "codex/vllm-tier-source-agentx",
+      "sha": "474973acbea52dbcd044cbd6c4624a9d18c0b22d",
+      "committed_date": "2026-08-28T01:31:22Z",
+      "open_prs": []
+    },
+    {
+      "name": "config/dsv41flash-b200-mooncake",
+      "sha": "a484e2f0b590b6d86fa813e9e7be4f73c51c4651",
+      "committed_date": "2026-09-11T04:14:52Z",
+      "open_prs": []
+    },
+    {
+      "name": "config/dsv41flash-b300-mooncake",
+      "sha": "37f7f317c29293e746ab5f3643cd0a768cfe0ba5",
+      "committed_date": "2026-09-11T04:14:53Z",
+      "open_prs": []
+    },
+    {
+      "name": "config/dsv41flash-gb200-mooncake",
+      "sha": "4f6483f1359b9bddbabff24c028f10a6443f459e",
+      "committed_date": "2026-09-11T05:15:43Z",
+      "open_prs": []
+    },
+    {
+      "name": "config/dsv41flash-gb300-agentx-batch3",
+      "sha": "1eef7a87995aa3d1b4dc45ba045e5df7f3913f3e",
+      "committed_date": "2026-09-11T05:52:33Z",
+      "open_prs": []
+    },
+    {
+      "name": "config/dsv41flash-h100-mooncake",
+      "sha": "fe6807e73efcdce343306b677bd2c3677d447cff",
+      "committed_date": "2026-09-11T04:14:55Z",
+      "open_prs": []
+    },
+    {
+      "name": "config/dsv41flash-h200-mooncake",
+      "sha": "e86339c847aebcd91bc8345c44e390c677b575ea",
+      "committed_date": "2026-09-11T09:29:19Z",
+      "open_prs": []
+    },
+    {
+      "name": "config/gb300-upstream-synthetic",
+      "sha": "22a92a904968a5d6ffa0e7b2da254c020f517cdc",
+      "committed_date": "2026-09-11T01:59:59Z",
+      "open_prs": []
+    },
+    {
+      "name": "cx-pr2820-ep16-x86",
+      "sha": "e40eac1a914d8f8095d31c895623cc76e37b8732",
+      "committed_date": "2026-09-10T03:31:53Z",
+      "open_prs": []
+    },
+    {
+      "name": "data/dsv41flash-golden-al",
+      "sha": "8a58c9cd7c9c3725fc4f942331d644906eb75ecc",
+      "committed_date": "2026-09-10T15:54:24Z",
+      "open_prs": []
+    },
+    {
+      "name": "dev/jiejing/glm5.2-eval-hicache-size",
+      "sha": "a6b9d3a1b3c3df6daf0ebdfe9d4523af84e1e01c",
+      "committed_date": "2026-09-11T05:30:19Z",
+      "open_prs": []
+    },
+    {
+      "name": "dev/jiejing/glm5.2-eval-write-through",
+      "sha": "b169be32266d3e70927639a14c24446b9c29d876",
+      "committed_date": "2026-09-11T06:17:08Z",
+      "open_prs": []
+    },
+    {
+      "name": "dsv4-b300-w4a4-megamoe-20260904",
+      "sha": "3ccb09a46afe5ab6015e6ccf8da268c618c2818e",
+      "committed_date": "2026-09-08T01:15:45Z",
+      "open_prs": [
+        {
+          "number": 2878,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2878"
+        }
+      ]
+    },
+    {
+      "name": "dsv4-fp4-b200-vllm-agentic-dspark",
+      "sha": "9df882f1be19f41a5a2e7e60d319f488f6228fd8",
+      "committed_date": "2026-09-10T18:59:57Z",
+      "open_prs": []
+    },
+    {
+      "name": "dsv4-fp4-b300-dynamo-trt-recipes",
+      "sha": "d46b04e1c94f6f202512af6012a8d2dac3f72c5d",
+      "committed_date": "2026-09-11T00:39:15Z",
+      "open_prs": []
+    },
+    {
+      "name": "dsv4-fp4-b300-sglang-agentic-hicache-dspark6-0813",
+      "sha": "b183c404730898e152b907a2afc0c4c84262b3c5",
+      "committed_date": "2026-09-07T02:59:04Z",
+      "open_prs": []
+    },
+    {
+      "name": "dsv4-fp4-gb300-dynamo-trt-agentx-rerun",
+      "sha": "7dcd29b2f88d50b6354280e37bdb3084bba274d7",
+      "committed_date": "2026-09-08T17:04:57Z",
+      "open_prs": []
+    },
+    {
+      "name": "dsv4-fp8-h200-cudagraph-capture-sizes",
+      "sha": "196d80930a69b6719a79c6d8440bfd791ba42437",
+      "committed_date": "2026-09-01T00:18:00Z",
+      "open_prs": []
+    },
+    {
+      "name": "dsv4-mi355-sgl-agentic-0828",
+      "sha": "e0412861f1a903978ef6d58c9c7fdef7c4bb251b",
+      "committed_date": "2026-08-28T06:09:46Z",
+      "open_prs": []
+    },
+    {
+      "name": "dsv4-mi355-sgl-agentic-0907",
+      "sha": "3cc2e8ae5f086ae41f2fd80f9dc56477ed0eef65",
+      "committed_date": "2026-09-07T08:28:40Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-aiter021p1-a8w4-lmcache-dev104-c14-20260907",
+      "sha": "0822898ca963c7ae718f19936e3794771536b059",
+      "committed_date": "2026-09-07T14:31:03Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c14-aiter-cprr-20260831",
+      "sha": "86d5ea7f9e9ecb4a5e111aa6509626694ffa1cdc",
+      "committed_date": "2026-08-31T05:37:06Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c14-vllm-pr53222-20260831",
+      "sha": "877a1cd70e6f8578ab1a8c1da7ddf33f5d08ab2a",
+      "committed_date": "2026-08-31T05:33:37Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c40-vllm-baseline-ab-20260831",
+      "sha": "388108f7608a65318c0197209fbf3730e6c31d6e",
+      "committed_date": "2026-09-01T06:03:09Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c40-vllm-pr53222-ab-20260831",
+      "sha": "49573dd845dc2e61f2ee6db8143eec02dc6e6d02",
+      "committed_date": "2026-08-31T08:35:37Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c48-gmu090-gpuworkers8-20260903",
+      "sha": "51e74d70b48194eee435337ab707332881393d52",
+      "committed_date": "2026-09-03T02:47:26Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c48-gmu090-only-20260903",
+      "sha": "4b7aad87550e5c200975b984fb1afb85faa7f541",
+      "committed_date": "2026-09-03T02:47:25Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c48-gpuworkers2-only-20260903",
+      "sha": "726cc8512d372c096487ea2bc9d59a676a7ddee7",
+      "committed_date": "2026-09-03T04:56:18Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c48-gpuworkers4-only-20260903",
+      "sha": "363b000a564479987aaec11fe0c1e2c27ebfef4f",
+      "committed_date": "2026-09-03T04:56:18Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c48-gpuworkers8-only-20260903",
+      "sha": "9ad5b76603b25e742a80c2d31b856117b06c41ce",
+      "committed_date": "2026-09-03T02:47:25Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c48-job100621375270-image7c5-20260903",
+      "sha": "51435d6fbc91b837e97823336ddec89abc4e4614",
+      "committed_date": "2026-09-03T12:28:16Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c48-mns64-cg96-gmu090-workers2-20260903",
+      "sha": "5b40bc1aa6cedf0cd76f776aadcf171dc0f8e4b1",
+      "committed_date": "2026-09-03T10:44:15Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c48-mns96-cg96-nightly27a94d1-20260903",
+      "sha": "2640645a625db62ce17063de0d7febc31f0de339",
+      "committed_date": "2026-09-03T07:43:00Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-c48-nightly27a94d1-gmu090-20260903",
+      "sha": "11400885d69fb1cd4544e52f14e1278bacb42767",
+      "committed_date": "2026-09-03T07:11:45Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-gb300-gb200-hbm-20260908",
+      "sha": "1986cbcac728ddc275c1b6c3adf8012076031839",
+      "committed_date": "2026-09-08T03:41:45Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-gb300-mem085-20260907",
+      "sha": "4e6819bcf72c738626cbdad35377bf2f91f677f1",
+      "committed_date": "2026-09-07T16:12:22Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-mi355x-lmcache-dev104-c44-c48-20260907",
+      "sha": "9415afc1cb9f73149b31c4a64932c89e8880be4e",
+      "committed_date": "2026-09-07T01:31:52Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-mi355x-lmcache-dev104-c48-exclude-g15-20260907",
+      "sha": "f1d695c4d164719914d5159a19c0e2fd1afd88ee",
+      "committed_date": "2026-09-07T03:21:39Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-mi355x-lmcache-dev104-c60-exclude-g15-20260907",
+      "sha": "40d28f1bdf7635be9b4fe316370443fc1784bf75",
+      "committed_date": "2026-09-07T04:18:57Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-nightly7c5-lmcache-v0.5.5rc3-c1-c8-c14-c40-20260902",
+      "sha": "0a292fa1637848e4c98f8638dd03b5ca418866b6",
+      "committed_date": "2026-09-02T08:09:58Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-nightly7c5-lmcache-v0.5.5rc3-c14-c40-c52-20260902",
+      "sha": "4ca1cdead54e8f6fdff4bd9457e797c8978abd63",
+      "committed_date": "2026-09-02T03:00:28Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-nightly7c5-no-lmcache-sweep-20260901",
+      "sha": "c3d6a1a4b1196d5e24b0ac27a26cff65133ccfcd",
+      "committed_date": "2026-09-01T10:13:35Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-nightly7c5-vllm-simple-c14-c40-c52-20260902",
+      "sha": "23e65cab4fe1569e0f730740d35e93ba89cb2ae0",
+      "committed_date": "2026-09-02T00:55:31Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-vllm-pr53940-c1-c4-20260907",
+      "sha": "6fd5af423d67c0afe1ac6524e4e531637c9c2d94",
+      "committed_date": "2026-09-07T08:28:56Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-vllm-pr53940-lmcache-dev104-c1-c4-20260907",
+      "sha": "93bb071d68feef52bcc45952c53e58c8f3633173",
+      "committed_date": "2026-09-07T08:45:51Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/k3-vllm-pr53940-lmcache-dev104-c14-aiter021p1-20260907",
+      "sha": "656124a9dd59d28a9dd99f81b2caf672faf1cbb0",
+      "committed_date": "2026-09-07T13:22:29Z",
+      "open_prs": []
+    },
+    {
+      "name": "experiment/tool-use-eval-mi300x-integration",
+      "sha": "6af14224ee2c7ee75a26454a8aeda074c420c586",
+      "committed_date": "2026-08-30T15:36:09Z",
+      "open_prs": []
+    },
+    {
+      "name": "feat/agentx-k3-deployment-power",
+      "sha": "db9aaff6dd8b0373630d46be5ccfeab4d3aa27d5",
+      "committed_date": "2026-09-11T00:27:47Z",
+      "open_prs": []
+    },
+    {
+      "name": "feat/agentx-tilert-power",
+      "sha": "3fbab8c15d5049f4dd94b31a6a3df0e27fdc56eb",
+      "committed_date": "2026-09-09T19:20:04Z",
+      "open_prs": []
+    },
+    {
+      "name": "feat/glm5.2-fp8-b300-sglang-agentic-mtp-dayzero",
+      "sha": "9d7ce527939adc42219995b0b0e0f6cc9f6c8f40",
+      "committed_date": "2026-09-08T02:08:25Z",
+      "open_prs": [
+        {
+          "number": 2884,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2884"
+        }
+      ]
+    },
+    {
+      "name": "feat/kimik3-power-backfill",
+      "sha": "2f3d637f62d85bccc9c9b41fc5c05eca5039796c",
+      "committed_date": "2026-09-12T02:05:32Z",
+      "open_prs": []
+    },
+    {
+      "name": "feat/qwen3.5-fp8-mi355x-sglang-agentic-mtp-dayzero",
+      "sha": "4a5db0a4478c6e4a2940585931cd008015cb6de2",
+      "committed_date": "2026-09-08T00:39:39Z",
+      "open_prs": [
+        {
+          "number": 2871,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2871"
+        }
+      ]
+    },
+    {
+      "name": "feat/qwen3.8next-fp8-mi355x-sglang-agentic",
+      "sha": "4b02f48a1e9f73abe7153ebf4f3f7ddbb6b72be3",
+      "committed_date": "2026-08-27T04:45:08Z",
+      "open_prs": [
+        {
+          "number": 2754,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2754"
+        }
+      ]
+    },
+    {
+      "name": "fix/b300-dsxe-image-import",
+      "sha": "3973e869690dbe73b289460061832e5eb3472ea2",
+      "committed_date": "2026-09-08T19:18:39Z",
+      "open_prs": []
+    },
+    {
+      "name": "fix/b300-login-node-import",
+      "sha": "fffdaa162944cfac85bbbcaa820ac9a090acec50",
+      "committed_date": "2026-09-08T19:38:30Z",
+      "open_prs": []
+    },
+    {
+      "name": "fix/dsv41flash-aiter-quiet-auto",
+      "sha": "1d894b495b32ff8ed15c76c9d97853d90ee2f742",
+      "committed_date": "2026-09-12T00:25:05Z",
+      "open_prs": []
+    },
+    {
+      "name": "fix/gb200-dsv4-metrics-refresh",
+      "sha": "b742758f46398c1caacb41ca473ccadffc71a887",
+      "committed_date": "2026-09-04T08:58:17Z",
+      "open_prs": []
+    },
+    {
+      "name": "fix/glm-b300-flashinfer",
+      "sha": "1af841640040774e7d3536e8344383d791e5354c",
+      "committed_date": "2026-09-10T20:02:18Z",
+      "open_prs": []
+    },
+    {
+      "name": "fix/h3-amd-runtime-recovery",
+      "sha": "9b06cd892537e3d7845ea9d6d7c9c695e08ab6b9",
+      "committed_date": "2026-09-09T22:03:08Z",
+      "open_prs": []
+    },
+    {
+      "name": "fix/nested-eval-artifact-staging",
+      "sha": "822299ab98fbf2a33d35e6daf4a5e983393a6faf",
+      "committed_date": "2026-09-09T12:54:02Z",
+      "open_prs": []
+    },
+    {
+      "name": "glm5.2-fp4-b300-dynamo-trt-agentic-mtp-compact",
+      "sha": "dd9c653cd4b9dfb4f775b293d9b3def46246ca9b",
+      "committed_date": "2026-09-02T21:27:21Z",
+      "open_prs": []
+    },
+    {
+      "name": "jiacao/dsv4-flydsl-agentx-baseline",
+      "sha": "ad1509f93962772153d4c977c395d88943f2a1fb",
+      "committed_date": "2026-09-01T00:31:21Z",
+      "open_prs": []
+    },
+    {
+      "name": "jiacao/dsv4-flydsl-agentx-treatment",
+      "sha": "15834aa5671cd8ccfb77c1f6604b6667874aac2e",
+      "committed_date": "2026-09-01T00:31:43Z",
+      "open_prs": []
+    },
+    {
+      "name": "jiacao/dsv4-flydsl-port-clean",
+      "sha": "a9698060cb854e730c54cd908102f36f3c245c3b",
+      "committed_date": "2026-08-31T23:16:29Z",
+      "open_prs": []
+    },
+    {
+      "name": "kimik3-fp4-b300-dynamo-vllm-disagg-1p3d-efa-prefill-store",
+      "sha": "ce0e5b7bb03d047d1ebf68649a0703ed855d4773",
+      "committed_date": "2026-09-07T02:26:06Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud-cold/glm5.2-fp4-b200-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "sha": "57d2ed5df89e04da0eb68a1353251c12504af255",
+      "committed_date": "2026-09-08T02:08:09Z",
+      "open_prs": [
+        {
+          "number": 2864,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2864"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/glm5.2-fp4-b300-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "sha": "f7ab3517d4511aea193230018161057d27d91fa9",
+      "committed_date": "2026-09-08T02:08:17Z",
+      "open_prs": [
+        {
+          "number": 2880,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2880"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/kimik3-fp4-b200-dynamo-vllm-agentic-dspark-nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36",
+      "sha": "ab034847bc55f2bb514abb062f2dc9466b05031f",
+      "committed_date": "2026-09-07T23:22:08Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud-cold/kimik3-fp4-b300-agentic-dspark-conc-10-12-14",
+      "sha": "43b7be407345e71efac7549caad38ab42c0d34e9",
+      "committed_date": "2026-09-05T22:41:32Z",
+      "open_prs": [
+        {
+          "number": 2846,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2846"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/minimaxm3-fp4-b200-vllm-agentic-mtp-nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36",
+      "sha": "50e127a82fc177c56f007f6366b612c44ebd01ed",
+      "committed_date": "2026-09-08T03:06:30Z",
+      "open_prs": [
+        {
+          "number": 2860,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2860"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/minimaxm3-fp4-b300-vllm-agentic-mtp-nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36",
+      "sha": "3f0bc9acf1fe95345f565698e7e941fcde4d19a6",
+      "committed_date": "2026-09-08T17:09:48Z",
+      "open_prs": [
+        {
+          "number": 2883,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2883"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/minimaxm3-fp8-h100-vllm-agentic-mtp-nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36",
+      "sha": "1e6635f66d1750db75efc45106adfdf7b9fdcfb5",
+      "committed_date": "2026-09-08T17:09:52Z",
+      "open_prs": [
+        {
+          "number": 2874,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2874"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/minimaxm3-fp8-mi325x-vllm-agentic-mtp-nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36",
+      "sha": "5f4e8e6d57d6b16859d9080d1058757b5bec98f0",
+      "committed_date": "2026-09-08T00:57:45Z",
+      "open_prs": [
+        {
+          "number": 2872,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2872"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/qwen3.5-fp4-b200-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "sha": "0a43cbe293beac46da5720ff7bced01e4a2af63f",
+      "committed_date": "2026-09-07T23:03:03Z",
+      "open_prs": [
+        {
+          "number": 2862,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2862"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/qwen3.5-fp4-b300-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "sha": "25d9e08e722e24386f3085a1a0a3437ed56e38b0",
+      "committed_date": "2026-09-08T01:41:28Z",
+      "open_prs": [
+        {
+          "number": 2882,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2882"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/qwen3.5-fp8-b200-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "sha": "cf0125efa9cc3ccfedc386ba94a5cbb71f2e004b",
+      "committed_date": "2026-09-07T23:01:01Z",
+      "open_prs": [
+        {
+          "number": 2861,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2861"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/qwen3.5-fp8-b300-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "sha": "847e9dd2e27899fcefa42a2add3cd09aca46ce75",
+      "committed_date": "2026-09-08T01:41:20Z",
+      "open_prs": [
+        {
+          "number": 2881,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2881"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/qwen3.5-fp8-h100-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "sha": "75846b89436db220c5569b89a7c6610377daf867",
+      "committed_date": "2026-09-08T00:33:44Z",
+      "open_prs": [
+        {
+          "number": 2869,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2869"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/qwen3.5-fp8-mi325x-sglang-agentic-mtp-v0.5.19-rocm720-mi30x-20260907",
+      "sha": "3729e06c63d6248e58ddd2eef34b43fbc603e695",
+      "committed_date": "2026-09-08T00:35:23Z",
+      "open_prs": [
+        {
+          "number": 2870,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2870"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/qwen3.8next-fp4-b300-sglang-agentic-mtp-dev-cu13-qwen38-next-local-20260907",
+      "sha": "a50e00eb121468e61472f42be1d44f9dedbc2513",
+      "committed_date": "2026-09-08T01:36:58Z",
+      "open_prs": [
+        {
+          "number": 2879,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2879"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/qwen3.8next-fp8-h100-sglang-agentic-mtp-dev-cu13-qwen38-next-local-20260907",
+      "sha": "e3af7fe784f9fa0ca2c18a0546538d536b068791",
+      "committed_date": "2026-09-08T00:55:46Z",
+      "open_prs": [
+        {
+          "number": 2876,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2876"
+        }
+      ]
+    },
+    {
+      "name": "klaud-cold/qwen3.8next-fp8-h200-sglang-agentic-mtp-dev-cu13-qwen38-next-local-20260907",
+      "sha": "1a6698ff022b221e553d6f39cacce459fd57046b",
+      "committed_date": "2026-09-08T07:10:41Z",
+      "open_prs": [
+        {
+          "number": 2877,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2877"
+        }
+      ]
+    },
+    {
+      "name": "klaud/auto-0d7cb0d3810af263-6146c2a6f202a93b",
+      "sha": "777c40e77d6704f54ef582b484cc40c184878d90",
+      "committed_date": "2026-09-09T20:59:46Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-342f14ebc08f06b1-fa39a9e32aba886a",
+      "sha": "d51e5344b80643754bdcad560097328bbcb90730",
+      "committed_date": "2026-09-09T07:42:27Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-389b6d925f13f3cf-d35fe7ae4e29de08",
+      "sha": "732b2e148db17bd7ab589ff20b0078abe97a21aa",
+      "committed_date": "2026-09-10T06:42:37Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-3fd4818b3b90593e-3d9c146c5e9ad2d6",
+      "sha": "3ebb46c104d956517b63f9617c44e649c2285ffb",
+      "committed_date": "2026-09-10T13:51:31Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-4abec966e3301936-3d9c146c5e9ad2d6",
+      "sha": "03191bd989cbfcd860806e1f56ced52cd45657ca",
+      "committed_date": "2026-09-11T00:53:43Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-51d9acec3b181791-8eede55d6ccb7552",
+      "sha": "256689714a9b4e405dc627c9419cd92499ea8dc1",
+      "committed_date": "2026-09-10T09:36:17Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-7194ba06f4ff3ea4-0f7930fff108ab30",
+      "sha": "22694f52afa460e655155763e14b65d802d5dcb7",
+      "committed_date": "2026-09-09T20:19:21Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-81cddfb2540a439c-3d9c146c5e9ad2d6",
+      "sha": "2db555bbd051aef960d4f4d12114803e0b167fa1",
+      "committed_date": "2026-09-11T21:19:43Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-8a7f400957397734-3497b7e4d3d23ff5",
+      "sha": "62e6de632b30499bfcd4c9b5c9361987ac6bfc91",
+      "committed_date": "2026-09-09T07:46:03Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-906fff6c74191d2d-fa39a9e32aba886a",
+      "sha": "8ab3bdfbd4078d03018188fe5470dcdea019a850",
+      "committed_date": "2026-09-09T02:01:10Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-aa043d5cc89d9d3e-f7a6259862406d3d",
+      "sha": "e621c6274d9e466731b0e3cc92fa0fadf1af2133",
+      "committed_date": "2026-09-11T04:44:46Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-b3fff31b6f9a6956-b3fe5685ff662693",
+      "sha": "7568b8f8529b843ba13dcfa45dfe1c43d49ae23f",
+      "committed_date": "2026-09-10T02:32:24Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-b58ce44ef464d0bf-3d9c146c5e9ad2d6",
+      "sha": "dd604c0dc8cc59ecfa377b0fe31ee81139f63aa5",
+      "committed_date": "2026-09-12T01:13:23Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-e4b2c5440222f47a-30f4b66275d7e326",
+      "sha": "ba8660e54fbebacfbbd7274e1f704317cd2e8d82",
+      "committed_date": "2026-09-10T12:37:35Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/auto-ec81b5fa42baf985-30f4b66275d7e326",
+      "sha": "58dfa919e7a91c8a7fa2bdad90f7324be3f81ab3",
+      "committed_date": "2026-09-11T20:56:18Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/dsv41flash-b300-tep4-dep4",
+      "sha": "c8f4da13e4a36ea5eb02713c80c992f0d9d9c388",
+      "committed_date": "2026-09-12T00:00:06Z",
+      "open_prs": [
+        {
+          "number": 3028,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/3028"
+        }
+      ]
+    },
+    {
+      "name": "klaud/glm5.2-fp4-b200-sglang-agentic-mtp-conc48",
+      "sha": "dc6e956f6d2dee7ed0141fe2b23b8439137acf53",
+      "committed_date": "2026-09-05T04:37:25Z",
+      "open_prs": [
+        {
+          "number": 2828,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2828"
+        }
+      ]
+    },
+    {
+      "name": "klaud/recovery-34569150629-023c120132f497f0-a32566a003a59219",
+      "sha": "f2d141e13efc524d82910f1b9dc8862184fab4fd",
+      "committed_date": "2026-09-11T20:33:45Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/recovery-34569150629-0819223abfa858c3-a32566a003a59219",
+      "sha": "dcb7b1a7d667f5d158326bb2e4a8c07a24d8bbac",
+      "committed_date": "2026-09-11T20:34:39Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/recovery-34569150629-0c1068466c38565f-013203e0f89888cf",
+      "sha": "9272a1981c16709b54834ffb9a0f91e0b584b49f",
+      "committed_date": "2026-09-11T20:33:50Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/recovery-34569150629-39cf82a2bb6e3c04-3cf2069b9d51c51a",
+      "sha": "e16e3457141a01c5009bb4684f6075e612e48ad1",
+      "committed_date": "2026-09-11T20:34:32Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/recovery-34569150629-8865ea90d67581df-20395df361a4aaf0",
+      "sha": "e35ba7eaf5a80d04533222b296ccadfe0f17c154",
+      "committed_date": "2026-09-11T20:33:37Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/recovery-34644815270-68551d95238169ff-f7a6259862406d3d",
+      "sha": "abd232e5741ce71337f918fffacdc0088994e2b7",
+      "committed_date": "2026-09-12T00:23:43Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/recovery-34644815270-81cddfb2540a439c-3d9c146c5e9ad2d6",
+      "sha": "d9a218b2bac4fc9d36aed7fdbd0602c9f75a015b",
+      "committed_date": "2026-09-12T00:23:55Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaud/recovery-34644815270-ec81b5fa42baf985-30f4b66275d7e326",
+      "sha": "465ad797eb5692c3ac2d0d41b07b1050d97d77f1",
+      "committed_date": "2026-09-12T00:23:49Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaude/auto-7d2f82b89dfa60c1-047a5787e0abec71",
+      "sha": "e1acafa13a13875afd60ff04ba84f9fcae9d593a",
+      "committed_date": "2026-09-05T00:39:37Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaude/auto-95461d0c22050af8-c035e766ed4b72b7",
+      "sha": "0ed0ec418ba4c6416d20a612df5d3ad8a9338e17",
+      "committed_date": "2026-09-05T01:52:01Z",
+      "open_prs": []
+    },
+    {
+      "name": "klaude/auto-daa7a1a5144e3543-ed613715f3bfca2a",
+      "sha": "fd71d273c69c2eac4be18b52509b974997684c7f",
+      "committed_date": "2026-09-05T19:09:20Z",
+      "open_prs": []
+    },
+    {
+      "name": "minimax-m3-gb200-agg-upstream",
+      "sha": "0e75355fa90f399c38a059e2354af2a6eedc196b",
+      "committed_date": "2026-09-09T23:16:54Z",
+      "open_prs": []
+    },
+    {
+      "name": "minimaxm3-fp4-gb200-dynamo-vllm-agentic-agg-mtp-curve-update",
+      "sha": "d8d4221974b9b23049c3e2bc25bbdddc7396ad11",
+      "committed_date": "2026-09-02T21:33:22Z",
+      "open_prs": []
+    },
+    {
+      "name": "nv/gb300-kimi-agentx-update",
+      "sha": "f2be63a98849591c40d80428cef5af6fb185417c",
+      "committed_date": "2026-09-02T23:34:37Z",
+      "open_prs": []
+    },
+    {
+      "name": "nv/k3-b300-lmcache-agentx",
+      "sha": "bf607b34b9aab4140186383a1eb2fc66b58fac51",
+      "committed_date": "2026-09-11T00:21:35Z",
+      "open_prs": [
+        {
+          "number": 2802,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2802"
+        }
+      ]
+    },
+    {
+      "name": "perf/k3-mi355x-lmcache-rc3-c1-c8-c14-c40",
+      "sha": "a720a04fc480a4d8fd2640870c366c2971a41d4e",
+      "committed_date": "2026-09-02T12:39:46Z",
+      "open_prs": []
+    },
+    {
+      "name": "perf/kimi-k3-mi355x-c1-spec3-20260905",
+      "sha": "59792c186ae7b9b4001341cc42ce874d7404b27e",
+      "committed_date": "2026-09-05T22:36:01Z",
+      "open_prs": []
+    },
+    {
+      "name": "pr-new",
+      "sha": "526d4d4f66a235cfc225071845dd6ae58b12995f",
+      "committed_date": "2026-09-09T10:26:49Z",
+      "open_prs": []
+    },
+    {
+      "name": "qwen-b200-sgl-fp8-v2",
+      "sha": "36e26b6a7a815f1db165d39dc675a1bf70ea244c",
+      "committed_date": "2026-09-07T22:42:05Z",
+      "open_prs": []
+    },
+    {
+      "name": "qwen-b200-sgl-fp8-v3",
+      "sha": "7eab99401563d11fe5cb2193de172e80c44e1775",
+      "committed_date": "2026-09-07T23:25:27Z",
+      "open_prs": []
+    },
+    {
+      "name": "qwen-b300-sgl-fp8-update",
+      "sha": "3417585c07f98e8f6ef2714cc0626f610d71cb96",
+      "committed_date": "2026-09-07T21:49:55Z",
+      "open_prs": []
+    },
+    {
+      "name": "qwen35-b300-8k1k-fp8",
+      "sha": "28041a11269b8dc3c535b47f84dc8dd013651a24",
+      "committed_date": "2026-09-09T19:58:38Z",
+      "open_prs": [
+        {
+          "number": 2922,
+          "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2922"
+        }
+      ]
+    },
+    {
+      "name": "revert-2701",
+      "sha": "d6afb3aafa94368b4a3912af4e9c733b526a8749",
+      "committed_date": "2026-08-26T05:41:28Z",
+      "open_prs": []
+    },
+    {
+      "name": "revert-2983-dev/jiejing/glm5.2-eval-hicache-budget",
+      "sha": "049c46ded0f43fae7dc78901104b0682775522cd",
+      "committed_date": "2026-09-11T03:29:47Z",
+      "open_prs": []
+    },
+    {
+      "name": "rihuo/dsv4-b200-dynamo-trt-8k1k",
+      "sha": "3e944403e1f8122395b3f98ed0f06434316b213e",
+      "committed_date": "2026-08-31T22:38:36Z",
+      "open_prs": []
+    },
+    {
+      "name": "wenyaogao/weekly-overview-snapshot",
+      "sha": "446523d60f6337ce88b438647a0d8a02f16c4379",
+      "committed_date": "2026-08-28T18:12:48Z",
+      "open_prs": []
+    },
+    {
+      "name": "yhl/c64-topk6-ci",
+      "sha": "ee2d80a06d5fddd8799df2ffece562db535ed2d5",
+      "committed_date": "2026-09-10T16:26:41Z",
+      "open_prs": []
+    },
+    {
+      "name": "yichaozhu/k3-dspark-mooncake-harness",
+      "sha": "25e9ebcf62acaae1a51a9685e323e50557f6a77a",
+      "committed_date": "2026-08-31T04:11:36Z",
+      "open_prs": []
+    },
+    {
+      "name": "yichaozhu/k3-dspark-mooncake-harness-0902",
+      "sha": "133c38eeaf7c2efa8ff55d96b0ca9f3e86224485",
+      "committed_date": "2026-09-02T06:37:17Z",
+      "open_prs": []
+    },
+    {
+      "name": "yichaozhu/k3-pd-aiter-maxtput",
+      "sha": "709e9ff588b07c7bbed3514d0ed18f1c2122b08e",
+      "committed_date": "2026-09-09T19:37:15Z",
+      "open_prs": []
+    }
+  ],
+  "related_pull_requests": [
+    {
+      "number": 3028,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/3028",
+      "head_ref": "klaud/dsv41flash-b300-tep4-dep4",
+      "head_sha": "c8f4da13e4a36ea5eb02713c80c992f0d9d9c388",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Try TEP4 and DEP4 for DeepSeek V4.1 Flash AgentX on B300 / 在 B300 上尝试 DeepSeek V4.1 Flash AgentX 的 TEP4 与 DEP4"
+    },
+    {
+      "number": 3014,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/3014",
+      "head_ref": "amd/glm52-fp4-mi355x-sglang-agentx-v519",
+      "head_sha": "6d0ef7538afcbbefcd2d3beadbe5cd49f21563a9",
+      "base_ref": "main",
+      "title": "[WIP][AMD][AGENTX] GLM-5.2 FP4 MI355X SGLang v0.5.19: full Pareto re-sweep"
+    },
+    {
+      "number": 2922,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2922",
+      "head_ref": "qwen35-b300-8k1k-fp8",
+      "head_sha": "28041a11269b8dc3c535b47f84dc8dd013651a24",
+      "base_ref": "main",
+      "title": "perf(qwen3.5): update B300 FP8 SGLang tuning"
+    },
+    {
+      "number": 2884,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2884",
+      "head_ref": "feat/glm5.2-fp8-b300-sglang-agentic-mtp-dayzero",
+      "head_sha": "9d7ce527939adc42219995b0b0e0f6cc9f6c8f40",
+      "base_ref": "main",
+      "title": "[Klaud Cold] glm5.2-fp8-b300-sglang-agentic-mtp: day-zero GLM-5.2 FP8 SGLang AgentX MTP on B300 / B300 上 GLM-5.2 FP8 SGLang AgentX MTP 首发配方"
+    },
+    {
+      "number": 2883,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2883",
+      "head_ref": "klaud-cold/minimaxm3-fp4-b300-vllm-agentic-mtp-nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36",
+      "head_sha": "3f0bc9acf1fe95345f565698e7e941fcde4d19a6",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update minimaxm3-fp4-b300-vllm-agentic-mtp vLLM image to nightly-8a728663c1c3eeace834a95f5654fa653cc1998c and move to cluster:b300-dsxe"
+    },
+    {
+      "number": 2882,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2882",
+      "head_ref": "klaud-cold/qwen3.5-fp4-b300-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "head_sha": "25d9e08e722e24386f3085a1a0a3437ed56e38b0",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update qwen3.5-fp4-b300-sglang-agentic-mtp SGLang image to nightly-dev-cu13-20260907-30705c00 and move to cluster:b300-dsxe"
+    },
+    {
+      "number": 2881,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2881",
+      "head_ref": "klaud-cold/qwen3.5-fp8-b300-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "head_sha": "847e9dd2e27899fcefa42a2add3cd09aca46ce75",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update qwen3.5-fp8-b300-sglang-agentic-mtp SGLang image to nightly-dev-cu13-20260907-30705c00 and move to cluster:b300-dsxe"
+    },
+    {
+      "number": 2880,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2880",
+      "head_ref": "klaud-cold/glm5.2-fp4-b300-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "head_sha": "f7ab3517d4511aea193230018161057d27d91fa9",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update glm5.2-fp4-b300-sglang-agentic-mtp SGLang image to nightly-dev-cu13-20260908-20ca564b and move to cluster:b300-dsxe"
+    },
+    {
+      "number": 2879,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2879",
+      "head_ref": "klaud-cold/qwen3.8next-fp4-b300-sglang-agentic-mtp-dev-cu13-qwen38-next-local-20260907",
+      "head_sha": "a50e00eb121468e61472f42be1d44f9dedbc2513",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update qwen3.8next-fp4-b300-sglang-agentic-mtp SGLang image to dev-cu13-qwen38-next-local (2026-09-07, digest-pinned)"
+    },
+    {
+      "number": 2878,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2878",
+      "head_ref": "dsv4-b300-w4a4-megamoe-20260904",
+      "head_sha": "3ccb09a46afe5ab6015e6ccf8da268c618c2818e",
+      "base_ref": "main",
+      "title": "dsv4-fp4-b300-sglang-agentic-hicache-mtp: restore MegaMoE FP4 acts, retarget to cluster:b300-dsxe / 恢复 MegaMoE FP4 激活路径，并迁移至 cluster:b300-dsxe"
+    },
+    {
+      "number": 2877,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2877",
+      "head_ref": "klaud-cold/qwen3.8next-fp8-h200-sglang-agentic-mtp-dev-cu13-qwen38-next-local-20260907",
+      "head_sha": "1a6698ff022b221e553d6f39cacce459fd57046b",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update qwen3.8next-fp8-h200-sglang-agentic-mtp SGLang image to dev-cu13-qwen38-next-local (2026-09-07, digest-pinned)"
+    },
+    {
+      "number": 2876,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2876",
+      "head_ref": "klaud-cold/qwen3.8next-fp8-h100-sglang-agentic-mtp-dev-cu13-qwen38-next-local-20260907",
+      "head_sha": "e3af7fe784f9fa0ca2c18a0546538d536b068791",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update qwen3.8next-fp8-h100-sglang-agentic-mtp SGLang image to dev-cu13-qwen38-next-local (2026-09-07, digest-pinned)"
+    },
+    {
+      "number": 2874,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2874",
+      "head_ref": "klaud-cold/minimaxm3-fp8-h100-vllm-agentic-mtp-nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36",
+      "head_sha": "1e6635f66d1750db75efc45106adfdf7b9fdcfb5",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update minimaxm3-fp8-h100-vllm-agentic-mtp vLLM image to nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36"
+    },
+    {
+      "number": 2872,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2872",
+      "head_ref": "klaud-cold/minimaxm3-fp8-mi325x-vllm-agentic-mtp-nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36",
+      "head_sha": "5f4e8e6d57d6b16859d9080d1058757b5bec98f0",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update minimaxm3-fp8-mi325x-vllm-agentic-mtp vLLM ROCm image to nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36"
+    },
+    {
+      "number": 2871,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2871",
+      "head_ref": "feat/qwen3.5-fp8-mi355x-sglang-agentic-mtp-dayzero",
+      "head_sha": "4a5db0a4478c6e4a2940585931cd008015cb6de2",
+      "base_ref": "main",
+      "title": "[Klaud Cold] qwen3.5-fp8-mi355x-sglang-agentic-mtp: day-zero Qwen3.5 FP8 SGLang AgentX MTP on MI355X / MI355X 上 Qwen3.5 FP8 SGLang AgentX MTP 首发配方"
+    },
+    {
+      "number": 2870,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2870",
+      "head_ref": "klaud-cold/qwen3.5-fp8-mi325x-sglang-agentic-mtp-v0.5.19-rocm720-mi30x-20260907",
+      "head_sha": "3729e06c63d6248e58ddd2eef34b43fbc603e695",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update qwen3.5-fp8-mi325x-sglang-agentic-mtp SGLang ROCm image to v0.5.19-rocm720-mi30x-20260907"
+    },
+    {
+      "number": 2869,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2869",
+      "head_ref": "klaud-cold/qwen3.5-fp8-h100-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "head_sha": "75846b89436db220c5569b89a7c6610377daf867",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update qwen3.5-fp8-h100-sglang-agentic-mtp SGLang image to nightly-dev-cu13-20260907-30705c00"
+    },
+    {
+      "number": 2864,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2864",
+      "head_ref": "klaud-cold/glm5.2-fp4-b200-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "head_sha": "57d2ed5df89e04da0eb68a1353251c12504af255",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update glm5.2-fp4-b200-sglang-agentic-mtp SGLang image to nightly-dev-cu13-20260908-20ca564b"
+    },
+    {
+      "number": 2862,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2862",
+      "head_ref": "klaud-cold/qwen3.5-fp4-b200-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "head_sha": "0a43cbe293beac46da5720ff7bced01e4a2af63f",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update qwen3.5-fp4-b200-sglang-agentic-mtp SGLang image to nightly-dev-cu13-20260907-30705c00"
+    },
+    {
+      "number": 2861,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2861",
+      "head_ref": "klaud-cold/qwen3.5-fp8-b200-sglang-agentic-mtp-nightly-dev-cu13-20260907-30705c00",
+      "head_sha": "cf0125efa9cc3ccfedc386ba94a5cbb71f2e004b",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update qwen3.5-fp8-b200-sglang-agentic-mtp SGLang image to nightly-dev-cu13-20260907-30705c00"
+    },
+    {
+      "number": 2860,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2860",
+      "head_ref": "klaud-cold/minimaxm3-fp4-b200-vllm-agentic-mtp-nightly-d9105ea8001e0a6d77a96327d17515bb5791fb36",
+      "head_sha": "50e127a82fc177c56f007f6366b612c44ebd01ed",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Update minimaxm3-fp4-b200-vllm-agentic-mtp vLLM image to nightly-8a728663c1c3eeace834a95f5654fa653cc1998c"
+    },
+    {
+      "number": 2846,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2846",
+      "head_ref": "klaud-cold/kimik3-fp4-b300-agentic-dspark-conc-10-12-14",
+      "head_sha": "43b7be407345e71efac7549caad38ab42c0d34e9",
+      "base_ref": "main",
+      "title": "[Klaud Cold] Add conc 10/12/14 to kimik3-fp4-b300-vllm-agentic-dspark and move it to cluster:b300-dsxe / 为 kimik3-fp4-b300-vllm-agentic-dspark 新增并发 10/12/14 并迁移至 cluster:b300-dsxe"
+    },
+    {
+      "number": 2831,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2831",
+      "head_ref": "amd/k3-mi355x-lmcache-dcp-retrieve-fix",
+      "head_sha": "cc0333833cb49c839d0200e0889e3ab27e752ebf",
+      "base_ref": "main",
+      "title": "perf(agentx): split the K3 MI355X DCP8 arm and halve its DRAM budget / 性能：拆分 K3 MI355X DCP8 配置并将其 DRAM 预算减半"
+    },
+    {
+      "number": 2828,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2828",
+      "head_ref": "klaud/glm5.2-fp4-b200-sglang-agentic-mtp-conc48",
+      "head_sha": "dc6e956f6d2dee7ed0141fe2b23b8439137acf53",
+      "base_ref": "main",
+      "title": "[Klaud Cold] glm5.2-fp4-b200-sglang-agentic-mtp: extend the AgentX curve to concurrency 48 with EP8/DEP8 arms / 以 EP8/DEP8 分支将 GLM-5.2 B200 SGLang AgentX 曲线扩展至并发度 48"
+    },
+    {
+      "number": 2802,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2802",
+      "head_ref": "nv/k3-b300-lmcache-agentx",
+      "head_sha": "bf607b34b9aab4140186383a1eb2fc66b58fac51",
+      "base_ref": "main",
+      "title": "perf(agentx): add LMCache offload arm to Kimi-K3 B300 at conc 56/70"
+    },
+    {
+      "number": 2797,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2797",
+      "head_ref": "codex/h100-minimaxm3-disagg-source",
+      "head_sha": "b41d05864fa0f17674b36b8eb89cfaa21c58468b",
+      "base_ref": "main",
+      "title": "Validate vLLM P/D cache-source metrics on GB300"
+    },
+    {
+      "number": 2796,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2796",
+      "head_ref": "codex/h100-cache-source-validation",
+      "head_sha": "992df5d5a7925f680938aa21f4fc2b4cfbe6604c",
+      "base_ref": "main",
+      "title": "Validate bounded vLLM cache token sources on H100"
+    },
+    {
+      "number": 2780,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2780",
+      "head_ref": "albecheng/speedbench-al-qwen3.8",
+      "head_sha": "276933c8decb7b06cc7c477f301dd8653b328bb8",
+      "base_ref": "main",
+      "title": "[NV] Add SPEED-Bench AL collectors for Qwen3.8-2.4T-A95B and Qwen3.8-Flash-Next"
+    },
+    {
+      "number": 2754,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2754",
+      "head_ref": "feat/qwen3.8next-fp8-mi355x-sglang-agentic",
+      "head_sha": "4b02f48a1e9f73abe7153ebf4f3f7ddbb6b72be3",
+      "base_ref": "main",
+      "title": "[Klaud Cold] qwen3.8next-fp8-mi355x-sglang-agentic: Qwen3.8-Flash-Next FP8 SGLang AgentX on MI355X / MI355X 上 Qwen3.8-Flash-Next FP8 SGLang AgentX 配方"
+    },
+    {
+      "number": 2625,
+      "url": "https://github.com/SemiAnalysisAI/InferenceX/pull/2625",
+      "head_ref": "agent/capture-trtllm-server-metrics",
+      "head_sha": "5713868d043b64afdf5fb99a8b8a28cfde2696eb",
+      "base_ref": "main",
+      "title": "Capture TensorRT-LLM AgentX server metrics"
+    }
+  ],
+  "protected_branches": []
+}
