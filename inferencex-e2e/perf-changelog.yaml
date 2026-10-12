@@ -9542,5 +9542,5 @@
 - config-keys:
     - qwen3.5-fp8-mi355x-atom-mtp
   description:
-    - "Update ATOM image from rocm/atom atom0.1.2.post to rocm/atom-dev:nightly_202610080328 (ATOM v0.1.7)."
+    - "Update ATOM to v0.1.7 (rocm/atom-dev:nightly_202610080328) and keep prefix caching disabled as in the old image."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3918
