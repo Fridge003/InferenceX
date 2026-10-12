@@ -41,7 +41,9 @@ jobs:
       LOCAL_TAG: amd-dme-highres:privatedrop-20261008
       SQSH_NAME: amd-exporter-highres-20261008.sqsh
       # Collection pulls this tag from the public package that also holds the patched build it replaces.
-      GHCR_REF: ghcr.io/semianalysisai/amd-device-metrics-exporter:highres-privatedrop-20261008
+      # AMD's version label, the feature, and the drop date; the earlier highres-privatedrop-20261008
+      # tag points at the same digest.
+      GHCR_REF: ghcr.io/semianalysisai/amd-device-metrics-exporter:v1.5.4-highres-20261008
       ENROOT_PACKAGE: enroot_4.2.0-1_amd64.deb
       ENROOT_PACKAGE_SHA256: 50bfcf8336bfe1a5d19481081d7800ae80300a27795595757f7d20957e079a62
       WORK: ${{ github.workspace }}/.privatedrop
@@ -139,6 +141,14 @@ jobs:
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
           if docker manifest inspect "$GHCR_REF" > "$WORK/ghcr-manifest.json" 2> /dev/null; then
             echo "::notice::$GHCR_REF already exists; the tag is not re-pushed so its digest stays stable"
+          elif python3 .github/scripts/draft_release_asset.py --tag "$RELEASE_TAG" --find ghcr-digest.txt > "$WORK/digest-asset.json" 2> /dev/null; then
+            # The image is already published under another tag: point the new tag at that manifest.
+            asset_url=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["url"])' "$WORK/digest-asset.json")
+            published=$(curl --fail --location --silent --show-error \
+              --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/octet-stream" "$asset_url")
+            echo "tagging $published as $GHCR_REF"
+            docker buildx imagetools create --tag "$GHCR_REF" "$published"
+            docker manifest inspect "$GHCR_REF" > "$WORK/ghcr-manifest.json"
           else
             docker tag "$LOCAL_TAG" "$GHCR_REF"
             docker push "$GHCR_REF"
