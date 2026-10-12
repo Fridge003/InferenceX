@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write # Draft release assets are readable and writable only with write access.
+      packages: write # Publish the image to the repository-linked GHCR package.
     timeout-minutes: 40
     env:
       ARCHIVE_NAME: device-metrics-exporter-latest.tar.gz
@@ -39,6 +40,8 @@ jobs:
       IMAGE_CONFIG_ID: sha256:bb0ffcde637f2ff05c5b2118e19445f9663d7418aa6affbd202d54a0a78880b7
       LOCAL_TAG: amd-dme-highres:privatedrop-20261008
       SQSH_NAME: amd-exporter-highres-20261008.sqsh
+      # Collection pulls this tag from the public package that also holds the patched build it replaces.
+      GHCR_REF: ghcr.io/semianalysisai/amd-device-metrics-exporter:highres-privatedrop-20261008
       ENROOT_PACKAGE: enroot_4.2.0-1_amd64.deb
       ENROOT_PACKAGE_SHA256: 50bfcf8336bfe1a5d19481081d7800ae80300a27795595757f7d20957e079a62
       WORK: ${{ github.workspace }}/.privatedrop
@@ -60,6 +63,10 @@ jobs:
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          if python3 .github/scripts/draft_release_asset.py --tag "$RELEASE_TAG" --find "$SQSH_NAME" > /dev/null 2>&1; then
+            echo "::notice::$SQSH_NAME is already on the draft release; skipping the conversion"
+            echo "squash_exists=true" >> "$GITHUB_OUTPUT"
+          fi
           python3 .github/scripts/draft_release_asset.py --tag "$RELEASE_TAG" --find "$ARCHIVE_NAME" > "$WORK/archive-asset.json"
           asset_url=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["url"])' "$WORK/archive-asset.json")
           curl --fail --location --silent --show-error --output "$WORK/$ARCHIVE_NAME" \
@@ -78,7 +85,7 @@ jobs:
             echo "version probe unavailable on CPU: $(tail -n 1 "$WORK/version.txt")"
           cat "$WORK/version.txt"
       - name: Convert to an Enroot squash
-        if: steps.download.outputs.skip != 'true'
+        if: steps.download.outputs.skip != 'true' && steps.download.outputs.squash_exists != 'true'
         run: |
           set -eo pipefail
           curl --fail --location --output "$WORK/$ENROOT_PACKAGE" \
@@ -111,7 +118,7 @@ jobs:
           sha256sum "$SQSH_NAME" provenance.json > SHA256SUMS
           cat SHA256SUMS
       - name: Store the squash on the draft release
-        if: steps.download.outputs.skip != 'true'
+        if: steps.download.outputs.skip != 'true' && steps.download.outputs.squash_exists != 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release-tag || 'amd-dme-highres-privatedrop-20261008' }}
@@ -121,3 +128,27 @@ jobs:
             python3 .github/scripts/draft_release_asset.py --tag "$RELEASE_TAG" --put "$WORK/$name" --name "$name"
           done
           python3 .github/scripts/draft_release_asset.py --tag "$RELEASE_TAG" --list
+      - name: Publish the image to GHCR
+        if: steps.download.outputs.skip != 'true'
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release-tag || 'amd-dme-highres-privatedrop-20261008' }}
+        run: |
+          set -eo pipefail
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          if docker manifest inspect "$GHCR_REF" > "$WORK/ghcr-manifest.json" 2> /dev/null; then
+            echo "::notice::$GHCR_REF already exists; the tag is not re-pushed so its digest stays stable"
+          else
+            docker tag "$LOCAL_TAG" "$GHCR_REF"
+            docker push "$GHCR_REF"
+            docker manifest inspect "$GHCR_REF" > "$WORK/ghcr-manifest.json"
+          fi
+          digest=$(docker manifest inspect -v "$GHCR_REF" | python3 -c 'import json, sys
+          doc = json.load(sys.stdin)
+          doc = doc[0] if isinstance(doc, list) else doc
+          print(doc["Descriptor"]["digest"])')
+          printf '%s@%s\n' "${GHCR_REF%%:*}" "$digest" > "$WORK/ghcr-digest.txt"
+          cat "$WORK/ghcr-digest.txt"
+          printf '### GHCR\n`%s`\n' "$(cat "$WORK/ghcr-digest.txt")" >> "$GITHUB_STEP_SUMMARY"
+          python3 .github/scripts/draft_release_asset.py --tag "$RELEASE_TAG" --put "$WORK/ghcr-digest.txt" --name ghcr-digest.txt
