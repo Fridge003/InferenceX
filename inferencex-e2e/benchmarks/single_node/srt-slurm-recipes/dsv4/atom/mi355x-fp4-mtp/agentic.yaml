@@ -224,7 +224,9 @@ override_tp8_c128_dep:
 
 # DRAM variants: ATOM's lmcache_mp tier backed by srtctl's lmcache-server
 # service (one LMCache server per node on port 8750, run from the LMCache build in
-# the ATOM image) within the 1019 GB budget (dram-utilization 0.34).
+# the ATOM image) whose L1 is the point's DRAM budget (1000 GB at dram-utilization
+# 0.3334). max_pinned_state_bytes repeats it in bytes: the binder resolves no
+# reference inside the brace-doubled JSON.
 override_tp8_c256_dep_lmcache:
   services:
     - name: lmcache
@@ -238,7 +240,7 @@ override_tp8_c256_dep_lmcache:
         - --supported-transfer-mode
         - lmcache_driven
         - --l1-size-gb
-        - '1000'
+        - '@dram.total-gb'
         - --l1-use-lazy
         - --l1-read-ttl-seconds
         - '900'
@@ -280,7 +282,6 @@ override_tp8_c256_dep_lmcache:
     env:
       CONC: '256'
       KV_OFFLOADING: 'dram'
-      TOTAL_CPU_DRAM_GB: '1019'
       AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: '1'
       AGENTIC_WARMUP_GRACE_PERIOD: '3600'
 
@@ -297,7 +298,7 @@ override_tp8_c384_dep_lmcache:
         - --supported-transfer-mode
         - lmcache_driven
         - --l1-size-gb
-        - '1000'
+        - '@dram.total-gb'
         - --l1-use-lazy
         - --l1-read-ttl-seconds
         - '900'
@@ -339,6 +340,5 @@ override_tp8_c384_dep_lmcache:
     env:
       CONC: '384'
       KV_OFFLOADING: 'dram'
-      TOTAL_CPU_DRAM_GB: '1019'
       AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: '1'
       AGENTIC_WARMUP_GRACE_PERIOD: '3600'
