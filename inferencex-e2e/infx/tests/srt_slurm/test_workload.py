@@ -46,13 +46,12 @@ ROUTER = '{"name": "vllm-router", "version": "0.1.14"}'
 @pytest.fixture
 def project(tmp_path):
     """A project whose shared blocks set the client and a default env value."""
-    for workload in ("fixed-sequence", "agentic"):
-        for lane in ("single", "multi"):
-            shared = tmp_path / f"configs/srt-recipes/{workload}-{lane}.yaml"
-            shared.parent.mkdir(parents=True, exist_ok=True)
-            shared.write_text(yaml.safe_dump({"benchmark": {
-                "type": "custom", "command": f"bash {workload}-{lane}.sh", "env": {"TOKENIZER": "/shared"},
-            }, "health_check": {"max_attempts": 10, "interval_seconds": 5}}))
+    for block in ("fixed-sequence-single", "fixed-sequence-multi", "agentic"):
+        shared = tmp_path / f"configs/srt-recipes/{block}.yaml"
+        shared.parent.mkdir(parents=True, exist_ok=True)
+        shared.write_text(yaml.safe_dump({"benchmark": {
+            "type": "custom", "command": f"bash {block}.sh", "env": {"TOKENIZER": "/shared"},
+        }, "health_check": {"max_attempts": 10, "interval_seconds": 5}}))
     (tmp_path / "configs/srt-recipes/telemetry-dcgm.yaml").write_text(yaml.safe_dump({"telemetry": {
         "enabled": True, "required": True, "dcgm_exporter": {"container_image": "dcgm-exporter"},
     }}))  # fmt: skip
@@ -375,7 +374,7 @@ def test_the_multinode_binder_writes_the_one_selected_variant(project, tmp_path)
     env.update(IS_AGENTIC="1", KV_OFFLOADING="none")
     assert bind(f"{path}:override_narrow", str(output)).returncode == 0
     bound = yaml.safe_load(output.read_text())
-    assert bound["benchmark"]["command"] == "bash agentic-multi.sh"
+    assert bound["benchmark"]["command"] == "bash agentic.sh"
     # The selected variant's fabric references take the cluster's values.
     assert bound["roles"]["decode"]["env"] == {"UCX": "mlx5_0:1,mlx5_1:1"}
 

@@ -33,8 +33,8 @@ FABRIC_REFERENCE = "@fabric."
 SHARED_BLOCKS = {
     (False, False): Path("configs/srt-recipes/fixed-sequence-single.yaml"),
     (False, True): Path("configs/srt-recipes/fixed-sequence-multi.yaml"),
-    (True, False): Path("configs/srt-recipes/agentic-single.yaml"),
-    (True, True): Path("configs/srt-recipes/agentic-multi.yaml"),
+    (True, False): Path("configs/srt-recipes/agentic.yaml"),
+    (True, True): Path("configs/srt-recipes/agentic.yaml"),
 }
 # The bound variant srtctl gets.
 BOUND_RECIPE = "recipe.yaml"
