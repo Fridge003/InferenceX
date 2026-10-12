@@ -9625,4 +9625,4 @@
     - "Use NIXL with the LIBFABRIC backend for disaggregated KV transfer over the DSXE EFA fabric. The pinned image runs as shipped, with no setup script, no package changes and no explicit host EFA/OFI mounts."
     - "Use the DSXE cluster's 24 CPUs per GPU, HiCache ratio 3, decode max-running-requests at twice concurrency, and exclude the known degraded DSXE nodes."
     - "Serve B300 DSXE Dynamo+SGLang DeepSeek-V4-Pro-0813 weights from the node-local NVMe copy (DeepSeek-V4-Pro-0813@scratch, as for vLLM) instead of the shared /data/models copy, which slowed startup by hours when several points loaded concurrently."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3817
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3932
