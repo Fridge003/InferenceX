@@ -44,6 +44,8 @@ jobs:
       # AMD's version label, the feature, and the drop date; the earlier highres-privatedrop-20261008
       # tag points at the same digest.
       GHCR_REF: ghcr.io/semianalysisai/amd-device-metrics-exporter:v1.5.4-highres-20261008
+      # The image manifest the clusters pin; every tag this workflow writes must resolve to it.
+      PUBLISHED_DIGEST: sha256:0d1c32c965f955b0fbf1dc87a84f7205be9019ce8d2fdf1eb929de28c71cec54
       ENROOT_PACKAGE: enroot_4.2.0-1_amd64.deb
       ENROOT_PACKAGE_SHA256: 50bfcf8336bfe1a5d19481081d7800ae80300a27795595757f7d20957e079a62
       WORK: ${{ github.workspace }}/.privatedrop
@@ -138,27 +140,37 @@ jobs:
           RELEASE_TAG: ${{ inputs.release-tag || 'amd-dme-highres-privatedrop-20261008' }}
         run: |
           set -eo pipefail
+          repo=${GHCR_REF%%:*}; repo=${repo#ghcr.io/}; tag=${GHCR_REF##*:}
+          accept="application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.oci.image.index.v1+json"
           printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-          if docker manifest inspect "$GHCR_REF" > "$WORK/ghcr-manifest.json" 2> /dev/null; then
-            echo "::notice::$GHCR_REF already exists; the tag is not re-pushed so its digest stays stable"
-          elif python3 .github/scripts/draft_release_asset.py --tag "$RELEASE_TAG" --find ghcr-digest.txt > "$WORK/digest-asset.json" 2> /dev/null; then
-            # The image is already published under another tag: point the new tag at that manifest.
-            asset_url=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["url"])' "$WORK/digest-asset.json")
-            published=$(curl --fail --location --silent --show-error \
-              --header "Authorization: Bearer $GITHUB_TOKEN" --header "Accept: application/octet-stream" "$asset_url")
-            echo "tagging $published as $GHCR_REF"
-            docker buildx imagetools create --tag "$GHCR_REF" "$published"
-            docker manifest inspect "$GHCR_REF" > "$WORK/ghcr-manifest.json"
+          registry_token=$(curl --fail --silent --show-error --user "$GITHUB_ACTOR:$GHCR_TOKEN" \
+            "https://ghcr.io/token?scope=repository:$repo:pull,push" | python3 -c 'import json, sys; print(json.load(sys.stdin)["token"])')
+          resolve() { # digest a reference currently resolves to, empty when absent
+            curl --silent --head --header "Authorization: Bearer $registry_token" --header "Accept: $accept" \
+              "https://ghcr.io/v2/$repo/manifests/$1" | grep -i '^docker-content-digest:' | cut -d' ' -f2 | tr -d '\r'
+          }
+          if [ "$(resolve "$tag")" = "$PUBLISHED_DIGEST" ]; then
+            echo "::notice::$GHCR_REF already resolves to $PUBLISHED_DIGEST"
+          elif [ "$(resolve "$PUBLISHED_DIGEST")" = "$PUBLISHED_DIGEST" ]; then
+            # The manifest is already in the registry: write the same bytes under this tag, so the
+            # tag keeps the pinned digest (buildx imagetools would wrap it in an index instead).
+            curl --fail --silent --show-error --output "$WORK/manifest.json" --dump-header "$WORK/manifest.headers" \
+              --header "Authorization: Bearer $registry_token" --header "Accept: $accept" \
+              "https://ghcr.io/v2/$repo/manifests/$PUBLISHED_DIGEST"
+            media_type=$(grep -i '^content-type:' "$WORK/manifest.headers" | tail -n 1 | cut -d' ' -f2 | tr -d '\r')
+            curl --fail --silent --show-error --request PUT --data-binary "@$WORK/manifest.json" \
+              --header "Authorization: Bearer $registry_token" --header "Content-Type: $media_type" \
+              "https://ghcr.io/v2/$repo/manifests/$tag"
           else
             docker tag "$LOCAL_TAG" "$GHCR_REF"
             docker push "$GHCR_REF"
-            docker manifest inspect "$GHCR_REF" > "$WORK/ghcr-manifest.json"
           fi
-          digest=$(docker manifest inspect -v "$GHCR_REF" | python3 -c 'import json, sys
-          doc = json.load(sys.stdin)
-          doc = doc[0] if isinstance(doc, list) else doc
-          print(doc["Descriptor"]["digest"])')
-          printf '%s@%s\n' "${GHCR_REF%%:*}" "$digest" > "$WORK/ghcr-digest.txt"
+          resolved=$(resolve "$tag")
+          if [ "$resolved" != "$PUBLISHED_DIGEST" ]; then
+            echo "::error::$GHCR_REF resolves to '$resolved', expected $PUBLISHED_DIGEST"
+            exit 1
+          fi
+          printf '%s@%s\n' "ghcr.io/$repo" "$resolved" > "$WORK/ghcr-digest.txt"
           cat "$WORK/ghcr-digest.txt"
-          printf '### GHCR\n`%s`\n' "$(cat "$WORK/ghcr-digest.txt")" >> "$GITHUB_STEP_SUMMARY"
+          printf '### GHCR\n`%s` = `%s`\n' "$GHCR_REF" "$resolved" >> "$GITHUB_STEP_SUMMARY"
           python3 .github/scripts/draft_release_asset.py --tag "$RELEASE_TAG" --put "$WORK/ghcr-digest.txt" --name ghcr-digest.txt
