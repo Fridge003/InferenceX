@@ -1,5 +1,5 @@
 # GB200 AgentX SGLang disaggregated recipes for DeepSeek-V4-Pro-0813 with bundled
-# DSpark K=6 speculation and HiCache KV offload.
+# DSpark K=6 speculation and Mooncake unified-cache KV offload.
 
 schema: 2
 
@@ -17,6 +17,12 @@ base:
     max_attempts: 1440
     interval_seconds: 10
 
+  # Tachometer's per-node exporters slow decode steps by a few percent and add
+  # host memory on the head node; this ladder is a throughput measurement.
+  observability:
+    tachometer:
+      enabled: false
+
   resources:
     gpu_type: gb200
     gpus_per_node: 4
@@ -32,6 +38,54 @@ base:
         node: dedicated
       options:
         max_payload_mb: 32
+    - name: mooncake-master
+      type: mooncake-master
+      args:
+        - --eviction_high_watermark_ratio=0.90
+    # Decode ranks use a chunk cache, so their host DRAM only joins the store
+    # through standalone stores: four per decode node, so segments stay uniform
+    # with prefill's per-rank ones instead of one oversized segment per node.
+    - &decode-store
+      name: store-decode-0
+      type: mooncake-store
+      placement:
+        node: decode
+      args: ["--port", "8800"]
+      env:
+        MOONCAKE_PROTOCOL: rdma
+        MOONCAKE_DEVICE: "@fabric.rdma-devices"
+        MOONCAKE_GLOBAL_SEGMENT_SIZE: 180gb
+        MC_STORE_CLIENT_METRIC_INTERVAL: '5'
+        MC_ENABLE_DEST_DEVICE_AFFINITY: '1'
+        # Advertise the store transfer engine on the node address instead of the first active
+        # interface, which can be a BMC Redfish host interface (the same 10.0.1.2 on every node).
+        MC_TCP_BIND_ADDRESS: "{node_ip}"
+      preamble: |
+        ulimit -n 1048576
+        ulimit -l unlimited
+      # Cold container starts on a decode node can exceed srtctl's 120 s default;
+      # the <<: merge is shallow, so every store repeats the timeout.
+      readiness:
+        port: 8800
+        timeout_seconds: 600
+    - <<: *decode-store
+      name: store-decode-1
+      args: ["--port", "8801"]
+      readiness:
+        port: 8801
+        timeout_seconds: 600
+    - <<: *decode-store
+      name: store-decode-2
+      args: ["--port", "8802"]
+      readiness:
+        port: 8802
+        timeout_seconds: 600
+    - <<: *decode-store
+      name: store-decode-3
+      args: ["--port", "8803"]
+      readiness:
+        port: 8803
+        timeout_seconds: 600
 
   frontend:
     type: dynamo
@@ -84,6 +138,18 @@ base:
         SGLANG_LOG_MS: '1'
         SGLANG_REQUEST_STATE_WAIT_TIMEOUT: '60'
         SGLANG_NCCL_ALL_GATHER_IN_OVERLAP_SCHEDULER_SYNC_BATCH: '1'
+        MOONCAKE_PROTOCOL: rdma
+        # The store only registers host buffers on RDMA; without an explicit list it
+        # falls back to NVLink for same-domain peers and aborts at the warmup put.
+        MOONCAKE_DEVICE: "@fabric.rdma-devices"
+        MOONCAKE_GLOBAL_SEGMENT_SIZE: '@dram.per-gpu-bytes'
+        MOONCAKE_STANDALONE_STORAGE: '0'
+        MC_STORE_CLIENT_METRIC_INTERVAL: '5'
+        MC_ENABLE_DEST_DEVICE_AFFINITY: '1'
+        # Advertise the store transfer engine on the node address instead of the first active
+        # interface, which can be a BMC Redfish host interface (the same 10.0.1.2 on every node).
+        MC_TCP_BIND_ADDRESS: "{node}"
+        WITH_NVIDIA_PEERMEM: '0'
       args:
         host: 0.0.0.0
         served-model-name: deepseek-ai/DeepSeek-V4-Pro-0813
@@ -114,10 +180,9 @@ base:
         speculative-num-steps: 1
         speculative-eagle-topk: 1
         speculative-num-draft-tokens: 7
-        enable-hierarchical-cache: true
-        hicache-write-policy: write_back
-        hicache-io-backend: direct
-        hicache-mem-layout: page_first_direct
+        enable-unified-cache-external-linker: true
+        unified-cache-external-linker-backend: mooncake
+        hicache-storage-backend-extra-config: '{"enable_group_semantics":true}'
     decode:
       workers: 1
       env:
@@ -149,6 +214,8 @@ base:
         SGLANG_LOG_FORWARD_ITERS: '1'
         SGLANG_LOG_MS: '1'
         SGLANG_REQUEST_STATE_WAIT_TIMEOUT: '60'
+        MC_ENABLE_DEST_DEVICE_AFFINITY: '1'
+        WITH_NVIDIA_PEERMEM: '0'
       args:
         host: 0.0.0.0
         served-model-name: deepseek-ai/DeepSeek-V4-Pro-0813
@@ -186,6 +253,10 @@ base:
     container-remap-root: ""
 
   benchmark:
+    # The replay client holds ~300 GB of host memory; on the default head node it
+    # shares prefill_0's node and OOMs it. Put it on the etcd/nats node instead.
+    placement:
+      node: dedicated
     env:
       AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: "true"
       AIPERF_USE_DYNAMO_CONV_AWARE_ROUTING: "0"
@@ -206,7 +277,6 @@ override_1p1d_dep8_dep16_c64:
         dp-size: 8
         ep-size: 8
         mem-fraction-static: 0.85
-        hicache-ratio: 8
     decode:
       nodes: 4
       gpus: 16
@@ -233,7 +303,6 @@ override_1p1d_dep8_dep16_c128:
         dp-size: 8
         ep-size: 8
         mem-fraction-static: 0.80
-        hicache-ratio: 8
     decode:
       nodes: 4
       gpus: 16
@@ -259,7 +328,6 @@ override_1p1d_dep16_dep32_c256:
         dp-size: 16
         ep-size: 16
         mem-fraction-static: 0.85
-        hicache-ratio: 2
     decode:
       nodes: 8
       gpus: 32
@@ -287,7 +355,6 @@ override_2p1d_dep16_dep32_c768:
         dp-size: 16
         ep-size: 16
         mem-fraction-static: 0.85
-        hicache-ratio: 2
     decode:
       nodes: 8
       gpus: 32
@@ -315,7 +382,6 @@ override_2p1d_dep16_dep32_c1024:
         dp-size: 16
         ep-size: 16
         mem-fraction-static: 0.85
-        hicache-ratio: 2
     decode:
       nodes: 8
       gpus: 32
@@ -343,7 +409,6 @@ override_2p1d_dep16_dep32_c1280:
         dp-size: 16
         ep-size: 16
         mem-fraction-static: 0.85
-        hicache-ratio: 2
     decode:
       nodes: 8
       gpus: 32
