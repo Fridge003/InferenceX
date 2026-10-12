@@ -9619,4 +9619,4 @@
   description:
     - "Add a tuned DeepSeek-V4.1-Flash FP4 GB300 SGLang AgentX config on lmsysorg/sglang:nightly-dev-cu13-20261006-f3fe7534 with per-concurrency server settings for TP2 and TP4."
     - "Enable folded DSpark draft sampling and add scheduler, tokenizer and expert-parallelism tuning, plus a HiCache DRAM tier at concurrency 112."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/TBD
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3929
