@@ -111,7 +111,6 @@ base:
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: 'sglang:'
 
 override_tp4_c44_b4:
-  name: agg-gb300-tp4-c44-b4-mtp-hicache-nightly-20260913
   roles:
     agg:
       nodes: 1
@@ -130,7 +129,6 @@ override_tp4_c44_b4:
       PCP_SIZE: '1'
 
 override_tp4_c44_b2:
-  name: agg-gb300-tp4-c44-b2-mtp-hicache-nightly-20260913
   roles:
     agg:
       nodes: 1
@@ -149,7 +147,6 @@ override_tp4_c44_b2:
       PCP_SIZE: '1'
 
 override_tp4_c44_b1:
-  name: agg-gb300-tp4-c44-b1-mtp-hicache-nightly-20260913
   roles:
     agg:
       nodes: 1
@@ -168,7 +165,6 @@ override_tp4_c44_b1:
       PCP_SIZE: '1'
 
 override_tp4_c1_b1:
-  name: agg-gb300-tp4-c1-b1-mtp-hicache-nightly-20260913
   roles:
     agg:
       nodes: 1
@@ -187,7 +183,6 @@ override_tp4_c1_b1:
       PCP_SIZE: '1'
 
 override_tp8_c1_b1:
-  name: agg-gb300-tp8-c1-b1-mtp-hicache-nightly-20260913
   roles:
     agg:
       nodes: 2
