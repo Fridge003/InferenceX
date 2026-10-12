@@ -6672,7 +6672,8 @@ dsv4-fp4-gb200-dynamo-sglang-agentic-disagg:
   srt-recipe-dir: dsv4/sglang/gb200-fp4/agentx
   scenarios:
     agentic-coding:
-    - dram-utilization: 0.80
+    # Sizes the ~140 GiB Mooncake segment per prefill GPU; the decode stores keep their own.
+    - dram-utilization: 0.6664
       search-space:
       - spec-decoding: draft_model
         conc-list: [64]
