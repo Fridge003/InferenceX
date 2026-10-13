@@ -491,6 +491,8 @@ clusters:
         visibility: shared
         import: compute
         lock-timeout-s: 1800
+        single-node-import: true
+        multi-node-import: true
         framework-dirs:
           dynamo-sglang:
             key-style: plus
@@ -499,7 +501,7 @@ clusters:
               dsv4: {key-style: plus}
               glm5.2: {dir: /data/gharunners/containers}
           dynamo-trt: {key-style: plus-strip-nvcr, import: unchecked}
-          vllm: {dir: /data/gharunners/containers, import: unchecked}
+          vllm: {dir: /data/gharunners/containers, import: compute}
         helper-dirs:
           nginx: {key-style: plus, import: unchecked}
           dcgm-exporter: {dir: /data/gharunners/containers}
