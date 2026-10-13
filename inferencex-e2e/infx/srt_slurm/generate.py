@@ -78,6 +78,7 @@ def point_environment(point: Mapping[str, Any]) -> dict[str, str]:
             PREFILL_TP=str(prefill["tp"]),
             PREFILL_PP_SIZE=str(prefill["pp"]),
             PREFILL_PCP_SIZE=str(prefill["pcp-size"]),
+            PREFILL_DWDP_SIZE=str(prefill.get("dwdp-size", 1)),
         )
         if agentic:
             # A multi-node AgentX job serves its one concurrency.

@@ -420,7 +420,10 @@ def dram_budget(
         raise ValueError("A multi-node DRAM point needs its cluster's gpus-per-node")
     else:
         sizes = ("PREFILL_TP", "PREFILL_PP_SIZE", "PREFILL_PCP_SIZE")
-        gpus = min(math.prod(_positive(_required(environment, n), n) for n in sizes), gpus_per_node)
+        gpus = math.prod(_positive(_required(environment, n), n) for n in sizes)
+        # A DWDP prefill worker is a group of PREFILL_DWDP_SIZE ranks, 1 without DWDP.
+        dwdp = _positive(environment.get("PREFILL_DWDP_SIZE") or "1", "PREFILL_DWDP_SIZE")
+        gpus = min(gpus * dwdp, gpus_per_node)
     return {
         "total-gb": total,
         "total-bytes": total * BYTES_PER_GB,
