@@ -27,7 +27,7 @@ base:
         UCX_RNDV_SCHEME: "put_zcopy"
         OMPI_MCA_btl: "tcp,self"
         OMPI_MCA_pml: "ob1"
-        TRTLLM_UCX_INTERFACE: "@fabric.ucx-net-devices"
+        TRTLLM_UCX_INTERFACE: "@fabric.rdma-device-ports"
       args:
         max_batch_size: 2
         max_num_tokens: 16896
@@ -62,7 +62,7 @@ base:
         UCX_RNDV_SCHEME: "put_zcopy"
         OMPI_MCA_btl: "tcp,self"
         OMPI_MCA_pml: "ob1"
-        TRTLLM_UCX_INTERFACE: "@fabric.ucx-net-devices"
+        TRTLLM_UCX_INTERFACE: "@fabric.rdma-device-ports"
       args:
         pipeline_parallel_size: 1
         max_seq_len: 9256

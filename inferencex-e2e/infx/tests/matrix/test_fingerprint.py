@@ -53,7 +53,7 @@ RECIPES = {
     f"{MULTI}/disagg.yaml": {
         "base": {"schema": 2, "engine": "sglang", "roles": {
             "prefill": {"nodes": 1, "args": {"mem-fraction-static": 0.8},
-                        "env": {"UCX_NET_DEVICES": "@fabric.ucx-net-devices"}},
+                        "env": {"UCX_NET_DEVICES": "@fabric.rdma-device-ports"}},
             "decode": {"nodes": 1},
         }},
         "override_a": {"roles": {"decode": {"args": {"max-running-requests": 64}}}},
@@ -71,7 +71,7 @@ RUNNERS = {"labels": {"cluster:fixture": ["node-a"]}, "clusters": {"fixture": {
     "gpus-per-node": 8, "available-cpu-dram-mib": 1024000, "arch": "x86_64", "scheduler": "slurm",
     "slurm": {"partition": "batch", "exclusive": True, "srt-slurm": {
         "network-interface": "eth0", "mounts": {"/data/models": "/models"},
-        "power-exporter-port": 9400, "fabric": {"ucx-net-devices": ["mlx5_0:1"]},
+        "power-exporter-port": 9400, "fabric": {"rdma-device-ports": ["mlx5_0:1"]},
     }},
 }}}  # fmt: skip
 
@@ -179,7 +179,7 @@ AGENTX_POINTS = {("agentx", "agentx.yaml:override_bench", 2)}
         "configs/runners.yaml",
         lambda runners: runners["clusters"]["fixture"]["slurm"]["srt-slurm"].update({
             "mounts": {"/scratch/models": "/models"}, "power-exporter-port": 9500,
-            "fabric": {"ucx-net-devices": ["mlx5_1:1", "mlx5_2:1"]},
+            "fabric": {"rdma-device-ports": ["mlx5_1:1", "mlx5_2:1"]},
         }),
         set(), id="cluster-facts",
     ),
