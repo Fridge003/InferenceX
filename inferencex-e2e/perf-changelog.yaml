@@ -9689,4 +9689,4 @@
   description:
   - Pin kimik3 MI355X FP4 atom mtp AgentX to the 2026-10-13 image rocm/atom-dev:nightly_202610131505@sha256:b78300a6caf6c1fec3b1f27b4f7333326c9d34911bfc7ae229d13d2ebbc43884.
   - Preserve deployment topology, speculative mode, concurrency points, KV-offload settings and evaluation coverage.
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4026
