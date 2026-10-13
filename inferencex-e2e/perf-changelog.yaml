@@ -9694,5 +9694,6 @@
   - qwen3.5-fp4-b200-sglang-agentic-mtp
   description:
   - Pin qwen3.5 B200 FP4 sglang mtp AgentX to the 2026-10-13 image lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7.
+  - Move to the user-approved NVFP4-V2 checkpoint used by the current fixed-sequence recipes; the original checkpoint path is absent on B200. Repeat correctness evaluation for the changed checkpoint.
   - Preserve deployment topology, speculative mode, concurrency points, KV-offload settings and evaluation coverage.
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3975
