@@ -1583,3 +1583,38 @@ dsv41flash-fp4-mi355x-sglang-agentic-dspark:
       - { tp: 2, ep: 1, dp-attn: false, kv-offloading: none, spec-decoding: mtp, conc-list: [1, 2, 4, 8, 16], srt-recipe: benchmarks/single_node/srt-slurm-recipes/dsv41flash/sglang/mi355x-fp4-mtp/agentic.yaml }
       - { tp: 4, ep: 1, dp-attn: false, kv-offloading: none, spec-decoding: mtp, conc-list: [1, 2, 4, 8, 16], srt-recipe: benchmarks/single_node/srt-slurm-recipes/dsv41flash/sglang/mi355x-fp4-mtp/agentic.yaml }
       - { tp: 2, ep: 1, dp-attn: true, kv-offloading: none, spec-decoding: mtp, conc-list: [32, 64], srt-recipe: benchmarks/single_node/srt-slurm-recipes/dsv41flash/sglang/mi355x-fp4-mtp/agentic.yaml }
+
+minimaxm3-fp4-mi355x-vllm-agentic-mtp:
+  image: vllm/vllm-openai-rocm:nightly-5555a2d8f7116b2b4877f66516f4128176cf722a@sha256:e0be00f1b99da608cc3c8571c7c86bae0c05f19e1e61a59c1d70aeea6bca6140
+  model: amd/MiniMax-M3-MXFP4
+  model-prefix: minimaxm3
+  runner: cluster:mi355x-amds
+  precision: fp4
+  framework: vllm
+  multinode: false
+  scenarios:
+    agentic-coding:
+    - dram-utilization: 0.2
+      search-space:
+      - tp: 4
+        kv-offloading: none
+        conc-list:
+        - 1
+        - 4
+        - 5
+        - 8
+        - 10
+        - 12
+        - 15
+        - 20
+        - 24
+        - 32
+        spec-decoding: mtp
+        srt-recipe: benchmarks/single_node/srt-slurm-recipes/minimaxm3/vllm/mi355x-fp4-mtp/agentic.yaml
+      - tp: 2
+        kv-offloading: none
+        conc-list:
+        - 1
+        - 2
+        spec-decoding: mtp
+        srt-recipe: benchmarks/single_node/srt-slurm-recipes/minimaxm3/vllm/mi355x-fp4-mtp/agentic.yaml
