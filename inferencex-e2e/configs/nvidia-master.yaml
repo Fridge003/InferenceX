@@ -8407,7 +8407,8 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
       search-space:
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [1]
+        conc-list:
+        - 1
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8417,10 +8418,11 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c1.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c1.yaml
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [4]
+        conc-list:
+        - 4
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8430,10 +8432,11 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c4.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c4.yaml
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [8]
+        conc-list:
+        - 8
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8443,10 +8446,11 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c8.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c8.yaml
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [14]
+        conc-list:
+        - 14
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8456,10 +8460,11 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c14.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c14.yaml
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [24]
+        conc-list:
+        - 24
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8469,10 +8474,11 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c24.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c24.yaml
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [48]
+        conc-list:
+        - 48
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8482,22 +8488,11 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c48.yaml"
-      - kv-offloading: none
-        conc-list: [96]
-        num-nodes: 2
-        worker:
-          num-worker: 1
-          tp: 8
-          pp: 2
-          dcp-size: 8
-          ep: 1
-          dp-attn: false
-          additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c96.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c48.yaml
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [32]
+        conc-list:
+        - 32
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8507,10 +8502,11 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c32.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c32.yaml
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [56]
+        conc-list:
+        - 56
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8520,10 +8516,11 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c56.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c56.yaml
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [72]
+        conc-list:
+        - 72
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8533,10 +8530,11 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c72.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c72.yaml
       - spec-decoding: mtp
         kv-offloading: none
-        conc-list: [80]
+        conc-list:
+        - 80
         num-nodes: 2
         worker:
           num-worker: 1
@@ -8546,7 +8544,8 @@ kimik3-fp4-b200-dynamo-vllm-agentic-dspark:
           ep: 1
           dp-attn: false
           additional-settings:
-          - "CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c80.yaml"
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c80.yaml
+
 qwen3.5-fp8-gb300-dynamo-sglang-mtp:
   image: lmsysorg/sglang:v0.5.14-cu130@sha256:5027e95bf6ec536856b1b52a91d1f35ff5c564ab83e8a94758a169ff09bb8df3
   model: Qwen/Qwen3.5-397B-A17B-FP8
@@ -9715,3 +9714,30 @@ qwen3.5-fp8-gb300-dynamo-sglang-agentic-agg-midcurve:
           dp-attn: false
           additional-settings:
           - CONFIG_FILE=recipes/qwen3.5/sglang/gb300-fp8/agentx/agg-gb300-tp8-c1-b1-mtp-hicache-nightly-20260913.yaml
+
+kimik3-fp4-b200-dynamo-vllm-agentic-dspark-no-spec:
+  image: vllm/vllm-openai:nightly-5555a2d8f7116b2b4877f66516f4128176cf722a@sha256:e5c9e6bb82f645e8fca04e4d395743ee5ed473a62b98942d65f83c35d0c69301
+  model: moonshotai/Kimi-K3
+  model-prefix: kimik3
+  runner: cluster:b200-nscale
+  precision: fp4
+  framework: dynamo-vllm
+  multinode: true
+  disagg: false
+  scenarios:
+    agentic-coding:
+    - dram-utilization: 0.8
+      search-space:
+      - kv-offloading: none
+        conc-list:
+        - 96
+        num-nodes: 2
+        worker:
+          num-worker: 1
+          tp: 8
+          pp: 2
+          dcp-size: 8
+          ep: 1
+          dp-attn: false
+          additional-settings:
+          - CONFIG_FILE=recipes/kimik3/vllm/b200-fp4/agentx/agg-tp8pp2-mooncake-c96.yaml
