@@ -19,10 +19,14 @@ identity:
   model:
     repo: "deepseek-ai/DeepSeek-V4-Pro-0813"
   container:
-    image: "lmsysorg/sglang:nightly-dev-20260916-c9a8fba9"
+    image: "lmsysorg/sglang:nightly-dev-20261013-7224fce1"
 
 dynamo:
-  install: false
+  # The image's Dynamo 1.6.0.dev20261010 predates ai-dynamo/dynamo#16005 and
+  # registers one DP rank for an attn-dp-size worker; this commit counts all.
+  install: true
+  source:
+    rev: "b208989fbe1cfbfde64d11334d8af4ff04fe1a99"
 
 health_check:
   max_attempts: 1440
@@ -56,9 +60,6 @@ frontend:
   args:
     router-mode: "kv"
     router-session-affinity-ttl-secs: "3600"
-    active-decode-blocks-threshold: "None"
-    active-prefill-tokens-threshold: "None"
-    active-prefill-tokens-threshold-frac: "None"
 
 engine: sglang
 roles:
@@ -68,64 +69,44 @@ roles:
     gpus: 8
 
     env:
-      SGLANG_RAGGED_VERIFY_MODE: "static"
       SGLANG_ENABLE_PREFILL_WAR_READ_DONE: "1"
-      SGLANG_DEFAULT_THINKING: "1"
-      SGLANG_DSV4_REASONING_EFFORT: high
       PIP_BREAK_SYSTEM_PACKAGES: "1"
       PYTHONNOUSERSITE: "1"
       TORCH_CUDA_ARCH_LIST: "10.0"
       # Triton compiles with the image's CUDA ptxas.
       TRITON_PTXAS_PATH: /usr/local/cuda/bin/ptxas
-      SGLANG_JIT_DEEPGEMM_PRECOMPILE: "1"
       SGLANG_JIT_DEEPGEMM_FAST_WARMUP: "1"
-      SGLANG_OPT_SWA_SPLIT_LEAF_ON_INSERT: "1"
-      SGLANG_OPT_UNIFIED_CACHE_FREE_OUT_OF_WINDOW_SLOTS: "1"
-      SGLANG_OPT_USE_CUSTOM_ALL_REDUCE_V2: "1"
-      SGLANG_OPT_USE_ONLINE_COMPRESS: "0"
-      SGLANG_OPT_USE_JIT_INDEXER_METADATA: "1"
-      SGLANG_OPT_USE_JIT_NORM: "1"
-      SGLANG_OPT_USE_TOPK_V2: "True"
       # Covers the 8192-token per-rank prefill budget (65536 / 8 DP ranks).
       SGLANG_OPT_DEEPGEMM_MEGA_MOE_NUM_MAX_TOKENS_PER_RANK: "8320"
 
     args:
       served-model-name: "deepseek-ai/DeepSeek-V4-Pro-0813"
       enable-metrics: true
-      enable-cache-report: true
       trust-remote-code: true
       weight-loader-prefetch-checkpoints: true
       watchdog-timeout: 1000000
       allow-auto-truncate: true
-      attention-backend: dsv4
-      page-size: 256
-      disable-shared-experts-fusion: true
       disable-flashinfer-autotune: true
       tp-size: 8
-      dp-size: 8
+      attn-dp-size: 8
       ep-size: 8
-      enable-dp-attention: true
       enable-dp-lm-head: true
       enable-dp-attention-local-control-broadcast: true
       moe-a2a-backend: megamoe
       enable-deepseek-v4-fp4-indexer: true
       enable-prefill-delayer: true
       prefill-decode-interval: 20
-      incremental-streaming-output: true
       stream-interval: 20
       # Mega-MoE's transient workspace sits outside the static pool.
       mem-fraction-static: 0.88
       swa-full-tokens-ratio: 0.075
       chunked-prefill-size: 65536
       max-running-requests: 768
-      # Per-rank graph limit: max-running-requests / dp-size = 768 / 8.
+      # Per-rank graph limit: max-running-requests / attn-dp-size = 768 / 8.
       cuda-graph-max-bs-decode: 96
       kv-events-config: '{"publisher":"zmq","topic":"kv-events","endpoint":"tcp://*:5557"}'
       speculative-algorithm: DSPARK
       speculative-dspark-block-size: 6
-      speculative-num-steps: 1
-      speculative-eagle-topk: 1
-      speculative-num-draft-tokens: 7
       # HiCache capacity is a host/device ratio; 3 keeps the tier near 2 TB.
       enable-hierarchical-cache: true
       hicache-ratio: 3
