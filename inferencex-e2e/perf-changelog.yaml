@@ -9634,7 +9634,7 @@
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3926
 
 - config-keys:
-    - qwen3.8next-fp8-h200-sglang-agentic-mtp
+    - dsv41flash-fp4-h200-sglang-agentic-dspark
   scenario-type:
     - agentic-coding
   no-evals: true
