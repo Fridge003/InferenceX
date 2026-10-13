@@ -68,6 +68,10 @@ AGENTX_MULTINODE_ENV = {
     "ROUTER_METADATA": '{"name": "dynamo-router", "version": "1.5.0"}',
     "KV_P2P_TRANSFER": "mooncake",
 }
+# A DWDP prefill worker: a group of eight TP1 ranks.
+DWDP_PREFILL = {
+    "PREFILL_TP": "1", "PREFILL_EP": "1", "PREFILL_DP_ATTN": "false", "PREFILL_DWDP_SIZE": "8",
+}
 
 
 def fixed_row(env=FIXED_ENV):
@@ -159,6 +163,8 @@ def test_benchmark_collector_publishes_valid_rows_and_quarantines_malformed_ones
         "bmk_aggregate/agg_aggregate.json": fixed_row(AGGREGATE_ENV),
         "bmk_agentic_single/single.json": agentx_row(),
         "bmk_agentic_multinode/multinode_conc8.json": agentx_multinode_row(),
+        "bmk_dwdp/agg_dwdp.json": fixed_row(MULTINODE_ENV | DWDP_PREFILL | {"PREFILL_GPUS": "16"}),
+        "bmk_agentic_dwdp/dwdp_conc8.json": agentx_row(AGENTX_MULTINODE_ENV | DWDP_PREFILL),
     }
     missing_isl = fixed_row()
     del missing_isl["isl"]
@@ -260,6 +266,8 @@ def test_eval_collector_publishes_valid_rows_and_quarantines_malformed_ones(tmp_
      {("result_schema_version", "int_type")}),
     (FIXED_SEQUENCE_ROW, lambda: fixed_row() | {"dp_attention": False},
      {("dp_attention", "literal_error")}),
+    (FIXED_SEQUENCE_ROW, lambda: multinode_row() | {"prefill_dwdp_size": 1},
+     {("prefill_dwdp_size", "greater_than_equal")}),
     (FIXED_SEQUENCE_ROW, lambda: fixed_row() | {"is_multinode": "false"}, {(None, "topology")}),
     # AgentX latency lives in request_metrics; only power metrics are top-level extras.
     (AGENTX_ROW, lambda: agentx_row() | {"avg_power_w": 650.0}, set()),

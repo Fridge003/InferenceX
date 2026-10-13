@@ -227,6 +227,13 @@
           "title": "Prefill Pcp Size",
           "type": "integer"
         },
+        "prefill_dwdp_size": {
+          "default": null,
+          "description": "Ranks per DWDP prefill group; absent without DWDP.",
+          "minimum": 2,
+          "title": "Prefill Dwdp Size",
+          "type": "integer"
+        },
         "prefill_ep": {
           "exclusiveMinimum": 0,
           "title": "Prefill Ep",

@@ -61,6 +61,7 @@ The models accept these producer quirks:
 
 - `dp_attention`, `prefill_dp_attention`, and `decode_dp_attention` are the strings `"true"` and `"false"` on throughput and AgentX rows.
 - Multinode AgentX `tp` adds prefill and decode TP, and `ep` is the larger role's EP. Multinode rows without decode GPUs report `decode_tp` and `decode_ep` as `0`.
+- Multinode throughput and AgentX rows carry `prefill_dwdp_size` only when the prefill worker is a DWDP group, so its value is at least `2`.
 - `recipe_fingerprint` is empty when the dispatched config has none.
 - Eval rows upper-case `hw`, use `0` for an absent `isl` or `osl`, keep `build_row` defaults such as `"unknown"`, write `prefill=<flag>,decode=<flag>` when the roles' DP-attention settings differ, and may carry lm-eval's `"N/A"` standard errors.
 
