@@ -7375,7 +7375,7 @@ glm5.2-fp4-b300-sglang-agentic-mtp:
 # ~94.5 GB/GPU across 8 B300s; the fp8 KV pool that remains inside
 # --mem-fraction-static 0.85 is ~150 GB/GPU against ~187 GB/GPU on NVFP4.
 glm5.2-fp8-b300-sglang-agentic-mtp:
-  image: lmsysorg/sglang:nightly-dev-cu13-20260908-20ca564b
+  image: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
   model: zai-org/GLM-5.2-FP8
   model-prefix: glm5.2
   runner: cluster:b300-dsxe
