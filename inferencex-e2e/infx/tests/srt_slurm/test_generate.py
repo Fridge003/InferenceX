@@ -60,6 +60,17 @@ MASTER = {
             "kv-offloading": "dram", "kv-offload-backend": {"name": "hicache"},
         }]}]},
     },
+    # One DWDP prefill group of eight TP1 ranks.
+    "agentx-multi-dwdp": {
+        "image": "org/image:1", "model": "org/model", "model-prefix": "dsr1", "precision": "fp8",
+        "framework": "dynamo-sglang", "runner": "cluster:fixture", "multinode": True,
+        "disagg": True, "kv-p2p-transfer": "nixl", "srt-recipe-dir": "fixture",
+        "scenarios": {"agentic-coding": [{"dram-utilization": 0.5, "search-space": [{
+            "prefill": {"num-worker": 1, "tp": 1, "ep": 1, "dp-attn": False, "dwdp-size": 8},
+            "decode": ROLE, "conc-list": [8], "srt-recipe": "agentic-dram.yaml",
+            "kv-offloading": "dram", "kv-offload-backend": {"name": "hicache"},
+        }]}]},
+    },
 }  # fmt: skip
 SHARED = {
     "fixed-sequence-single.yaml": {"benchmark": {"type": "custom", "command": "bash client.sh"}},
@@ -195,13 +206,15 @@ def test_a_multinode_agentx_power_point_gets_its_clusters_exporter_port_and_clie
     assert recipe["benchmark"]["concurrencies"] == [8]
 
 
+@pytest.mark.parametrize("key", ["agentx-multi-dram", "agentx-multi-dwdp"])
 def test_a_multinode_dram_point_sizes_host_dram_from_its_budget_per_prefill_gpu(
-    project, power_lane, tmp_path
+    project, power_lane, tmp_path, key
 ):
     output = tmp_path / "out"
-    assert generate(project, output, "agentx-multi-dram") == 0
+    assert generate(project, output, key) == 0
 
-    # 1,000,000 MiB at 0.5 over all eight GPUs of a node: 524 GB, 65 GB per GPU.
+    # 1,000,000 MiB at 0.5 over all eight GPUs of a node: 524 GB, 65 GB per GPU. The DWDP
+    # group's eight TP1 ranks cover the same eight GPUs.
     [(_, recipe)] = written(output)
     assert recipe["roles"]["prefill"]["args"]["hicache-size"] == 65
 
