@@ -31,11 +31,12 @@ base:
     gpus_per_node: 4
   engine:
     type: trtllm
-    publish_events_and_metrics: false
+    publish_events_and_metrics: true
   roles:
     prefill:
       nodes: 1
       env:
+        OMP_NUM_THREADS: '1'
         CUDA_SCALE_LAUNCH_QUEUES: 4x
         MIMALLOC_ARENA_RESERVE: '0'
         MIMALLOC_PURGE_DELAY: ''
@@ -119,6 +120,7 @@ base:
         trust_remote_code: true
     decode:
       env:
+        OMP_NUM_THREADS: '1'
         MIMALLOC_ARENA_RESERVE: '0'
         MIMALLOC_PURGE_DELAY: ''
         NCCL_GRAPH_MIXING_SUPPORT: '0'
