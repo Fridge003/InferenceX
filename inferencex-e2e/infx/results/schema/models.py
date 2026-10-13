@@ -38,6 +38,9 @@ RecipeFingerprint = Annotated[
     str,
     Field(pattern=r"^(?:[0-9a-f]{64})?$", description="Empty when the dispatched config has none."),
 ]
+DwdpSize = Annotated[
+    int, Field(ge=2, description="Ranks per DWDP prefill group; absent without DWDP.")
+]
 StdErr = Annotated[
     float | Literal["N/A"],
     Field(description="lm-eval writes 'N/A' when it cannot estimate a standard error."),
@@ -139,6 +142,7 @@ class FixedSequenceMultinodeRow(_FixedSequenceRow):
     prefill_pp: Positive
     prefill_dcp_size: Positive
     prefill_pcp_size: Positive
+    prefill_dwdp_size: DwdpSize = None
     prefill_ep: Positive
     prefill_dp_attention: DpAttention
     prefill_num_workers: NonNegative
@@ -213,6 +217,7 @@ class AgentXMultinodeRow(_AgentXRow):
     prefill_pp: Positive
     prefill_dcp_size: Positive
     prefill_pcp_size: Positive
+    prefill_dwdp_size: DwdpSize = None
     prefill_ep: Positive
     prefill_dp_attention: DpAttention
     num_prefill_gpu: NonNegative
