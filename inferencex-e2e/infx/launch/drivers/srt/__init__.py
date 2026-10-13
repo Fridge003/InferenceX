@@ -39,6 +39,12 @@ if TYPE_CHECKING:
     from infx.clusters.slurm import SrtSlurmSettings
 
 
+DOCKER_ENV = (
+    "HF_HUB_CACHE", "HF_HUB_OFFLINE", "HF_DATASETS_OFFLINE", "TRANSFORMERS_OFFLINE",
+    "PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX", "MODEL_DOWNLOAD_LOCK_TIMEOUT",
+)  # fmt: skip
+
+
 def run_single_node(launch: Launch) -> int:
     """One native single-node point: bind its recipe variant, submit, follow, verify."""
     request = SingleNodeRequest.from_env(launch.request.env)
@@ -73,7 +79,12 @@ def run_single_node(launch: Launch) -> int:
     config.create_volume_mounts(run)
     rendered = config.render(run.cluster, job_config)
     if docker:
+        # Pyxis hands a container the whole submit environment; docker only what it is told.
+        names = [*DOCKER_ENV, *run.cluster.env, *run.srt.env]
         rendered["launcher"] = "docker"
+        rendered["docker_args"] = [
+            "-w", "/infmax-workspace", *(arg for name in names for arg in ("-e", name)),
+        ]  # fmt: skip
     config.write(checkout.root / "srtslurm.yaml", rendered)
     if rc := run_setup(run, checkout):
         return rc
