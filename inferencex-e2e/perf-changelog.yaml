@@ -9705,4 +9705,4 @@
   - Pin qwen3.5 H200 FP8 sglang mtp AgentX to the 2026-10-13 image lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7.
   - Preserve deployment topology, speculative mode, concurrency points, KV-offload settings and evaluation coverage.
   - Copy shared recipes so unrelated dashboard rows retain their current images.
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4023
