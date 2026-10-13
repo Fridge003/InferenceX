@@ -9621,3 +9621,11 @@
     - "Switch NIXL KV transfer to the C++ transfer-agent bounce buffer (max_average_descriptor_size 4MB, min_descriptor_count 1) and lower kv_cache_bounce_size_mb from 5120 to 1024."
     - "Move Dynamo on all six points to the ai-dynamo 1.6.0.dev20261010 wheel, which includes ai-dynamo/dynamo#15628 (routed node address selection for metadata and transport advertisement)."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3707
+
+- config-keys:
+    - dsr1-fp8-h200-sglang
+  scenario-type:
+    - fixed-seq-len
+  description:
+    - "DNM: run the c4 point through srt-slurm launcher: docker on h200-dgxc."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3942
