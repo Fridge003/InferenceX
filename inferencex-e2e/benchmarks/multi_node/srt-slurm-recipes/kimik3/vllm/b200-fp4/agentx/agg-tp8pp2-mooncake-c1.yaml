@@ -3,14 +3,14 @@ name: "kimik3-vllm-agg-b200-tp8pp2-mooncake-c1-agentic"
 
 model:
   path: "kimik3"
-  container: "vllm/vllm-openai:nightly-ac9126e58aa7bbab1856ba6593ba4d5003fea516"
+  container: "vllm/vllm-openai:nightly-5555a2d8f7116b2b4877f66516f4128176cf722a@sha256:e5c9e6bb82f645e8fca04e4d395743ee5ed473a62b98942d65f83c35d0c69301"
   precision: "fp4"
 
 identity:
   model:
     repo: "moonshotai/Kimi-K3"
   container:
-    image: "vllm/vllm-openai:nightly-ac9126e58aa7bbab1856ba6593ba4d5003fea516"
+    image: "vllm/vllm-openai:nightly-5555a2d8f7116b2b4877f66516f4128176cf722a@sha256:e5c9e6bb82f645e8fca04e4d395743ee5ed473a62b98942d65f83c35d0c69301"
 
 dynamo:
   install: false
