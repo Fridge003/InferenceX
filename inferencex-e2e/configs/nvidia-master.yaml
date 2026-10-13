@@ -5583,7 +5583,7 @@ qwen3.5-fp4-b200-sglang-agentic-mtp:
 # Qwen3.8-Flash-Next NVFP4 AgentX on B200 via SGLang with native NEXTN MTP.
 # TP1 matches the verified single-node recipe.
 qwen3.8next-fp4-b200-sglang-agentic-mtp:
-  image: lmsysorg/sglang:qwen38flashnext
+  image: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
   model: RadixArk/Qwen3.8-Flash-Next-NVFP4
   model-prefix: qwen3.8next
   runner: cluster:b200-nscale
@@ -5595,6 +5595,7 @@ qwen3.8next-fp4-b200-sglang-agentic-mtp:
     - dram-utilization: 0.8
       search-space:
       - { tp: 1, ep: 1, spec-decoding: mtp, kv-offloading: none, conc-list: [1, 4, 8, 16], srt-recipe: benchmarks/single_node/srt-slurm-recipes/qwen3.8next/sglang/b200-fp4-mtp/agentic.yaml }
+
 qwen3.5-fp4-gb200-dynamo-sglang-agentic-mtp:
   image: lmsysorg/sglang:nightly-dev-20260818-c0b6474b
   model: nvidia/Qwen3.5-397B-A17B-NVFP4-V2
