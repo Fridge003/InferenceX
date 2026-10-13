@@ -9715,3 +9715,27 @@ qwen3.5-fp8-gb300-dynamo-sglang-agentic-agg-midcurve:
           dp-attn: false
           additional-settings:
           - CONFIG_FILE=recipes/qwen3.5/sglang/gb300-fp8/agentx/agg-gb300-tp8-c1-b1-mtp-hicache-nightly-20260913.yaml
+
+qwen3.8next-fp8-h100-sglang-agentic-mtp:
+  image: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
+  model: Qwen/Qwen3.8-Flash-Next-FP8
+  model-prefix: qwen3.8next
+  runner: cluster:h100-dgxc
+  precision: fp8
+  framework: sglang
+  multinode: false
+  scenarios:
+    agentic-coding:
+    - dram-utilization: 0.8
+      search-space:
+      - tp: 8
+        ep: 8
+        spec-decoding: mtp
+        kv-offloading: none
+        conc-list:
+        - 1
+        - 4
+        - 8
+        - 12
+        - 16
+        srt-recipe: benchmarks/single_node/srt-slurm-recipes/qwen3.8next/sglang/h100-fp8-mtp/agentic.yaml
