@@ -56,6 +56,11 @@ base:
           kv_transfer_sender_future_timeout_ms: 20
           kv_transfer_timeout_ms: 600000
           transceiver_runtime: PYTHON
+          agent_bounce_buffer_enable: true
+          agent_bounce_params:
+            max_average_descriptor_size: 4MB
+            min_descriptor_count: '1'
+          kv_cache_bounce_size_mb: 1024
         cuda_graph_config:
         disable_overlap_scheduler: false
         enable_attention_dp: true
@@ -136,6 +141,11 @@ base:
           kv_transfer_sender_future_timeout_ms: 20
           kv_transfer_timeout_ms: 600000
           transceiver_runtime: PYTHON
+          agent_bounce_buffer_enable: true
+          agent_bounce_params:
+            max_average_descriptor_size: 4MB
+            min_descriptor_count: '1'
+          kv_cache_bounce_size_mb: 1024
         cuda_graph_config:
           enable_padding: true
         enable_attention_dp: false
