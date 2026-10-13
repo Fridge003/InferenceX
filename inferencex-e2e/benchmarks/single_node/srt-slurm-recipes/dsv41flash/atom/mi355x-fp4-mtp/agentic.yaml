@@ -1,20 +1,21 @@
 # DeepSeek-V4.1-Flash AgentX on MI355X with ATOM DSpark (five draft tokens),
 # following ROCm/ATOM recipes/DeepSeek-V4.1-Flash-Agentic.md at the image's
-# revision (a0527c9dbfb801e22cd29882454df6f6d21cdd91). TP2 and TP4, no expert
-# parallelism; the KV cache is GPU-resident.
+# revision (661ef7661eef0d804d2b52d81ed41d80aeaf9fdb). TP2 and TP4, no expert
+# parallelism, DP attention with prefill TBO (ROCm/ATOM#2376) from concurrency
+# 32; the KV cache is GPU-resident.
 base:
   schema: 2
   name: dsv41flash-fp4-mi355x-atom-agentic
   model:
     path: hf:deepseek-ai/DeepSeek-V4.1-Flash
-    container: rocm/atom-dev:nightly_202610121516
+    container: rocm/atom-dev:nightly_202610131505
     precision: fp4
   resources:
     gpu_type: mi355x
     gpus_per_node: 8
   frontend:
     type: atomesh
-    container_image: rocm/atom-dev@sha256:a60811a8467b43e3e50e9e9eb8cec34f68b7bca03f8c6dbd6a0ff813dde49d4c
+    container_image: rocm/atom-dev@sha256:b78300a6caf6c1fec3b1f27b4f7333326c9d34911bfc7ae229d13d2ebbc43884
     enable_multiple_frontends: false
   observability:
     enabled: false
@@ -66,7 +67,10 @@ base:
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: 'atom:'
 
 # One variant per point. Every point admits 128 sequences and captures every
-# decode size through 32 plus 48, 64 and 128.
+# decode size through 32 plus 48, 64 and 128. The _dpa points (concurrency 32
+# and above) run DP attention with prefill TBO, keep each AIPerf session on one
+# DP rank and defer prefill so that at least 10 decode passes run between
+# prefills.
 
 override_tp2_c1:
   roles:
@@ -92,14 +96,6 @@ override_tp2_c4:
     env:
       CONC: '4'
 
-override_tp2_c6:
-  roles:
-    agg:
-      gpus: 2
-  benchmark:
-    env:
-      CONC: '6'
-
 override_tp2_c8:
   roles:
     agg:
@@ -116,25 +112,76 @@ override_tp2_c16:
     env:
       CONC: '16'
 
-override_tp2_c32:
+override_tp2_c32_dpa:
   roles:
     agg:
       gpus: 2
+      args: &dpa_args
+        enable-dp-attention: true
+        enable-tbo: true
+        # ATOM_DP_LB_REQ_EQUIV weights in-flight requests under least_tokens.
+        dp-load-balance: least_tokens
+      env: &dpa_env
+        GPU_MAX_HW_QUEUES: '5'
+        ATOM_DP_SESSION_AFFINITY: '1'
+        ATOM_DP_LB_REQ_EQUIV: '512'
+        ATOM_ENABLE_PREFILL_DELAYER: '1'
+        ATOM_PREFILL_DECODE_INTERVAL: '10'
   benchmark:
     env:
       CONC: '32'
+      # Session affinity keys on the AIPerf session id.
+      AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: '1'
 
-override_tp2_c64:
+override_tp2_c64_dpa:
   roles:
     agg:
       gpus: 2
-      # Run at least 4 decode passes after each prefill and batch the prefills
-      # that arrive meanwhile; at this load the batching also raises throughput.
-      env:
-        ATOM_PREFILL_DECODE_INTERVAL: '4'
+      args: *dpa_args
+      env: *dpa_env
   benchmark:
     env:
       CONC: '64'
+      AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: '1'
+
+override_tp2_c128_dpa:
+  roles:
+    agg:
+      gpus: 2
+      args: *dpa_args
+      env: *dpa_env
+  benchmark:
+    env:
+      CONC: '128'
+      AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: '1'
+
+override_tp2_c256_dpa:
+  roles:
+    agg:
+      gpus: 2
+      args: *dpa_args
+      env: *dpa_env
+  benchmark:
+    env:
+      CONC: '256'
+      AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: '1'
+
+# Plain-TP companions of the DP-attention points above, at the same concurrency.
+override_tp2_c128:
+  roles:
+    agg:
+      gpus: 2
+  benchmark:
+    env:
+      CONC: '128'
+
+override_tp2_c256:
+  roles:
+    agg:
+      gpus: 2
+  benchmark:
+    env:
+      CONC: '256'
 
 override_tp4_c1:
   roles:
@@ -152,14 +199,13 @@ override_tp4_c8:
     env:
       CONC: '8'
 
-override_tp4_c32:
+override_tp4_c32_dpa:
   roles:
     agg:
       gpus: 4
-      # Run at least 16 decode passes after each prefill and batch the prefills
-      # that arrive meanwhile, so new turns stall decode less often.
-      env:
-        ATOM_PREFILL_DECODE_INTERVAL: '16'
+      args: *dpa_args
+      env: *dpa_env
   benchmark:
     env:
       CONC: '32'
+      AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: '1'
