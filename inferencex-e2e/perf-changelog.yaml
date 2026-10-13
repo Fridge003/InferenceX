@@ -9623,7 +9623,7 @@
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3707
 
 - config-keys:
-    - minimaxm3-fp8-h200-vllm-agentic-mtp
+    - dsv41flash-fp4-h200-vllm-agentic-dspark
   scenario-type:
     - agentic-coding
   no-evals: true
