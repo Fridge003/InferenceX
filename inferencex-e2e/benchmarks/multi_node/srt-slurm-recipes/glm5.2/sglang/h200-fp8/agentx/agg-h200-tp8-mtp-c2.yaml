@@ -7,7 +7,7 @@ name: agg-h200-tp8-mtp-c2
 
 model:
   path: hf:zai-org/GLM-5.2-FP8
-  container: lmsysorg/sglang:nightly-dev-20260914-4358a161
+  container: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
   precision: fp8
 
 identity:
@@ -15,7 +15,7 @@ identity:
     repo: zai-org/GLM-5.2-FP8
     revision: f33c6dc501ee5a2c7e35155653b1b1abbc320951
   container:
-    image: lmsysorg/sglang:nightly-dev-20260914-4358a161
+    image: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
   frameworks:
     dynamo: 1.5.0.dev20260913
     sglang: 4358a1617cad734fc37bf53d9e5c2092bd43d075
