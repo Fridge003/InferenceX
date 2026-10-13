@@ -68,7 +68,7 @@ base:
         speculative-num-steps: 5
         speculative-eagle-topk: 1
         speculative-num-draft-tokens: 6
-        cuda-graph-max-bs: 64
+        cuda-graph-max-bs-decode: 64
         max-running-requests: 80
         max-prefill-tokens: 16384
         chunked-prefill-size: 16384
@@ -203,7 +203,7 @@ override_tp2ep2_hicache_cap48:
         speculative-num-draft-tokens: 4
         enable-linear-replayssm-spec: true
         linear-replayssm-cache-len: 8
-        cuda-graph-max-bs: 48
+        cuda-graph-max-bs-decode: 48
         max-running-requests: 48
         mem-fraction-static: 0.88
         max-mamba-cache-size: 192
