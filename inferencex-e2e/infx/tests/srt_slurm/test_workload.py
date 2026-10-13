@@ -16,9 +16,7 @@ from infx.srt_slurm.workload import (
     bind_workload,
     check_setup_script,
     compose_recipe,
-    dram_budget,
     parse_concurrencies,
-    resolve_dram,
     resolve_fabric,
 )
 
@@ -28,15 +26,7 @@ MULTI_ENV = {
     "IMAGE": "registry/image:2", "MODEL": "org/model", "PRECISION": "fp8",
     "ISL": "8192", "OSL": "1024", "CONC_LIST": "4 16",
 }  # fmt: skip
-AGENTX_ENV = {
-    "IMAGE": "nvcr.io#org/image:3", "MODEL": "org/model", "PRECISION": "fp4", "CONC_LIST": "8",
-    "KV_OFFLOADING": "none",
-}  # fmt: skip
-# A single-node TP8 point offloading KV to a 1731 GB budget: 216.375 GB per GPU.
-DRAM_ENV = {
-    "IMAGE": "org/image:1", "MODEL": "org/model", "PRECISION": "fp8", "CONC": "4", "GPU_COUNT": "8",
-    "KV_OFFLOADING": "dram", "TOTAL_CPU_DRAM_GB": "1731",
-}  # fmt: skip
+AGENTX_ENV = {"IMAGE": "nvcr.io#org/image:3", "MODEL": "org/model", "PRECISION": "fp4", "CONC_LIST": "8"}
 CLIENT_ENV = {"RESULT_DIR": "/logs/agentic", "HF_HUB_CACHE": "/hf_hub_cache"}
 MOONCAKE = '{"name": "mooncake", "version": "0.3.11.post1"}'
 ROUTER = '{"name": "vllm-router", "version": "0.1.14"}'
@@ -108,11 +98,6 @@ def test_bundles_take_the_shared_block_under_base_and_keep_their_variants(projec
      "benchmark.env.HF_HUB_CACHE (= '/elsewhere')"),
     ({"base": {"benchmark": {"env": {"RESULT_DIR": "/logs"}}}}, True, False,
      "base.benchmark.env.RESULT_DIR (= '/logs')"),
-    # A single-node variant may name its point's KV offloading, never the budget it gets.
-    ({"base": {}, "override_c": {"benchmark": {"env": {"TOTAL_CPU_DRAM_GB": "1731"}}}}, True, False,
-     "override_c.benchmark.env.TOTAL_CPU_DRAM_GB (= '1731')"),
-    ({"base": {"benchmark": {"env": {"KV_OFFLOADING": "dram"}}}}, True, False,
-     "base.benchmark.env.KV_OFFLOADING (= 'dram')"),
     ({"environment": {"ROUTER_VERSION": "0.1.14"}}, True, False, "environment.ROUTER_VERSION (= '0.1.14')"),
     ({"base": {}, "override_c": {"services": [{"name": "m", "env": {"KV_OFFLOAD_BACKEND_VERSION": "1"}}]}},
      True, True, "override_c.services[0].env.KV_OFFLOAD_BACKEND_VERSION (= '1')"),
@@ -121,20 +106,6 @@ def test_a_fragment_that_sets_a_bound_key_is_rejected(project, data, agentic, mu
     path = fragment(project, data)
     with pytest.raises(ValueError, match=re.escape(f"remove {reported} from the fragment")):
         compose_recipe(path, agentic=agentic, multinode=multinode, root=project)
-
-
-@pytest.mark.parametrize(("data", "reported"), [
-    ({"roles": {"agg": {"env": {"LMCACHE_MAX_LOCAL_CPU_SIZE": "128"}}}},
-     "roles.agg.env.LMCACHE_MAX_LOCAL_CPU_SIZE (= '128')"),
-    ({"base": {}, "override_c": {"roles": {"agg": {"args": {
-        "kv-transfer-config": '{"kv_connector_extra_config":{"cpu_bytes_to_use":1000}}',
-    }}}}}, "override_c.roles.agg.args.kv-transfer-config.kv_connector_extra_config.cpu_bytes_to_use (= 1000)"),
-    ({"services": [{"args": ["--l1-size-gb", "1296"]}]}, "services[0].args[1] (= '1296')"),
-])  # fmt: skip
-def test_a_fragment_that_sizes_host_dram_with_a_literal_is_rejected(project, data, reported):
-    path = fragment(project, data)
-    with pytest.raises(ValueError, match=re.escape(f"set {reported} to a '@dram.<name>' value")):
-        compose_recipe(path, agentic=True, multinode=False, root=project)
 
 
 def test_multinode_binding_writes_the_point_and_leaves_the_client_its_job_environment():
@@ -168,78 +139,11 @@ def test_agentx_binding_writes_the_launchers_client_paths_without_lengths():
     assert bound == {
         "model": {"path": "hf:org/model", "container": "nvcr.io#org/image:3", "precision": "fp4"},
         "identity": {"container": {"image": "nvcr.io/org/image:3"}},
-        "benchmark": {"env": {"AIPERF_X": "1", "KV_OFFLOADING": "none", **CLIENT_ENV}},
+        "benchmark": {"env": {"AIPERF_X": "1", **CLIENT_ENV}},
     }
     own_layout = {"benchmark": {"env": {"HF_HOME": "/logs/hf"}}}
     bound = bind_workload(own_layout, AGENTX_ENV, agentic=True, multinode=True, client_env=CLIENT_ENV)
-    assert bound["benchmark"]["env"] == {
-        "HF_HOME": "/logs/hf", "KV_OFFLOADING": "none", "RESULT_DIR": "/logs/agentic",
-    }  # fmt: skip
-
-
-def test_a_dram_point_binds_its_budget_and_every_backend_size_derived_from_it(project):
-    path = fragment(project, {
-        "roles": {"agg": {
-            "args": {
-                "hicache-size": "@dram.per-gpu-gb",
-                "kv-transfer-config": '{"kv_connector":"SimpleCPUOffloadConnector",'
-                '"kv_connector_extra_config":{"cpu_bytes_to_use":"@dram.total-bytes",'
-                '"cpu_bytes_to_use_per_rank":"@dram.per-gpu-bytes","lazy_offload":true}}',
-            },
-            "env": {"LMCACHE_MAX_LOCAL_CPU_SIZE": "@dram.per-gpu-gb"},
-        }},
-        "services": [{
-            "args": ["--l1-size-gb", "@dram.total-gb"],
-            "options": {"store_config": {"global_segment_size": "@dram.per-gpu-bytes"}},
-        }],
-    })
-    composed = compose_recipe(path, agentic=True, multinode=False, root=project)
-
-    bound = bind_workload(composed, DRAM_ENV, agentic=True, multinode=False)
-    resolved = resolve_dram(bound, dram_budget(DRAM_ENV, multinode=False))
-
-    assert resolved["benchmark"]["env"] == {
-        "TOKENIZER": "/shared", "MODEL": "org/model", "CONC": "4", "KV_OFFLOADING": "dram",
-        "TOTAL_CPU_DRAM_GB": "1731",
-    }  # fmt: skip
-    assert resolved["roles"]["agg"] == {
-        "args": {
-            "hicache-size": 216,
-            "kv-transfer-config": '{"kv_connector":"SimpleCPUOffloadConnector",'
-            '"kv_connector_extra_config":{"cpu_bytes_to_use":1731000000000,'
-            '"cpu_bytes_to_use_per_rank":216375000000,"lazy_offload":true}}',
-        },
-        "env": {"LMCACHE_MAX_LOCAL_CPU_SIZE": "216"},
-    }
-    assert resolved["services"] == [{
-        "args": ["--l1-size-gb", "1731"],
-        "options": {"store_config": {"global_segment_size": 216375000000}},
-    }]
-
-
-@pytest.mark.parametrize(("value", "environment", "message"), [
-    ("@dram.total-gb", {**DRAM_ENV, "KV_OFFLOADING": "none", "TOTAL_CPU_DRAM_GB": "0"},
-     "roles.agg.args.size: '@dram.total-gb' sizes host DRAM on a point without a DRAM budget"),
-    ("@dram.per-rank-gb", DRAM_ENV, "'@dram.per-rank-gb' is not a whole '@dram.<name>' value"),
-    ("x@dram.total-gb", DRAM_ENV, "'x@dram.total-gb' is not a whole '@dram.<name>' value"),
-])  # fmt: skip
-def test_a_point_without_a_budget_or_an_unknown_reference_fails(value, environment, message):
-    recipe = {"roles": {"agg": {"args": {"size": value}}}}
-    bound = bind_workload(recipe, environment, agentic=True, multinode=False)
-    with pytest.raises(ValueError, match=message):
-        resolve_dram(bound, dram_budget(environment, multinode=False))
-
-
-@pytest.mark.parametrize(("prefill", "per_gpu_gb"), [
-    # TP8 x PP2 spans four-GPU nodes and fills each; TP2 covers half of one.
-    ({"PREFILL_TP": "8", "PREFILL_PP_SIZE": "2", "PREFILL_PCP_SIZE": "1"}, 180),
-    ({"PREFILL_TP": "2", "PREFILL_PP_SIZE": "1", "PREFILL_PCP_SIZE": "1"}, 360),
-])  # fmt: skip
-def test_a_multinode_budget_covers_the_prefill_workers_gpus_on_a_node(prefill, per_gpu_gb):
-    environment = {"KV_OFFLOADING": "dram", "TOTAL_CPU_DRAM_GB": "721", **prefill}
-    assert dram_budget(environment, multinode=True, gpus_per_node=4)["per-gpu-gb"] == per_gpu_gb
-    with pytest.raises(ValueError, match="needs its cluster's gpus-per-node"):
-        dram_budget(environment, multinode=True)
+    assert bound["benchmark"]["env"] == {"HF_HOME": "/logs/hf", "RESULT_DIR": "/logs/agentic"}
 
 
 def test_a_power_point_gets_telemetry_and_its_concurrencies_on_a_bundle_variant(project):
@@ -366,7 +270,7 @@ def test_the_multinode_binder_writes_the_one_selected_variant(project, tmp_path)
     assert result.returncode == 2
     assert "selects 2 variants, not one" in result.stderr
     assert not output.exists()
-    env.update(IS_AGENTIC="1", KV_OFFLOADING="none")
+    env["IS_AGENTIC"] = "1"
     assert bind(f"{path}:override_narrow", str(output)).returncode == 0
     bound = yaml.safe_load(output.read_text())
     assert bound["benchmark"]["command"] == "bash agentic.sh"

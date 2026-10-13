@@ -23,13 +23,7 @@ from infx.matrix.generate import expand_config_keys, generate_config_matrix
 from infx.matrix.validation import config_root, load_config_files, load_runner_file
 from infx.srt_slurm.single_node import select_recipe
 from infx.srt_slurm.synthetic_acceptance import build_overrides, selected_recipes
-from infx.srt_slurm.workload import (
-    bind_multinode,
-    check_setup_script,
-    dram_budget,
-    resolve_dram,
-    resolve_fabric,
-)
+from infx.srt_slurm.workload import bind_multinode, check_setup_script, resolve_fabric
 
 if TYPE_CHECKING:
     from infx.clusters import Cluster, RunnerInventory
@@ -69,16 +63,11 @@ def point_environment(point: Mapping[str, Any]) -> dict[str, str]:
             TOTAL_CPU_DRAM_GB=str(point["total-cpu-dram-gb"]),
         )
     if "prefill" in point:
-        prefill = point["prefill"]
         environment.update(
             IS_MULTINODE="true",
             SRT_RECIPE=point["srt-recipe"],
             POWER="1" if point.get("power") else "0",
             CONC_LIST=" ".join(map(str, point["conc"])),
-            PREFILL_TP=str(prefill["tp"]),
-            PREFILL_PP_SIZE=str(prefill["pp"]),
-            PREFILL_PCP_SIZE=str(prefill["pcp-size"]),
-            PREFILL_DWDP_SIZE=str(prefill.get("dwdp-size", 1)),
         )
         if agentic:
             # A multi-node AgentX job serves its one concurrency.
@@ -214,7 +203,9 @@ def generate_recipes(
 ) -> dict[str, Any]:
     """Bind every srt-slurm point of ``config_keys``; write recipes and a manifest.
 
-    A runner label on several clusters leaves ``'@fabric.<name>'`` values as written and the
+    A multi-node point is bound with its cluster's DCGM exporter port and AgentX client
+    paths; the manifest names that cluster, the one its runner label schedules on. A runner
+    label on several clusters leaves ``'@fabric.<name>'`` values as written and the
     manifest's ``cluster`` null.
     """
     if output.exists() and (not output.is_dir() or any(output.iterdir())):
@@ -244,12 +235,6 @@ def generate_recipes(
             variant, recipe = bound_variant(
                 point, environment, root, power_port=power_port, client_env=client_env
             )
-            budget = dram_budget(
-                environment,
-                multinode="prefill" in point,
-                gpus_per_node=placement[1].gpus_per_node if placement else None,
-            )
-            recipe = resolve_dram(recipe, budget)
             if fabric is not None:
                 recipe = resolve_fabric(recipe, fabric)
             check_setup_script(recipe, root / point["srt-recipe"].partition(":")[0], root)

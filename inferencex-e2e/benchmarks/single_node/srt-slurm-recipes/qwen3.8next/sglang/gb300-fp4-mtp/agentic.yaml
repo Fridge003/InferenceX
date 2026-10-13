@@ -1,5 +1,6 @@
 # Stock ARM64 SGLang, one serving GPU per point. No source/package overlay.
-# The HiCache host pool takes the point's per-GPU DRAM budget.
+# Size the host cache against the public GB300 profile's per-worker DRAM allowance.
+# The matrix floors the allowance to 225 GB; H224 leaves pool-alignment headroom.
 base:
   schema: 2
   name: qwen3.8next-fp4-gb300-sglang-agentic-stock-v0521
@@ -75,7 +76,7 @@ base:
         enable-hierarchical-cache: true
         # One combined packed target/draft KV + Mamba host-pool budget.
         # Verify actual allocations, not whole-node Slurm memory reservation.
-        hicache-size: '@dram.per-gpu-gb'
+        hicache-size: 224
         hicache-io-backend: kernel
         hicache-mem-layout: page_first
         hicache-write-policy: write_back
@@ -99,6 +100,9 @@ base:
   benchmark:
     env:
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: 'sglang:'
+      # Native single-node binding verifies these against the generated point.
+      TOTAL_CPU_DRAM_GB: '225'
+      KV_OFFLOADING: dram
 
 # Only client concurrency changes; serving/admission/graph/cache settings stay fixed.
 override_c1:
