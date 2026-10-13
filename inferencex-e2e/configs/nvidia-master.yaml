@@ -5596,7 +5596,7 @@ qwen3.8next-fp4-b200-sglang-agentic-mtp:
       search-space:
       - { tp: 1, ep: 1, spec-decoding: mtp, kv-offloading: none, conc-list: [1, 4, 8, 16], srt-recipe: benchmarks/single_node/srt-slurm-recipes/qwen3.8next/sglang/b200-fp4-mtp/agentic.yaml }
 qwen3.5-fp4-gb200-dynamo-sglang-agentic-mtp:
-  image: lmsysorg/sglang:nightly-dev-20260818-c0b6474b
+  image: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:f05bb01da5ce689f143bc04f091b8a4bab4b195f7d09969f1b6b044aa067d9ac
   model: nvidia/Qwen3.5-397B-A17B-NVFP4-V2
   model-prefix: qwen3.5
   runner: cluster:gb200-nv
@@ -5683,6 +5683,7 @@ qwen3.5-fp4-gb200-dynamo-sglang-agentic-mtp:
           dp-attn: false
           additional-settings:
           - "CONFIG_FILE=recipes/qwen3.5/sglang/gb200-fp4/agentx/agg-variants.yaml:override_tp2ep2_hicache_cap48"
+
 minimaxm3-fp4-b300-vllm-agentic-mtp:
   image: vllm/vllm-openai:nightly-af7f9488c2210d67e1033ecdc845b087ee7fe92b
   model: nvidia/MiniMax-M3-NVFP4

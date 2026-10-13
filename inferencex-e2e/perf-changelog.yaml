@@ -9689,3 +9689,10 @@
   description:
     - "Bump ATOM image to the v0.1.7 release build (rocm/atom-dev:nightly_202610080328, digest-pinned)."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3911
+
+- config-keys:
+  - qwen3.5-fp4-gb200-dynamo-sglang-agentic-mtp
+  description:
+  - Pin qwen3.5 GB200 FP4 dynamo-sglang mtp AgentX to the 2026-10-13 image lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:f05bb01da5ce689f143bc04f091b8a4bab4b195f7d09969f1b6b044aa067d9ac.
+  - Preserve deployment topology, speculative mode, concurrency points, KV-offload settings and evaluation coverage.
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
