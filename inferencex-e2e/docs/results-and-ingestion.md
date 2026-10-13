@@ -516,11 +516,11 @@ Without a declared source, the CPU verdict never changes the job's exit code. Re
 window binds to the result, or the window's own contract checks failed). An overflowed CPU
 integration reuses the GPU leg's `non_finite_power_metric`, and `aggregate_result_missing` or
 `aggregate_result_unwritable` appears in both audits when the aggregate itself cannot be patched.
-The srt-slurm source pin (`9d65c0ae`, v2.47.2) writes the wide format and does not classify the
+The srt-slurm source pin (`545233a0`, v2.51.1) writes the wide format and does not classify the
 Module label, so these packages yield the Grace socket total plus its CPU-only and SysIO rails;
 module keys require a producer that classifies that label. A rail gap drops only that rail's keys
 and never changes `cpu_power_valid`. The selected Qwen3.5 and Kimi-K3 CPU-telemetry recipes pass
-`CPU_POWER_EXPORTER_RELEASE=v2.47.2` from their master-config `additional-settings` to
+`CPU_POWER_EXPORTER_RELEASE=v2.51.1` from their master-config `additional-settings` to
 `make setup`. Qwen3.5 8P1D keeps its frontend, benchmark client, and infra on the reserved head so their timestamps share the collector clock; its 13-node allocation still contains 12 GPU-worker nodes. This release includes legacy ACPI hwmon discovery. Setup verifies the downloaded
 asset checksum, replaces a cached binary with a different release marker, and fails on a pinned
 download error. The pinned srt-slurm submit preflight (NVIDIA/srt-slurm#553) rejects a missing,
