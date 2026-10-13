@@ -6,7 +6,7 @@ base:
   name: dsv41flash-fp4-h200-sglang-agentic
   model:
     path: hf:deepseek-ai/DeepSeek-V4.1-Flash
-    container: lmsysorg/sglang:nightly-dev-cu13-20260923-06008c17
+    container: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
     precision: fp4
   resources:
     gpu_type: h200
