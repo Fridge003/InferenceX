@@ -9689,4 +9689,4 @@
   description:
   - Pin minimaxm3 B200 FP4 trt mtp AgentX to the 2026-10-13 image nvcr.io/nvidia/tensorrt-llm/release:1.4.0rc0.dev202610130242@sha256:453c599e5f6f72f19e59e0464124010d120a49f2c0787ecec0d5ce559a0a0775.
   - Preserve deployment topology, speculative mode, concurrency points, KV-offload settings and evaluation coverage.
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3985
