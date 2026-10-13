@@ -9689,3 +9689,10 @@
   description:
     - "Bump ATOM image to the v0.1.7 release build (rocm/atom-dev:nightly_202610080328, digest-pinned)."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3911
+
+- config-keys:
+  - glm5.2-fp8-mi325x-sglang-agentic-mtp
+  description:
+  - Pin glm5.2 MI325X FP8 sglang mtp AgentX to the 2026-10-13 image lmsysorg/sglang-rocm:v0.5.21-rocm720-mi30x-20261013@sha256:38594c737b676b5ff9182a7f9d7bbce00792efae2bdb9d5d28af86c743844c3a.
+  - Preserve deployment topology, speculative mode, concurrency points, KV-offload settings and evaluation coverage.
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX

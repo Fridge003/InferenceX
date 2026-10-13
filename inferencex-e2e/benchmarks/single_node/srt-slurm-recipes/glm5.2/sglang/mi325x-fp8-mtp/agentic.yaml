@@ -5,7 +5,7 @@ base:
   name: glm5.2-fp8-mi325x-sglang-agentic
   model:
     path: hf:zai-org/GLM-5.2-FP8
-    container: lmsysorg/sglang:v0.5.19-rocm720-mi30x
+    container: lmsysorg/sglang-rocm:v0.5.21-rocm720-mi30x-20261013@sha256:38594c737b676b5ff9182a7f9d7bbce00792efae2bdb9d5d28af86c743844c3a
     precision: fp8
   resources:
     gpu_type: mi325x
