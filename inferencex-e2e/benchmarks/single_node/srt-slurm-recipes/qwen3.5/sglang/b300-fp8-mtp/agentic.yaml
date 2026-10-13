@@ -4,7 +4,7 @@ base:
   name: qwen3.5-fp8-b300-sglang-agentic
   model:
     path: hf:Qwen/Qwen3.5-397B-A17B-FP8
-    container: lmsysorg/sglang:v0.5.16-cu130
+    container: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
     precision: fp8
   resources:
     gpu_type: b300
