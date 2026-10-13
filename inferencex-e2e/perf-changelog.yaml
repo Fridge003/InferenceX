@@ -9646,3 +9646,12 @@
     - "ATOM's mono decode path (on by default) now takes any decode step of up to 48 rows, i.e. concurrency 1-8 with five DSpark drafts, not only DSpark verify steps. Steps of 12 or more rows that are a multiple of TP run its sublayers token-parallel, with reduce-scatters instead of all-reduces. The draft runner never runs token-parallel."
     - "No data-type or precision change to the DSpark draft. The checkpoint's bundled mtp.0-2 stages are stored like the target's layers: FP8 E4M3 weights with 32x32 UE8M0 block scales for the attention projections, shared experts and main_proj; MXFP4 routed experts; BF16 norms, router gate, Markov head and confidence head; F32 attention sinks and hc mixers. ATOM builds the draft with the target's native_quant_config() and make_v4_quant_config(), with no online quantization in this recipe, so it runs as shipped: FP8 activations on the FP8 GEMMs and the target's BF16 KV cache. Between 73defd9b8 and a0527c9db only the rows the draft reads under bounded replay change."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3928
+
+- config-keys:
+    - qwen3.5-fp4-b300-trtllm-agentic-mtp
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Add Qwen3.5-397B-A17B NVFP4 B300 AgentX on TensorRT-LLM release:1.3.0rc24: one aggregated TEP8 worker (TP8, MoE EP8) with native MTP at draft length 6, at concurrency 4, 8, 16, 24, 32, 52 and 64."
+    - "FP8 KV cache with KV cache manager v2, per-conversation block reuse, and TRT-LLM's native 128 GiB/rank host KV tier (dram-utilization 0.367)."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3967
