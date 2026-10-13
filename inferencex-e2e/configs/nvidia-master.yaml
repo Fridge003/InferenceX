@@ -1609,7 +1609,7 @@ dsr1-fp8-h200-sglang:
       search-space:
       - tp: 8
         conc-start: 4
-        conc-end: 4
+        conc-end: 64
         srt-recipe: benchmarks/single_node/srt-slurm-recipes/dsr1/sglang/h200-fp8/8k1k.yaml
 
 dsr1-fp8-h200-sglang-mtp:

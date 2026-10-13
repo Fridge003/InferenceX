@@ -9623,20 +9623,10 @@
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3707
 
 - config-keys:
-    - dsr1-fp8-h200-sglang
-  scenario-type:
-    - fixed-seq-len
-  description:
-    - "DNM: run the c4 point through srt-slurm launcher: docker on h200-dgxc."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3942
-
-- config-keys:
     - qwen3.5-fp8-h200-sglang-agentic-mtp
-    - minimaxm3-fp8-h200-vllm-agentic-mtp
-    - dsv41flash-fp4-h200-vllm-agentic-dspark
-    - dsv41flash-fp4-h200-sglang-agentic-dspark
   scenario-type:
     - agentic-coding
+  no-evals: true
   description:
     - "DNM: 20-minute AgentX points through srt-slurm launcher: docker on h200-dgxc."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3942
