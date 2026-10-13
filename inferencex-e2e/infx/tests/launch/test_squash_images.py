@@ -273,3 +273,26 @@ def test_image_provenance_is_the_squash_digest_or_the_registry_reference(tools, 
     squash.unlink()
     with pytest.raises(BackendError, match="not readable"):
         backend.image_provenance(staged)
+
+
+@pytest.mark.parametrize("single_node", [False, True])
+def test_h200_vllm_images_are_staged_before_srt_submission(monkeypatch, tmp_path, single_node):
+    cluster = load_inventory().clusters["h200-dgxc"]
+    backend = SlurmBackend(
+        cluster, LaunchRequest.from_env({"RUNNER_NAME": "h200-dgxc-slurm_00"}), Lifecycle()
+    )
+    policies = []
+    staged = str(tmp_path / "validated.sqsh")
+
+    def ensure(image, policy):
+        assert image == IMAGE
+        policies.append(policy)
+        return staged
+
+    monkeypatch.setattr(backend, "_ensure", ensure)
+    assert backend.stage_image(
+        IMAGE, framework="vllm", model_prefix="kimik3", single_node=single_node
+    ).reference == staged
+    assert len(policies) == 1
+    assert policies[0].import_mode == "compute"
+    assert policies[0].visibility == "shared"
