@@ -1635,7 +1635,7 @@ dsr1-fp8-h200-sglang-mtp:
 # DeepSeek-V4-Pro AgentX on one aggregated TP8 H200 worker. Keep the serving
 # topology fixed and sweep only concurrency to produce the Pareto curve.
 dsv4-fp8-h200-dynamo-sglang-agentic-agg:
-  image: lmsysorg/sglang:nightly-dev-20260914-4358a161
+  image: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
   model: deepseek-ai/DeepSeek-V4-Pro-0813
   model-prefix: dsv4
   runner: cluster:h200-dgxc
@@ -1660,6 +1660,7 @@ dsv4-fp8-h200-dynamo-sglang-agentic-agg:
           dp-attn: false
           additional-settings:
           - "CONFIG_FILE=recipes/dsv4/sglang/h200-fp8/agentx/agg-tp8-mtp-kvoffload.yaml"
+
 dsv4-fp4-b300-vllm-agentic-mtp:
   image: vllm/vllm-openai:nightly-dev-x86_64-cu13.0.1-20ebb28
   model: deepseek-ai/DeepSeek-V4-Pro-0813

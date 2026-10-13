@@ -7,14 +7,14 @@ name: "agg-h200-tp8-mtp-kvoffload"
 
 model:
   path: "deepseek-v4-pro-0813"
-  container: "dynamo-sglang"
+  container: "lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7"
   precision: "fp8"
 
 identity:
   model:
     repo: "deepseek-ai/DeepSeek-V4-Pro-0813"
   container:
-    image: "lmsysorg/sglang:nightly-dev-20260914-4358a161"
+    image: "lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7"
 
 dynamo:
   install: true
