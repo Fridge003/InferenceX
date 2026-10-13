@@ -1099,7 +1099,7 @@ glm5.2-fp8-mi325x-sglang-agentic-mtp:
       - { tp: 8, ep: 1, kv-offloading: none, spec-decoding: mtp, conc-list: [1, 2, 3, 4, 5, 6, 8], srt-recipe: benchmarks/single_node/srt-slurm-recipes/glm5.2/sglang/mi325x-fp8-mtp/agentic.yaml }
 
 minimaxm3-fp8-mi325x-vllm-agentic-mtp:
-  image: vllm/vllm-openai-rocm:v0.27.1
+  image: vllm/vllm-openai-rocm:nightly-5555a2d8f7116b2b4877f66516f4128176cf722a@sha256:e0be00f1b99da608cc3c8571c7c86bae0c05f19e1e61a59c1d70aeea6bca6140
   model: MiniMaxAI/MiniMax-M3-MXFP8
   model-prefix: minimaxm3
   runner: cluster:mi325x-amd
