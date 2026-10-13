@@ -9634,7 +9634,7 @@
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3926
 
 - config-keys:
-    - dsv41flash-fp4-h200-vllm-agentic-dspark
+    - dsv41flash-fp4-h200-sglang-agentic-dspark
   scenario-type:
     - agentic-coding
   no-evals: true
