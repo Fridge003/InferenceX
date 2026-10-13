@@ -9648,6 +9648,30 @@
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3928
 
 - config-keys:
+    - dsv41flash-fp4-mi355x-vllm-agentic-dspark
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Update the image from nightly-rocm100-7d0b4e57aac4c4323225b0eee9ae960ce75ffffe to nightly-rocm100-5555a2d8f7116b2b4877f66516f4128176cf722a, the 2026-10-13 ROCm 10.0 nightly, which contains vllm-project/vllm#59039 and #61082. Update model.container to match."
+    - "No point changes: concurrency 1, 2, 4, 8, 16, 32 and 64 on TP2 and TP4 (14 points), all re-measured on the new image."
+    - "Remove --no-swa-bounded-replay, which turns on decoder SWA bounded replay from vllm-project/vllm#59039: in eager prefill steps, layer 20 (the last KV source layer) writes its KV for every token, and the rest of layer 20 and layers 21-39 run on each request's last 128 tokens only. Prefix-cache SWA replay stays off, since vLLM still forces it off on ROCm (the window clamp it needs lives only in the FlashInfer and FlashMLA prefill kernels)."
+    - "Replace VLLM_ROCM_MONO_DECODE=1 with --monokernel. vllm-project/vllm#61082 moves the switch to KernelConfig.monokernel and removes the environment variable, so the old setting would leave the mono decode kernels off."
+    - "vllm-project/vllm#61082 also runs all 40 backbone layers whole as two persistent launches. Before, 30 ran whole and the other 10 (layers 0 and 1 and the compressor / indexer layers 2, 8, 14, 20, 24, 28, 32 and 36) kept vLLM's attention plus the FFN launch. The step limit is unchanged at 48 rows, i.e. concurrency 1-8 with five DSpark drafts; larger steps take the regular path."
+    - "No data-type or precision change to the DSpark draft. The checkpoint's bundled mtp.0-2 stages are stored like the target's layers: FP8 E4M3 weights with 32x32 UE8M0 block scales for the attention projections, shared experts and main_proj; MXFP4 routed experts; BF16 norms, router gate, Markov head and confidence head; F32 attention sinks and hc mixers. vLLM builds the draft with the checkpoint's own quantization config (get_draft_quant_config) and, with no kv_cache_dtype in speculative-config, the target's fp8_ds_mla KV cache, so it runs as shipped. The mono decode kernels skip the draft layers, and the draft load path is the same in 7d0b4e57 and 5555a2d8."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3959
+
+- config-keys:
+    - qwen3.5-fp4-gb200-dynamo-sglang-mtp
+  scenario-type:
+    - fixed-seq-len
+  description:
+    - "Add a Qwen3.5 NVFP4 V2 GB200 Dynamo-SGLang disaggregated MTP configuration for the 8k/1k scenario"
+    - "Add nine checked-in srt-slurm recipes covering TP and data-parallel-attention topologies"
+    - "Use chat-formatted benchmark inputs with Mooncake KV transfer"
+    - "Image: lmsysorg/sglang:nightly-dev-cu13-20260709-074bb928"
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/2594
+
+- config-keys:
     - qwen3.5-fp4-gb300-dynamo-trt-agentic-disagg
   scenario-type:
     - agentic-coding
