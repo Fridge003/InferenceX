@@ -9,7 +9,12 @@ from infx.results.metadata import parse_component_metadata
 from infx.results.topology import Parallelism, validate_parallelism
 
 from .request_metrics import compute_request_metrics
-from .server_metrics import compute_server_metrics
+from .server_metrics import (
+    compute_server_metrics,
+    deployment_from_env,
+    endpoint_roles_from_env,
+    request_scope_from_records,
+)
 
 
 def _env_int(env: Mapping[str, str], name: str, default: int = 0) -> int:
@@ -216,6 +221,9 @@ def build_result(
         framework=framework,
         records=records,
         server_logs=server_logs,
+        endpoint_roles=endpoint_roles_from_env(env),
+        request_scope=request_scope_from_records(records, request_accounting),
+        deployment=deployment_from_env(env),
     )
 
     if "total_tput_tps" in request_flat and num_gpus > 0:
