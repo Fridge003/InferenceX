@@ -3,7 +3,7 @@ base:
   schema: 2
   name: qwen3.5-fp4-b300-sglang-agentic
   model:
-    path: hf:nvidia/Qwen3.5-397B-A17B-NVFP4
+    path: hf:nvidia/Qwen3.5-397B-A17B-NVFP4-V2
     container: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
     precision: fp4
   resources:
@@ -22,7 +22,7 @@ base:
       nodes: 1
       workers: 1
       args:
-        served-model-name: nvidia/Qwen3.5-397B-A17B-NVFP4
+        served-model-name: nvidia/Qwen3.5-397B-A17B-NVFP4-V2
         trust-remote-code: true
         data-parallel-size: 1
         enable-symm-mem: true
@@ -37,7 +37,7 @@ base:
         mem-fraction-static: 0.8
         stream-interval: 50
         scheduler-recv-interval: 10
-        tokenizer-path: nvidia/Qwen3.5-397B-A17B-NVFP4
+        tokenizer-path: nvidia/Qwen3.5-397B-A17B-NVFP4-V2
         reasoning-parser: qwen3
         tool-call-parser: qwen3_coder
         speculative-algorithm: NEXTN
@@ -58,7 +58,7 @@ base:
     type: custom
     command: bash /infmax-workspace/benchmarks/srt_agentic.sh
     env:
-      MODEL: nvidia/Qwen3.5-397B-A17B-NVFP4
+      MODEL: nvidia/Qwen3.5-397B-A17B-NVFP4-V2
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: 'sglang:'
       # 256k-capped corpus, within this model's context.
       WEKA_LOADER_OVERRIDE: semianalysis_cc_traces_weka_062126_256k
