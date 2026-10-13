@@ -217,7 +217,15 @@ override_tp4_c16:
     env:
       CONC: '16'
 
+# DNM: c32 runs behind a separate vllm-router frontend container.
 override_tp4_c32:
+  frontend:
+    type: vllm-router
+    args:
+      policy: consistent_hash
+      request-timeout-secs: 14400
+      disable-retries: true
+  setup_script: vllm-router-0.1.14.sh
   roles:
     agg:
       gpus: 4

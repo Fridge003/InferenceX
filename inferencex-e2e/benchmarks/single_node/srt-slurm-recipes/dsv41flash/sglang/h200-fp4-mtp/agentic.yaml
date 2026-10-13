@@ -140,7 +140,16 @@ override_tp4_c16:
       CONC: '16'
       AGENTIC_WARMUP_GRACE_PERIOD: '1800'
 
+# DNM: c32 runs behind a separate sglang-router frontend container.
 override_tp4_c32:
+  frontend:
+    type: sglang-router
+    args:
+      policy: cache_aware
+      request-id-headers: x-correlation-id
+      connect-timeout-secs: 900
+      request-timeout-secs: 14400
+      disable-retries: true
   roles:
     agg:
       gpus: 4
