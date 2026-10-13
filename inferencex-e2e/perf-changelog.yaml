@@ -9698,3 +9698,11 @@
     - "Tune GLM-5.2 FP8 B300 SGLang MTP depth, admission caps, and HiCache scheduling with one recipe per concurrency; pin the upstream image by digest."
     - "Extend the concurrency grid to 20, 24 and 28 with uncapped admission (2x CONC) to cover the high-throughput end of the frontier."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3836
+
+- config-keys:
+  - qwen3.5-fp8-h200-sglang-agentic-hicache-mtp
+  description:
+  - Pin qwen3.5 H200 FP8 sglang mtp AgentX to the 2026-10-13 image lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7.
+  - Preserve deployment topology, speculative mode, concurrency points, KV-offload settings and evaluation coverage.
+  - Copy shared recipes so unrelated dashboard rows retain their current images.
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
