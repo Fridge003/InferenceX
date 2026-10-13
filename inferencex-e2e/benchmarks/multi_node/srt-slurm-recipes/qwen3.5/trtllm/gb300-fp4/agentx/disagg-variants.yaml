@@ -7,20 +7,19 @@ schema: 2
 base:
   model:
     path: qwen3.5-fp4
-    container: nvcr.io/nvidia/tensorrt-llm/release:1.3.0rc24
+    container: nvcr.io/nvidia/tensorrt-llm/release:1.3.0rc28.dev202609210001
     precision: fp4
   dynamo:
     install: true
     source:
-      git: https://github.com/cquil11/dynamo.git
-      rev: 2cbbdc863c336c2cfffa2a3668e2a6661801b259
+      wheel: 1.6.0.dev20261010
   identity:
     model:
       repo: nvidia/Qwen3.5-397B-A17B-NVFP4-V2
     container:
-      image: nvcr.io/nvidia/tensorrt-llm/release:1.3.0rc24
+      image: nvcr.io/nvidia/tensorrt-llm/release:1.3.0rc28.dev202609210001
     frameworks:
-      tensorrt_llm: 1.3.0rc24
+      tensorrt_llm: 1.3.0rc28.dev202609210001
   slurm:
     time_limit: 04:00:00
   health_check:
@@ -31,7 +30,7 @@ base:
     gpus_per_node: 4
   engine:
     type: trtllm
-    publish_events_and_metrics: true
+    publish_metrics: true
   roles:
     prefill:
       nodes: 1
