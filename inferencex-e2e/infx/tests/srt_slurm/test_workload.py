@@ -98,6 +98,11 @@ def test_bundles_take_the_shared_block_under_base_and_keep_their_variants(projec
      "benchmark.env.HF_HUB_CACHE (= '/elsewhere')"),
     ({"base": {"benchmark": {"env": {"RESULT_DIR": "/logs"}}}}, True, False,
      "base.benchmark.env.RESULT_DIR (= '/logs')"),
+    ({"base": {}, "override_tp8": {"benchmark": {"env": {
+        "IS_MULTINODE": "false", "ENABLE_AGENTX_POWER": "0",
+    }}}}, True, True,
+     "override_tp8.benchmark.env.IS_MULTINODE (= 'false'), "
+     "override_tp8.benchmark.env.ENABLE_AGENTX_POWER (= '0')"),
     ({"environment": {"ROUTER_VERSION": "0.1.14"}}, True, False, "environment.ROUTER_VERSION (= '0.1.14')"),
     ({"base": {}, "override_c": {"services": [{"name": "m", "env": {"KV_OFFLOAD_BACKEND_VERSION": "1"}}]}},
      True, True, "override_c.services[0].env.KV_OFFLOAD_BACKEND_VERSION (= '1')"),

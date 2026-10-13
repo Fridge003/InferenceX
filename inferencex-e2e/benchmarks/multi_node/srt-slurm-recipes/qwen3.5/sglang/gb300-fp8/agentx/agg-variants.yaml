@@ -121,12 +121,6 @@ override_tp4_c44_b4:
         max-running-requests: 4
         cuda-graph-max-bs-decode: 4
         hicache-size: 128
-  benchmark:
-    env:
-      IS_MULTINODE: 'false'
-      TP: '4'
-      PP_SIZE: '1'
-      PCP_SIZE: '1'
 
 override_tp4_c44_b2:
   roles:
@@ -139,12 +133,6 @@ override_tp4_c44_b2:
         max-running-requests: 2
         cuda-graph-max-bs-decode: 2
         hicache-size: 128
-  benchmark:
-    env:
-      IS_MULTINODE: 'false'
-      TP: '4'
-      PP_SIZE: '1'
-      PCP_SIZE: '1'
 
 override_tp4_c44_b1:
   roles:
@@ -157,12 +145,6 @@ override_tp4_c44_b1:
         max-running-requests: 1
         cuda-graph-max-bs-decode: 1
         hicache-size: 32
-  benchmark:
-    env:
-      IS_MULTINODE: 'false'
-      TP: '4'
-      PP_SIZE: '1'
-      PCP_SIZE: '1'
 
 override_tp4_c1_b1:
   roles:
@@ -175,12 +157,6 @@ override_tp4_c1_b1:
         max-running-requests: 1
         cuda-graph-max-bs-decode: 1
         hicache-size: 32
-  benchmark:
-    env:
-      IS_MULTINODE: 'false'
-      TP: '4'
-      PP_SIZE: '1'
-      PCP_SIZE: '1'
 
 override_tp8_c1_b1:
   roles:
@@ -193,6 +169,3 @@ override_tp8_c1_b1:
         max-running-requests: 1
         cuda-graph-max-bs-decode: 1
         hicache-size: 32
-  benchmark:
-    env:
-      TP: '8'
