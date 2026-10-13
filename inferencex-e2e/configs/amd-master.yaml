@@ -1456,7 +1456,7 @@ glm5.2-fp8-mi355x-sglang-agentic-mtp:
 # per concurrency point (K5/3.61 for C2-C8, K4/3.33 for C10-C40, K3/2.99 for
 # C48). The TP8 arm stays GPU-resident with no KV offload.
 glm5.2-fp4-mi355x-atom-agentic-mtp:
-  image: rocm/atom-dev:nightly_202609211553
+  image: rocm/atom-dev:nightly_202610131505@sha256:b78300a6caf6c1fec3b1f27b4f7333326c9d34911bfc7ae229d13d2ebbc43884
   model: amd/GLM-5.2-MXFP4
   model-prefix: glm5.2
   runner: cluster:mi355x-amds

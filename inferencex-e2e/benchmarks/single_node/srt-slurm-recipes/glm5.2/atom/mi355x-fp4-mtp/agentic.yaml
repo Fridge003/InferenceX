@@ -6,7 +6,7 @@ base:
   name: glm5.2-fp4-mi355x-atom-agentic
   model:
     path: hf:amd/GLM-5.2-MXFP4
-    container: rocm/atom-dev:nightly_202609211553
+    container: rocm/atom-dev:nightly_202610131505@sha256:b78300a6caf6c1fec3b1f27b4f7333326c9d34911bfc7ae229d13d2ebbc43884
     precision: fp4
   resources:
     gpu_type: mi355x
