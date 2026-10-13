@@ -117,17 +117,25 @@ def test_a_points_own_model_path_is_what_its_job_serves(tmp_path, monkeypatch):
     assert job_env(c, point, served)["MODEL_PATH"] == "/point/m"
 
 
-@pytest.mark.parametrize(("model", "overrides", "paths"), [
-    ("org/M", (), {"hf:org/M": "nvme/m"}),
-    ("org/Unstaged", (), {}),
-    ("org/M", (Override(Match(), hub=True),), {}),
+@pytest.mark.parametrize(("model", "agentic", "overrides", "paths"), [
+    ("org/M", "0", (), {"hf:org/M": "nvme/m"}),
+    # A fixed-sequence point needs a staged checkpoint unless its lane loads the Hub snapshot.
+    ("org/Unstaged", "0", (), LaunchError),
+    ("org/Unstaged", "1", (), {}),
+    ("org/M", "0", (Override(Match(), hub=True),), {}),
+    ("org/Unstaged", "0", (Override(Match(), hub=True),), {}),
 ])  # fmt: skip
 def test_the_bound_model_maps_to_its_checkpoint_unless_served_from_the_hub(
-    tmp_path, monkeypatch, model, overrides, paths
+    tmp_path, monkeypatch, model, agentic, overrides, paths
 ):
     monkeypatch.setitem(models.OVERRIDES, "c", overrides)
-    c, point = cluster(tmp_path), request(MODEL=model)
-    resolved = model_paths(c, point, served_path(c, point, checkpoint(c, point)))
+    c, point = cluster(tmp_path), request(MODEL=model, IS_AGENTIC=agentic)
+    served = served_path(c, point, checkpoint(c, point))
+    if paths is LaunchError:
+        with pytest.raises(LaunchError, match="stages no checkpoint"):
+            model_paths(c, point, served)
+        return
+    resolved = model_paths(c, point, served)
     assert resolved == {name: str(tmp_path / path) for name, path in paths.items()}
 
 

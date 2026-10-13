@@ -31,7 +31,7 @@ class Override:
     entry: str | None = None
     served_name: str | None = None
     require_config: bool = False
-    # Load the Hub snapshot of MODEL even though a checkpoint is staged.
+    # Load the Hub snapshot of MODEL, whether or not a checkpoint is staged.
     hub: bool = False
 
 
@@ -91,6 +91,11 @@ OVERRIDES: dict[str, tuple[Override, ...]] = {
             Match(any_of("glm5.2"), any_of("fp8"), any_of("dynamo-sglang"), agentic=True),
             hub=True,
         ),
+    ),
+    "mi355x-amds": (
+        # The cluster stages neither checkpoint; these lanes load the Hub snapshot.
+        Override(Match(any_of("dsr1"), any_of("fp8"), any_of("sglang-disagg")), hub=True),
+        Override(Match(any_of("qwen3.5"), any_of("fp4"), any_of("sglang-disagg")), hub=True),
     ),
 }
 
@@ -161,7 +166,14 @@ def served_path(cluster: Cluster, request: LaunchRequest, model: Checkpoint | No
 
 def model_paths(cluster: Cluster, request: LaunchRequest, served: str | None) -> dict[str, str]:
     """srtslurm.yaml ``model_paths``: the bound ``hf:<MODEL>`` to ``served``."""
-    if served is None or _override(cluster, request, "hub"):
+    if _override(cluster, request, "hub"):
+        return {}
+    if served is None:
+        if not request.is_agentic:
+            raise LaunchError(
+                f"cluster {cluster.id!r} stages no checkpoint for MODEL={request.model}, "
+                f"which the fixed-sequence recipe binds as hf:{request.model}"
+            )
         return {}
     return {f"hf:{request.model}": served}
 
