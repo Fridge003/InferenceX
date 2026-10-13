@@ -9653,6 +9653,5 @@
     - agentic-coding
   description:
     - "Enable publish_events_and_metrics for prefill and decode workers in the Qwen3.5 GB300 FP4 TRT-LLM AgentX recipe, keeping the cquil11/dynamo source pin at 2cbbdc863c336c2cfffa2a3668e2a6661801b259."
-    - "Set OMP_NUM_THREADS=1 for both server-worker roles."
     - "Scheduler settings and kv_cache_config are unchanged."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3971
