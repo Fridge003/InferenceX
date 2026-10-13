@@ -9685,6 +9685,12 @@
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3859
 
 - config-keys:
+    - dsr1-fp8-mi355x-atom
+  description:
+    - "Bump ATOM image to the v0.1.7 release build (rocm/atom-dev:nightly_202610080328, digest-pinned)."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3911
+
+- config-keys:
     - qwen3.5-fp8-gb200-dynamo-sglang
     - qwen3.5-fp8-gb300-dynamo-sglang
     - kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-dcp16-agg
