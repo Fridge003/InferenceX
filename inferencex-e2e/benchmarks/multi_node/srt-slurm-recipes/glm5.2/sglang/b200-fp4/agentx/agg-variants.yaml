@@ -17,7 +17,7 @@ base:
       image: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
     frameworks:
       dynamo: 1.5.0.dev20260909
-      sglang: 0.0.0.dev1+g008403017
+      sglang: 7224fce1b5e488c9916f20ec0556d696e595d512
   resources:
     gpu_type: b200
     gpus_per_node: 8
