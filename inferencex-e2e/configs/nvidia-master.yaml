@@ -7452,7 +7452,7 @@ glm5.2-fp8-b200-sglang-agentic-mtp:
 # infx/golden_al_distribution/glm5.2_mtp.yaml. Both arms use HiCache write-back
 # DRAM offload for the agentic working set.
 glm5.2-fp4-b200-dynamo-sglang-agentic-agg:
-  image: lmsysorg/sglang:nightly-dev-20260910-00840301
+  image: lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:009eafc447f47fc595ea5f9820a9d7a07a9d144f3c8b90ab8ef568f4124475a7
   model: nvidia/GLM-5.2-NVFP4
   model-prefix: glm5.2
   runner: cluster:b200-nscale
