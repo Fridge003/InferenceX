@@ -8,6 +8,7 @@ driver also uses the Slurm backend's own operations.
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -39,10 +40,12 @@ if TYPE_CHECKING:
     from infx.clusters.slurm import SrtSlurmSettings
 
 
-DOCKER_ENV = (
-    "HF_HUB_CACHE", "HF_HUB_OFFLINE", "HF_DATASETS_OFFLINE", "TRANSFORMERS_OFFLINE",
-    "PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX", "MODEL_DOWNLOAD_LOCK_TIMEOUT",
-)  # fmt: skip
+# Host-specific names; docker gets every other launch variable, as pyxis would.
+DOCKER_HOST_ENV = re.compile(
+    r"PATH|HOME|USER|LOGNAME|SHELL|PWD|OLDPWD|SHLVL|HOSTNAME|TERM|TMPDIR|MAIL|_|"
+    r"PYTHONPATH|PYTHONHOME|VIRTUAL_ENV|CUDA_VISIBLE_DEVICES|INVOCATION_ID|JOURNAL_STREAM|"
+    r"(LD|LC|XDG|SSH|DBUS|UV|SLURM|SBATCH|SALLOC|SRUN|GITHUB|RUNNER|ACTIONS|NVIDIA)_\w*"
+)
 
 
 def run_single_node(launch: Launch) -> int:
@@ -80,7 +83,7 @@ def run_single_node(launch: Launch) -> int:
     rendered = config.render(run.cluster, job_config)
     if docker:
         # Pyxis hands a container the whole submit environment; docker only what it is told.
-        names = [*DOCKER_ENV, *run.cluster.env, *run.srt.env]
+        names = sorted(n for n in run.env if n.isidentifier() and not DOCKER_HOST_ENV.fullmatch(n))
         rendered["launcher"] = "docker"
         rendered["docker_args"] = [
             "-w", "/infmax-workspace", *(arg for name in names for arg in ("-e", name)),
