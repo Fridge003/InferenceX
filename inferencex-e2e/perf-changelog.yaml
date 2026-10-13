@@ -9689,4 +9689,4 @@
   description:
   - Pin qwen3.5 MI355X FP4 sglang mtp AgentX to the 2026-10-13 image lmsysorg/sglang-rocm:v0.5.21-rocm720-mi35x-20261013@sha256:bb4f817fe8bdcf85539cbff855bcc1e095efd9646882003922aa26eb29a17750.
   - Preserve deployment topology, speculative mode, concurrency points, KV-offload settings and evaluation coverage.
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3991
