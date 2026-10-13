@@ -9689,4 +9689,4 @@
   description:
   - Pin dsv41flash GB200 FP4 sglang mtp AgentX to the 2026-10-13 image lmsysorg/sglang:nightly-dev-cu13-20261013-7224fce1@sha256:f05bb01da5ce689f143bc04f091b8a4bab4b195f7d09969f1b6b044aa067d9ac.
   - Preserve deployment topology, speculative mode, concurrency points, KV-offload settings and evaluation coverage.
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3997
