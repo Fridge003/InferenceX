@@ -161,6 +161,8 @@ override_1p1d_mcstore:
         MC_STORE_USE_HUGEPAGE: "1"
         MC_MAX_MR_SIZE: "68719476736"
         MC_TCP_BIND_ADDRESS: "{node_ip}"
+      # The remapped container root lacks host CAP_IPC_LOCK, so registering the segment counts against RLIMIT_MEMLOCK.
+      preamble: ulimit -l unlimited
       readiness:
         log:
           pattern: Starting real client service
