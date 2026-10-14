@@ -81,7 +81,17 @@ each as it lands. Never declare success from absence of output.
 
 ### 3. Root-cause a failure
 
+Read a failed job's launch record before its logs. Every `python -m infx.launch run` writes
+`job_event.json` ([schema](../../../inferencex-e2e/infx/launch/event.py)), uploaded as
+`job_event_<RESULT_FILENAME>`. Once every benchmark and eval job has finished,
+`collect-job-events.yml` joins the records into `events.jsonl` in the `job_events` artifact;
+a cancelled run keeps only the per-job artifacts. A failure's `error` names the first failing
+stage and type, marks likely infrastructure faults `retriable` (a hint, not a diagnosis), and
+points `evidence` at the log to open first.
+
 ```bash
+gh run download "$RUN_ID" --repo SemiAnalysisAI/InferenceX -n job_events
+jq -r 'select(.outcome == "failure") | [.error.stage, .error.type, .result_filename, .error.evidence] | @tsv' events.jsonl
 gh run view "$RUN_ID" --repo SemiAnalysisAI/InferenceX --json jobs \
   --jq '.jobs[] | select(.conclusion=="failure") | "\(.databaseId)\t\(.name)"'
 gh run view "$RUN_ID" --repo SemiAnalysisAI/InferenceX --log-failed > /tmp/sweep_failed.txt
