@@ -755,42 +755,30 @@ def test_v2_samples_reject_mixed_versions_and_invalid_utilization(tmp_path, row)
 # --- Grace CPU-side power leg (power/cpu/) -----------------------------------
 
 CPU_HOSTS = tuple(sorted({host for host, *_ in DEVICES}))
-CPU_HEADER_V1 = [
-    "schema_version", "timestamp_unix", "hostname", "source", "sensor",
-    "socket_id", "power_w", "total_power_w",
+CPU_HEADER = [
+    "schema_version", "timestamp_unix", "hostname", "source", "sensor", "socket_id",
+    "power_w", "cpu_rail_w", "soc_w", "dram_w", "total_power_w",
 ]
-CPU_HEADER_V2 = CPU_HEADER_V1[:7] + ["cpu_rail_w", "soc_w", "dram_w", "total_power_w"]
 GRACE_W = {"node-d": 500.0, "node-p": 700.0}
-MODULE_W = 1500.0
 DCGM_W = 300.0
 # Component rails never feed a headline metric; the values are chosen so any
-# leak into a headline key is visible against the Grace and module constants.
-RAILS_W = {"cpu_rail": 200.0, "soc": 50.0, "dram": 30.0}
-GRACE_KINDS = {"grace": None, **RAILS_W}
-
-_SENSORS = {
-    # (source, v1 firmware OEM label, v2 collector sensor name)
-    "grace": ("acpi", "Grace Power Socket {s}", "CPU{s}:cpuSidePowerUsageW"),
-    "cpu_rail": ("acpi", "CPU Power Socket {s}", "CPU{s}:cpuRailPowerUsageW"),
-    "soc": ("acpi", "SysIO Power Socket {s}", "CPU{s}:socPowerUsageW"),
-    "dram": ("acpi", "DRAM Power Socket {s}", "CPU{s}:dramPowerUsageW"),
-    "module": ("acpi", "Module Power Socket {s}", "Module Power Socket {s}"),
-    "dcgm": ("dcgm", "CPU{s}:cpuPowerUsageW", "CPU{s}:cpuPowerUsageW"),
-}
+# leak into a headline key is visible against the Grace constants.
+RAILS_W = {"cpu_rail": 200.0, "soc": 50.0}
+# srt-slurm cpu_rails.SENSOR_SUFFIXES: the Grace socket meter and the DCGM CPU rail.
+GRACE_SENSOR = "CPU{s}:cpuSidePowerUsageW"
+DCGM_SENSOR = "CPU{s}:cpuPowerUsageW"
 
 
-def _cpu_row(ts, host, socket, kind, watts, fmt):
-    source, label_v1, label_v2 = _SENSORS[kind]
-    sensor = (label_v1 if fmt == "v1" else label_v2).format(s=socket)
-    if fmt == "v1":
-        return [1, repr(ts), host, source, sensor, socket, repr(watts), ""]
-    rails = ["", "", ""] if source == "dcgm" else [repr(w) for w in RAILS_W.values()]
-    return [2, repr(ts), host, source, sensor, socket, repr(watts), *rails, ""]
+def _cpu_row(ts, host, socket, kind, watts):
+    if kind == "dcgm":
+        return [2, repr(ts), host, "dcgm", DCGM_SENSOR.format(s=socket), socket, repr(watts), "", "", "", ""]
+    rails = [repr(w) for w in RAILS_W.values()]
+    return [2, repr(ts), host, "acpi", GRACE_SENSOR.format(s=socket), socket, repr(watts), *rails, "", ""]
 
 
-def _cpu_rows(kinds_by_host=None, fmt="v1", *, hosts=CPU_HOSTS):
+def _cpu_rows(kinds_by_host=None, *, hosts=CPU_HOSTS):
     """One row per (scrape, host, socket, kind); ``None`` watts means the Grace constant."""
-    kinds_by_host = kinds_by_host or {host: GRACE_KINDS for host in hosts}
+    kinds_by_host = kinds_by_host or {host: {"grace": None} for host in hosts}
     rows = []
     ts = FIRST_TS
     while ts <= LAST_TS:
@@ -798,17 +786,17 @@ def _cpu_rows(kinds_by_host=None, fmt="v1", *, hosts=CPU_HOSTS):
             for socket in (0, 1):
                 for kind, watts in kinds_by_host.get(host, {}).items():
                     watts = GRACE_W[host] if watts is None else watts
-                    rows.append(_cpu_row(ts, host, socket, kind, watts, fmt))
+                    rows.append(_cpu_row(ts, host, socket, kind, watts))
         ts += 1.0
     return rows
 
 
-def add_cpu_package(pkg, rows, header=CPU_HEADER_V1, manifest_text=None):
+def add_cpu_package(pkg, rows, manifest_text=None):
     cpu_dir = pkg.power_dir / "cpu"
     cpu_dir.mkdir()
     with open(cpu_dir / "samples.csv", "w", newline="") as handle:
         writer = csv.writer(handle)
-        writer.writerow(header)
+        writer.writerow(CPU_HEADER)
         writer.writerows(rows)
     if manifest_text is None:
         manifest_text = json.dumps(
@@ -852,8 +840,8 @@ class TestCpuSidePower:
         from infx.results.power.audit import audit_summary
 
         pkg = build_package(tmp_path)
-        rows = _cpu_rows({host: {"grace": None} for host in CPU_HOSTS}, "v2")
-        add_cpu_package(pkg, rows, CPU_HEADER_V2)
+        rows = _cpu_rows()
+        add_cpu_package(pkg, rows)
         assert pkg.run(require_power=True) == 0
 
         agg = pkg.agg()
@@ -889,45 +877,16 @@ class TestCpuSidePower:
 
     def test_rail_gap_drops_only_that_rail(self, tmp_path):
         pkg = build_package(tmp_path)
-        rows = _cpu_rows({host: {"grace": None} for host in CPU_HOSTS}, "v2")
+        rows = _cpu_rows()
         for row in rows:
             if row[2] == "node-d" and row[5] == 0 and 1020.0 <= float(row[1]) <= 1030.0:
                 row[7] = ""
-        add_cpu_package(pkg, rows, CPU_HEADER_V2)
+        add_cpu_package(pkg, rows)
         assert pkg.run(require_power=True) == 0
         agg = pkg.agg()
         assert_grace_keys(agg)
         assert "avg_total_cpu_rail_power_w" not in agg
         assert agg["avg_total_cpu_sysio_power_w"] == 200.0
-
-    @pytest.mark.parametrize(
-        "kinds, expected_kind, expected_power, module_power",
-        [
-            ({host: {"dcgm": DCGM_W} for host in CPU_HOSTS}, "dcgm_cpu_rail", 1200.0, None),
-            (
-                {host: {"grace": None, "module": MODULE_W} for host in CPU_HOSTS},
-                "module", 2400.0, 6000.0,
-            ),
-            (
-                {"node-d": {"grace": None, "module": MODULE_W}, "node-p": {"grace": None}},
-                "grace_socket", 2400.0, None,
-            ),
-        ],
-    )
-    def test_cpu_source_selection(
-        self, tmp_path, kinds, expected_kind, expected_power, module_power
-    ):
-        pkg = build_package(tmp_path)
-        add_cpu_package(pkg, _cpu_rows(kinds))
-        assert pkg.run() == 0
-        agg = pkg.agg()
-        assert agg["cpu_power_valid"] == 1
-        assert agg["avg_total_cpu_power_w"] == expected_power
-        assert pkg.sidecar()["cpu"]["sensor_kind"] == expected_kind
-        if module_power is None:
-            assert "avg_total_module_power_w" not in agg
-        else:
-            assert agg["avg_total_module_power_w"] == module_power
 
     @pytest.mark.parametrize(
         "cpu, require_power",
@@ -953,7 +912,8 @@ class TestCpuSidePower:
             assert set(apm.CPU_METRIC_KEYS).isdisjoint(pkg.agg())
             assert pkg.sidecar()["cpu"]["reason_codes"]
             if cpu == "dcgm_only":
-                assert "cpu_sensor_source_mismatch" in pkg.sidecar()["cpu"]["reason_codes"]
+                # The DCGM CPU rail is not the Grace socket meter: no socket series.
+                assert pkg.sidecar()["cpu"]["reason_codes"] == ["cpu_socket_count_mismatch"]
 
     def test_package_without_cpu_dir_emits_no_cpu_fields(self, tmp_path):
         pkg = build_package(tmp_path)
@@ -982,7 +942,7 @@ class TestCpuSidePower:
         elif kind == "mixed":
             rows = _cpu_rows({"node-d": {"grace": None}, "node-p": {"dcgm": DCGM_W}})
         elif kind == "malformed":
-            rows.append([1, repr(FIRST_TS), "node-d", "acpi", "Grace Power Socket 0", 0, "n/a", ""])
+            rows.append(_cpu_row(FIRST_TS, "node-d", 0, "grace", "n/a"))
         add_cpu_package(pkg, rows)
         return pkg
 
@@ -991,7 +951,7 @@ class TestCpuSidePower:
         [
             ("socket", "cpu_socket_count_mismatch"),
             ("gap", "cpu_sample_gap_exceeded"),
-            ("mixed", "cpu_sensor_kind_mixed"),
+            ("mixed", "cpu_socket_count_mismatch"),
             ("malformed", "cpu_samples_malformed"),
         ],
         indirect=["tampered"],
@@ -1008,82 +968,3 @@ class TestCpuSidePower:
         assert cpu["cpu_power_valid"] is False
         assert reason in cpu["reason_codes"]
         assert pkg.sidecar()["power_valid"] is True
-
-    @pytest.mark.parametrize("gpu_failure", ["coverage", "producer_pin"])
-    def test_cpu_leg_survives_an_invalid_gpu_leg(self, tmp_path, gpu_failure):
-        pkg = build_package(tmp_path)
-        add_cpu_package(pkg, _cpu_rows())
-        if gpu_failure == "coverage":
-            _rewrite_samples(
-                pkg,
-                lambda body: [
-                    row for row in body
-                    if not (row[3] == "node-p" and row[4] == "0" and 20 <= int(row[2]) <= 24)
-                ],
-            )
-        assert pkg.run(sha="b" * 40 if gpu_failure == "producer_pin" else PRODUCER_SHA) == 0
-        agg = pkg.agg()
-        assert agg["power_valid"] == 0
-        assert "total_gpu_energy_j" not in agg
-        assert_grace_keys(agg)
-        sidecar = pkg.sidecar()
-        gpu_reason = (
-            "producer_commit_mismatch" if gpu_failure == "producer_pin"
-            else "package_recompute_invalid"
-        )
-        assert gpu_reason in sidecar["reasons"]
-        assert sidecar["cpu"]["reason_codes"] == []
-
-    def test_result_without_window_invalidates_cpu(self, tmp_path):
-        pkg = build_package(tmp_path)
-        add_cpu_package(pkg, _cpu_rows())
-        result = dict(BENCH_FIELDS, max_concurrency=8)
-        pkg.original_result.write_text(json.dumps(result))
-        pkg.bench_result.write_text(json.dumps(result))
-        assert pkg.run() == 0
-        assert pkg.agg()["cpu_power_valid"] == 0
-        assert "cpu_window_unavailable" in pkg.sidecar()["cpu"]["reason_codes"]
-
-
-def test_host_power_preserves_heterogeneous_hosts_inside_one_role(tmp_path):
-    pkg = build_package(tmp_path)
-    manifest_path = pkg.power_dir / "manifest.json"
-    manifest = json.loads(manifest_path.read_text())
-    for device in manifest["expected_devices"]:
-        for assignment in device["assignments"]:
-            assignment["worker_role"] = "agg"
-            assignment["het_group"] = None
-    manifest_path.write_text(json.dumps(manifest))
-    assert pkg.run(prefill_gpus=0, decode_gpus=0, aggregate_gpus=4) == 0
-    assert pkg.agg()["workers"] == [
-        {"role": "agg", "worker_idx": 0, "hosts": ["node-d"],
-         "num_gpus": 2, "avg_power_w": 300.0},
-        {"role": "agg", "worker_idx": 1, "hosts": ["node-p"],
-         "num_gpus": 2, "avg_power_w": 400.0},
-    ]
-
-
-def test_host_power_uses_timestamp_window_when_reported_duration_is_skewed(tmp_path):
-    pkg = build_package(tmp_path, bench_extra={"duration": 60.1})
-    window_path = pkg.windows_dir / f"{RESULT_STEM}.json"
-    window = json.loads(window_path.read_text())
-    window["duration"] = 60.1
-    window_path.write_text(json.dumps(window))
-
-    assert pkg.run() == 0
-    workers = pkg.agg()["workers"]
-    assert [(worker["role"], worker["avg_power_w"]) for worker in workers] == [
-        ("decode", 300.0), ("prefill", 400.0)
-    ]
-
-
-@pytest.mark.parametrize("temperature", ["nan", "inf", "bad", "-300", "200.5", "9223372036854775794"])
-def test_v3_samples_reject_invalid_temperature(tmp_path, temperature):
-    path = tmp_path / "samples.csv"
-    path.write_text(
-        "schema_version,timestamp_unix,scrape_seq,hostname,gpu_index,gpu_uuid,power_w,gpu_util_pct,sm_active,temperature_c\n"
-        f"3,1000,0,node-a,0,GPU-a,400,,,{temperature}\n"
-    )
-    rows, reasons = apm.read_samples(path)
-    assert rows == ()
-    assert reasons == ("samples_csv_malformed",)

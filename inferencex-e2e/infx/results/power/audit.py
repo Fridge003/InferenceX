@@ -7,7 +7,7 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from .cpu_side import HEADLINE_PREFERENCE
+from .cpu_side import SENSOR_GRACE
 
 _REASON_CODE = re.compile(r"[a-z][a-z0-9_]{0,63}")
 _CPU_COUNT_FIELDS = ("expected_sockets", "observed_sockets", "sample_row_count")
@@ -24,9 +24,8 @@ def _bounded_reasons(values: Any) -> list[str]:
 def _cpu_audit(cpu: Mapping[str, Any]) -> dict[str, Any]:
     """Project the CPU-side provenance: sensor kind, source, counts, reasons."""
     summary: dict[str, Any] = {}
-    kind = cpu.get("sensor_kind")
-    if kind in HEADLINE_PREFERENCE:
-        summary["sensor_kind"] = kind
+    if cpu.get("sensor_kind") == SENSOR_GRACE:
+        summary["sensor_kind"] = SENSOR_GRACE
     source = cpu.get("source")
     if isinstance(source, str) and 0 < len(source) <= 32:
         summary["source"] = source

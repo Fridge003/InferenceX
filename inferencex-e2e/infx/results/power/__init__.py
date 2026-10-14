@@ -36,8 +36,6 @@ CPU_METRIC_KEYS = (
     "avg_cpu_socket_power_w",
     "avg_total_cpu_power_w",
     "total_cpu_energy_j",
-    "avg_total_module_power_w",
-    "total_module_energy_j",
     "avg_total_cpu_rail_power_w",
     "total_cpu_rail_energy_j",
     "avg_total_cpu_sysio_power_w",
