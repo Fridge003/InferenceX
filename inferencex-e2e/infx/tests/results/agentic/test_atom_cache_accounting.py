@@ -389,7 +389,29 @@ def test_endpoint_roles_unknown_without_launcher_metadata(env: dict[str, str]) -
     assert endpoint_roles_from_env(env) is None
 
 
-def test_processor_entry_point_carries_validity_through_the_serializer(tmp_path: Path) -> None:
+DISAGG_ENV = {
+    "FRAMEWORK": "atom-disagg",
+    "IS_MULTINODE": "true",
+    "DISAGG": "true",
+    **{
+        f"{side}_{key}": value
+        for side in ("PREFILL", "DECODE")
+        for key, value in {
+            "NUM_WORKERS": "1",
+            "TP": "8",
+            "PP_SIZE": "1",
+            "DCP_SIZE": "1",
+            "PCP_SIZE": "1",
+            "EP": "1",
+            "DP_ATTN": "false",
+            "HARDWARE": "mi355x",
+        }.items()
+    },
+}
+ROLE_ENV = {"SRT_PREFILL_ENDPOINTS": "10.0.0.1:6100", "SRT_DECODE_ENDPOINTS": "10.0.0.2:6100"}
+
+
+def _atom_result_dir(tmp_path: Path) -> tuple[Path, list[dict]]:
     result_dir = _write_fixture(tmp_path)
     artifacts = result_dir / "aiperf_artifacts"
     (artifacts / "server_metrics_export.json").write_text(json.dumps(_pd()))
@@ -397,37 +419,25 @@ def test_processor_entry_point_carries_validity_through_the_serializer(tmp_path:
     records = [json.loads(line) for line in jsonl.read_text().splitlines() if line.strip()]
     for record in records:
         record["metrics"]["usage_prompt_tokens"] = {"value": 1000 // len(records), "unit": "tokens"}
-    jsonl.write_text("".join(json.dumps(record) + "\n" for record in records))
-    disagg_env = {
-        "FRAMEWORK": "atom-disagg",
-        "IS_MULTINODE": "true",
-        "DISAGG": "true",
-        **{
-            f"{side}_{key}": value
-            for side in ("PREFILL", "DECODE")
-            for key, value in {
-                "NUM_WORKERS": "1",
-                "TP": "8",
-                "PP_SIZE": "1",
-                "DCP_SIZE": "1",
-                "PCP_SIZE": "1",
-                "EP": "1",
-                "DP_ATTN": "false",
-                "HARDWARE": "mi355x",
-            }.items()
-        },
-    }
+    return result_dir, records
 
-    agg = _run_processor(
-        result_dir,
-        tmp_path / "out",
-        env_overrides={
-            **disagg_env,
-            "SRT_PREFILL_ENDPOINTS": "10.0.0.1:6100",
-            "SRT_DECODE_ENDPOINTS": "10.0.0.2:6100",
-        },
-    )
-    unresolved = _run_processor(result_dir, tmp_path / "unresolved", env_overrides=disagg_env)
+
+def _write_records(result_dir: Path, records: list[dict]) -> None:
+    jsonl = result_dir / "aiperf_artifacts" / "profile_export.jsonl"
+    jsonl.write_text("".join(json.dumps(record) + "\n" for record in records))
+
+
+def _failed(phase: str | None) -> dict:
+    metadata = {} if phase is None else {"benchmark_phase": phase}
+    return {"metadata": metadata, "error": {"type": "Timeout", "message": "request timed out"}}
+
+
+def test_processor_entry_point_carries_validity_through_the_serializer(tmp_path: Path) -> None:
+    result_dir, records = _atom_result_dir(tmp_path)
+    _write_records(result_dir, records)
+
+    agg = _run_processor(result_dir, tmp_path / "out", env_overrides={**DISAGG_ENV, **ROLE_ENV})
+    unresolved = _run_processor(result_dir, tmp_path / "unresolved", env_overrides=DISAGG_ENV)
 
     _assert_stable_server_metrics_schema(agg)
     assert len(records) == 5
@@ -440,3 +450,44 @@ def test_processor_entry_point_carries_validity_through_the_serializer(tmp_path:
         agg["server_metrics"]["tokens"]["prompt_total"]
         == (unresolved["server_metrics"]["tokens"]["prompt_total"])
     )
+
+
+@pytest.mark.parametrize(
+    ("failed_phases", "legacy", "status", "profiling_errors"),
+    [
+        ((), False, "VALID_COMPLETE", 0),
+        (("warmup",), False, "VALID_COMPLETE", 0),
+        (("profiling",), False, "REQUEST_SCOPE_UNRESOLVED", 1),
+        (("warmup", "profiling"), False, "REQUEST_SCOPE_UNRESOLVED", 1),
+        ((), True, "VALID_COMPLETE", 0),
+        ((None,), True, "REQUEST_SCOPE_UNRESOLVED", 1),
+    ],
+    ids=["clean", "warmup-error", "profiling-error", "both-phases", "legacy-clean", "legacy-error"],
+)
+def test_only_profiling_errors_from_the_loader_block_pricing(
+    tmp_path: Path,
+    failed_phases: tuple[str | None, ...],
+    legacy: bool,
+    status: str,
+    profiling_errors: int,
+) -> None:
+    result_dir, records = _atom_result_dir(tmp_path)
+    if legacy:
+        for record in records:
+            del record["metadata"]["benchmark_phase"]
+    _write_records(result_dir, [_failed(phase) for phase in failed_phases] + records)
+
+    agg = _run_processor(result_dir, tmp_path / "out", env_overrides={**DISAGG_ENV, **ROLE_ENV})
+    validity = agg["server_metrics"]["cache_validity"]
+    accounting = agg["request_accounting"]
+
+    assert _rates(agg["server_metrics"]) == (0.6, 0.1, 0.1, 0.7)
+    assert validity["status"] == status
+    assert validity["pricing_eligible"] is (status == "VALID_COMPLETE")
+    assert validity["request_scope"]["error_records"] == profiling_errors
+    assert accounting["records_profiled"] == 5
+    assert accounting["records_error_dropped"] == len(failed_phases)
+    assert accounting["records_profiling_error_dropped"] == profiling_errors
+    assert accounting["records_warmup_dropped"] == failed_phases.count("warmup")
+    expected_categories = {"Timeout": len(failed_phases)} if failed_phases else {}
+    assert accounting["error_categories"] == expected_categories

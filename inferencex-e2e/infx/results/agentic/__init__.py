@@ -172,6 +172,7 @@ def build_result(
         "records_dropped_total": 0,
         "records_warmup_dropped": 0,
         "records_error_dropped": 0,
+        "records_profiling_error_dropped": 0,
         "error_categories": {},
     }
 

@@ -21,13 +21,16 @@ def request_scope_from_records(
     """Client-side profiling cohort in server token units (``usage_prompt_tokens``).
 
     ``profiling_prompt_tokens`` is None when any successful record lacks usage, so a partial
-    sum is never compared with server counters.
+    sum is never compared with server counters. ``error_records`` counts failed profiling
+    requests; accounting without that split falls back to the all-phase error total.
     """
     prompt = extract_per_record_ints(records, "usage_prompt_tokens")
     return {
         "profiling_requests": len(records),
         "profiling_prompt_tokens": sum(prompt) if len(prompt) == len(records) else None,
-        "error_records": request_accounting.get("records_error_dropped"),
+        "error_records": request_accounting.get(
+            "records_profiling_error_dropped", request_accounting.get("records_error_dropped")
+        ),
         "cancelled_records": sum(
             1 for record in records if (record.get("metadata") or {}).get("was_cancelled")
         ),
