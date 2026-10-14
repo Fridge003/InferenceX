@@ -48,7 +48,6 @@ MULTINODE_ENV = {
     "DECODE_TP": "16", "DECODE_EP": "16", "DECODE_DP_ATTN": "false",
     "ROUTER_METADATA": '{"name": "dynamo-router", "version": "1.5.0"}', "KV_P2P_TRANSFER": "nixl",
 }
-# A shared-worker point: no decode GPUs, so decode TP/EP are zero.
 AGGREGATE_ENV = {
     **MULTINODE_ENV, "DISAGG": "false", "PREFILL_GPUS": "0", "DECODE_GPUS": "0",
     "AGGREGATE_GPUS": "8", "DECODE_NUM_WORKERS": "0",
@@ -68,7 +67,6 @@ AGENTX_MULTINODE_ENV = {
     "ROUTER_METADATA": '{"name": "dynamo-router", "version": "1.5.0"}',
     "KV_P2P_TRANSFER": "mooncake",
 }
-# A DWDP prefill worker: a group of eight TP1 ranks.
 DWDP_PREFILL = {
     "PREFILL_TP": "1", "PREFILL_EP": "1", "PREFILL_DP_ATTN": "false", "PREFILL_DWDP_SIZE": "8",
 }
