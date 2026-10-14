@@ -177,9 +177,10 @@ class CpuPowerExporter(Record):
     """The Grace CPU power exporter srt-slurm scrapes on this cluster's compute trays.
 
     A point that selects ``cpu-power`` binds ``telemetry.cpu_power_exporter`` with this source.
+    Only ACPI serves the Grace socket meter the CPU leg integrates.
     """
 
-    source: Literal["acpi", "dcgm"]
+    source: Literal["acpi"]
 
 
 class SrtSlurmSettings(Record):

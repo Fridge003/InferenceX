@@ -433,7 +433,7 @@ def main(argv: list[str] | None = None) -> None:
     )
     parser.add_argument(
         "--cpu-power-source",
-        choices=("acpi", "dcgm"),
+        choices=("acpi",),
         help="bind the cluster's Grace CPU power exporter with this source (needs --power-port)",
     )
     parser.add_argument(
