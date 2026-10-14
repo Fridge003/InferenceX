@@ -1575,9 +1575,8 @@ def main() -> int:
         "--require-power",
         action="store_true",
         default=os.environ.get("REQUIRE_POWER", "").lower() in {"1", "true", "yes"},
-        help="Fail invalid GPU power and any expected CPU source (also REQUIRE_POWER=1)",
+        help="Fail when power telemetry is invalid (also enabled by REQUIRE_POWER=1)",
     )
-    parser.add_argument("--expected-cpu-power", action="store_true")
     args = parser.parse_args()
     return run(
         args.power_dir,
@@ -1590,7 +1589,6 @@ def main() -> int:
         logs_root=args.logs_root,
         validation_result=args.validation_result,
         require_power=args.require_power,
-        expected_cpu=args.expected_cpu_power,
     )
 
 
