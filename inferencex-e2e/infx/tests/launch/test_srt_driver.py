@@ -19,6 +19,7 @@ import yaml
 
 from infx.launch.__main__ import main
 from infx.launch.drivers.srt import lanes, models
+from infx.launch.drivers.srt.checkout import CPU_POWER_EXPORTER_RELEASE
 from infx.launch.drivers.srt.lanes import LaneMount, SrtLane
 from infx.launch.drivers.srt.models import Override
 from infx.launch.policy import LaunchPath, Match
@@ -695,7 +696,7 @@ def test_launch_cpu_expectation_reaches_fixed_sequence_processor(harness, monkey
     assert bound["telemetry"]["cpu_power_exporter"] == {"source": "acpi"}
     assert bound["telemetry"]["dcgm_exporter"]["port"] == 19401
     [setup] = [call for call in lines(harness.logs, "make") if call.startswith("setup ")]
-    assert "CPU_POWER_EXPORTER_RELEASE=v2.51.1" in setup.split()
+    assert f"CPU_POWER_EXPORTER_RELEASE={CPU_POWER_EXPORTER_RELEASE}" in setup.split()
     pkg = build_package(harness.tmp / "power-input")
     monkeypatch.chdir(harness.tmp)
     # The workflow exports CPU_POWER once; the launcher and the processor both read it.
