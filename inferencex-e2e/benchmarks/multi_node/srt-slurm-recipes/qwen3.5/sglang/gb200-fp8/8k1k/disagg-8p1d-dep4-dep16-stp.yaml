@@ -28,11 +28,6 @@ frontend:
   num_additional_frontends: 4
   nginx_container: nginx
 
-model:
-  path: "qwen3.5-fp8"
-  container: "lmsysorg/sglang:nightly-dev-cu13-20260918-20518d85"
-  precision: "fp8"
-
 resources:
   gpu_type: "gb200"
   gpus_per_node: 4

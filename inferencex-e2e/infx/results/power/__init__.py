@@ -6,10 +6,6 @@ import math
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-# The unprefixed joules_per_* fields silently switched from role-local to
-# whole-deployment energy when multinode aggregation landed, and the values
-# alone cannot distinguish the two. Stamp the semantics so consumers fail
-# closed on unversioned rows instead of guessing.
 POWER_METRIC_SCHEMA_VERSION = 2
 
 WHOLE_METRIC_KEYS = (
@@ -75,8 +71,6 @@ def with_power_metrics(
     carried no ``cpu/`` sub-package, so only stale CPU keys are stripped and the
     output stays byte-identical to a run without the leg.
     """
-    # Do not coerce malformed JSON (such as a list of pairs) into an object.
-    # Leave non-mappings to fail on the same operations as the existing adapters.
     data = dict(result) if isinstance(result, Mapping) else result
     for key in (*metric_keys, *CPU_METRIC_KEYS, "cpu_power_valid"):
         data.pop(key, None)
