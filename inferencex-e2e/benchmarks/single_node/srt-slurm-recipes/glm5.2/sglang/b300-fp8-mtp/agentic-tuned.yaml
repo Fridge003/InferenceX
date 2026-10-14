@@ -6,11 +6,6 @@
 base:
   schema: 2
   name: glm5.2-fp8-b300-sglang-agentic-tuned
-  model:
-    path: hf:zai-org/GLM-5.2-FP8
-    # nightly-dev-cu13-20260914-4358a161 (amd64); the tag is gone from Docker Hub.
-    container: lmsysorg/sglang@sha256:239ae983b1bc6ead51e3fe88f21b7ab795ba7ef1a0666384924dac87d855005d
-    precision: fp8
   resources:
     gpu_type: b300
     gpus_per_node: 8
@@ -74,7 +69,6 @@ base:
     type: custom
     command: bash /infmax-workspace/benchmarks/srt_agentic.sh
     env:
-      MODEL: zai-org/GLM-5.2-FP8
       # Warmup can leave bytes unacknowledged past AIPerf's 30 s default.
       AIPERF_HTTP_TCP_USER_TIMEOUT: '900000'
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: 'sglang:'
