@@ -4,11 +4,11 @@ identity:
   model: {}
   container: {}
   frameworks:
-    dynamo: v1.4.2
+    dynamo: d7eefa0919a672fb400fe5034198a04b42018aa3
 dynamo:
   install: true
   source:
-    rev: v1.4.2
+    rev: d7eefa0919a672fb400fe5034198a04b42018aa3
 slurm:
   time_limit: 04:00:00
 health_check:
