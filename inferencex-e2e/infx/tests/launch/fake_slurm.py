@@ -235,7 +235,7 @@ def base_env(*, fakes: Path, logs: Path, workspace: Path, sandbox: Path) -> dict
         for key, value in os.environ.items()
         if not key.startswith(("SLURM_", "FAKE_", "SRT_", "INFERENCEX_", "INFX_", "UV_"))
         and key not in {
-            "VIRTUAL_ENV", "MODEL_PATH", "CONFIG_FILE", "EVAL_CONFIG_FILE", "BENCH_SCRIPT_OVERRIDE",
+            "VIRTUAL_ENV", "MODEL_PATH", "CONFIG_FILE", "EVAL_SRT_RECIPE", "BENCH_SCRIPT_OVERRIDE",
             "GITHUB_ACTIONS",
         }
     }
