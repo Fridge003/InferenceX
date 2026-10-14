@@ -1,6 +1,6 @@
 # Agent Operations Reference
 
-Detailed operational reference moved out of `AGENTS.md` to keep the default agent context small. Read only the section relevant to the current task.
+Read only the section relevant to the current task.
 
 ## Translation terminology
 
@@ -26,28 +26,9 @@ Write natural technical Chinese used by ML infrastructure engineers. Preserve mo
 
 ## Sweep labels and reuse
 
-A PR sweep requires exactly one primary label:
+Primary labels, modifiers, canary, fail-fast, and the fork dispatch path are documented in [PR sweep labels](workflows/README.md#pr-sweep-labels). Apply exactly one primary label, normally `full-sweep-fail-fast`.
 
-- `full-sweep-fail-fast`: canary-gated full sweep with matrix-scoped fail-fast. Recommended for image bumps, recipe changes, bring-up, and other full sweeps.
-- `full-sweep-enabled`: canary-gated full sweep without fail-fast. Use when a flaky job must not cancel its matrix's in-flight work.
-- `non-canary-full-sweep-enabled`: full sweep without canary or fail-fast. Use when both canary gating and fail-fast are unsuitable.
-
-`run-sweep.yml` sweeps run only on same-repository PRs that change `inferencex-e2e/perf-changelog.yaml`; the matrix comes from the appended entries. More than one primary label fails `check-changelog`, and modifiers alone start no GPU sweep (`check-changelog` still runs). Adding or removing any primary or modifier label cancels the in-progress sweep; a new one starts only while a primary label remains.
-
-Fork PRs run no `run-sweep.yml` jobs, not even changelog validation. A maintainer with `write`, `maintain`, or `admin` permission applies one primary label to an open, non-draft, conflict-free PR, and `.github/workflows/trusted-external-sweep.yml` dispatches `e2e-tests.yml` for that exact head SHA. That path runs no canary for any label, and only `full-sweep-fail-fast` sets fail-fast. Remove and re-add the primary label after each push to approve the new head.
-
-The canary is the lowest-concurrency non-eval single-node `1k1k`, `8k1k`, or AgentX entry, or a multi-node AgentX entry when there is no single-node candidate. If it fails, every other matrix is skipped. A sweep with only multi-node fixed-sequence or eval entries has no canary, so every matrix fans out at once and fail-fast is the only guard. No label trims concurrency; for a lowest-concurrency smoke run, dispatch `e2e-tests.yml` with `trim-conc: true`.
-
-Modifiers:
-
-- `all-evals` expands eval selection to every generated fixed-sequence configuration without suppressing throughput. It remains reuse-eligible; artifact reuse does not require a current sweep label.
-- `evals-only` suppresses throughput. Combining it with `all-evals` runs every eval and no throughput. Reuse is rejected while the PR carries it.
-- `agentx-fast` uses one deterministic warmup request per lane and a 20-minute AgentX profile. It does not affect fixed-sequence or eval jobs. Reuse is rejected while the PR carries it.
-- `all-evals` and `evals-only` fail `check-changelog` when the changelog additions include `append-only: true` or `no-evals: true` entries.
-
-Fail-fast is matrix-scoped: one matrix failure does not cancel other matrices, and completed results remain valid. The failed job remains red.
-
-Sweeps do not trigger while a PR has merge conflicts. For `inferencex-e2e/perf-changelog.yaml` conflicts, follow `inferencex-e2e/docs/KLAUD_DEBUG.md` section 1.1: merge `origin/main`, restore the file byte-for-byte from `origin/main`, then append only the PR's entry at the tail. Never 3-way merge the changelog.
+Sweeps do not trigger while a PR has merge conflicts. For `inferencex-e2e/perf-changelog.yaml` conflicts, run `python3 -m infx.workflows.prepare_perf_changelog_merge resolve-conflict` while the conflict stages are present, as in [changelog conflict recovery](workflows/README.md#changelog-conflict-recovery). It keeps main's bytes and re-appends only the PR's entry. Never hand-merge, 3-way merge, or reformat the changelog.
 
 Pushes to `main` never run a sweep: `.github/workflows/run-sweep.yml` is PR-only. A push that changes `inferencex-e2e/perf-changelog.yaml` runs `.github/workflows/merge-ingest.yml` (Merge Ingest). Its single `ingest` job validates the merged PR's authorized `/use <run_id>` (or legacy `/reuse-sweep-run`) command and source run, then dispatches ingest of that reused PR sweep. Without valid reuse authorization the run fails, and nothing is benchmarked or ingested. `[skip-sweep]` only skips PR benchmark setup; changelog validation and reuse authorization checks still run, and Merge Ingest ignores it.
 
@@ -67,7 +48,7 @@ gh api -X POST \
   -f 'inputs[duration-override]='
 ```
 
-The top-level `ref` selects the workflow definition and is normally `main`. `inputs[ref]` selects the repository revision under test. Direct config dispatches set `inputs[generate-cli-command]` with paths relative to the selected checkout's `inferencex-e2e/` directory. Trusted changelog-driven dispatches instead set both `inputs[changelog-base-ref]` and `inputs[changelog-head-ref]`. `duration-override` replaces per-config seconds, and `require-power` makes invalid fixed-sequence power telemetry fatal.
+The top-level `ref` selects the workflow definition and is normally `main`. `inputs[ref]` selects the repository revision under test. Direct config dispatches set `inputs[generate-cli-command]` with paths relative to the selected checkout's `inferencex-e2e/` directory. Trusted changelog-driven dispatches instead set both `inputs[changelog-base-ref]` and `inputs[changelog-head-ref]`. `duration-override` replaces per-config seconds, and `require-power` makes invalid power telemetry fatal for multi-node jobs and native single-node throughput and AgentX jobs; single-node matrix rows cannot set it.
 
 For AgentX preflight, add `-F 'inputs[agentx-fast]=true'`. Official runs use 10 warmup requests per lane and a one-hour profile.
 
@@ -83,29 +64,25 @@ The dispatch POST returns no body or run ID.
 
 ## Evaluation selection
 
-Full details live in `inferencex-e2e/infx/evals/EVALS.md`.
-
-`mark_eval_entries()` in `inferencex-e2e/infx/matrix/generate.py` selects evals, which default to the 8k1k subset plus AgentX GSM8K for every model, and run separately from throughput with `EVAL_ONLY=true`. Single-node AgentX GSM8K runs at the highest concurrency of each model/runner/framework/precision/spec-decoding/dp-attn/image group and uses the same `thresholds.yaml` floors as 8k1k. Kimi K3 and MiniMax M3 also run their vendor suites at every point, with GSM8K as an extra eval-only row.
-
-- `--no-evals`: skip evals.
-- `--evals-only`: run the default selected eval subset and suppress throughput.
-- `--all-evals`: expand selection to every generated fixed-sequence configuration. In `infx.matrix.generate`, it is eval-only even without `--evals-only`; in `infx.matrix.plan` (the PR label path), it only expands selection and composes with `--evals-only`.
-
-For multi-node configurations, `--all-evals` creates one eval job per engine topology and runs every distinct `conc-list` value sequentially against that engine. Changelog `all-evals: true` suppresses throughput for that entry. The PR `all-evals` label expands selection only, while the `evals-only` label suppresses throughput. `inferencex-e2e/infx/results/collect_eval_results.py` produces aggregated output.
+Eval selection, the `--no-evals` / `--evals-only` / `--all-evals` flags, and changelog eval fields are owned by `inferencex-e2e/infx/evals/EVALS.md`.
 
 ## Power telemetry
 
-Single-node fixed-sequence results may include `power_valid`, `avg_power_w`, `avg_total_gpu_power_w`, `total_gpu_energy_j`, and joules per query/input/output/total token. Invalid telemetry records `power_valid: 0` without energy metrics and fails only with `REQUIRE_POWER=1`.
+Multinode srt-slurm results, and single-node fixed-sequence and AgentX results with a retained native telemetry package, may include `power_valid`, `avg_power_w`, `avg_total_gpu_power_w`, `total_gpu_energy_j`, and joules per query/input/output/total token. Invalid telemetry records `power_valid: 0` without energy metrics and fails only with `REQUIRE_POWER=1`, or always on AgentX lanes whose launcher validates power.
 
 Multinode disaggregated results add `prefill_gpu_energy_j`, `decode_gpu_energy_j`, `prefill_avg_power_w`, `decode_avg_power_w`, `prefill_joules_per_input_token`, and `decode_joules_per_output_token`. Role energy covers the full formal benchmark window, not kernel-level phases, and the role watts are that energy divided by the same window and by the role's GPU count.
 
-NVL72 packages that also carry srt-slurm's `power/cpu/` sub-package add `cpu_power_valid`, `avg_cpu_socket_power_w`, `avg_total_cpu_power_w`, `total_cpu_energy_j`, and, when the module sensor is exposed on every socket, `avg_total_module_power_w` and `total_module_energy_j`. That verdict is independent of `power_valid`; strict `REQUIRE_POWER` qualification also requires any CPU source declared by the recipe; see [`inferencex-e2e/docs/results-and-ingestion.md`](../inferencex-e2e/docs/results-and-ingestion.md#measured-grace-cpu-side-power-nvl72).
+A multinode master row with `cpu-power: true` beside `power: true` adds srt-slurm's Grace CPU leg. The binder merges `telemetry.cpu_power_exporter` into the bound recipe from the cluster's `srt-slurm.cpu-power-exporter` record in `inferencex-e2e/configs/runners.yaml` (ACPI on `gb200-nv` and `gb300-nv`), the same way it merges the DCGM block, so recipe fragments and `additional-settings` never carry it; `make setup` pins the exporter release from `CPU_POWER_EXPORTER_RELEASE` in `infx/launch/drivers/srt/checkout.py` for those jobs only, and the workflow exports `CPU_POWER=1` once for both the launcher and the result processor.
 
-Every power result — valid or invalid, single-node or multinode — carries `power_metric_schema_version`. Version 2 defines each unprefixed `joules_per_*` field as whole-deployment GPU-board energy over the named denominator; role-scoped energy uses the explicit `prefill_*` / `decode_*` keys. Rows without the field predate the whole-deployment switch and their unprefixed joules are not comparable across topologies.
+The package then carries `power/cpu/samples.csv` in srt-slurm's wide format (one row per scrape, host, and Grace socket; two sockets per worker host in the manifest topology), and the aggregate adds `cpu_power_valid`, `avg_cpu_socket_power_w`, `avg_total_cpu_power_w`, and `total_cpu_energy_j` from the `CPU<n>:cpuSidePowerUsageW` series, plus `avg_total_cpu_rail_power_w` / `total_cpu_rail_energy_j` (ACPI `CPU Power Socket N`, cores only) and `avg_total_cpu_sysio_power_w` / `total_cpu_sysio_energy_j` (ACPI `SysIO Power Socket N`), each pair only when every socket reports that rail without gaps. The meters nest ([NVIDIA Grace power guide](https://docs.nvidia.com/dccpu/grace-perf-tuning-guide/power-thermals.html)): `Grace Power Socket N` is the whole socket (CPU rail, SysIO rail, LPDDR5X, and regulator loss) and the two rails are a breakdown inside it, so never add them to or subtract them from the total; a GB300 socket reads about 97 W while its rails sum to about 55 W. The DRAM rail is blank on the CI NVL72 firmware, and the superchip module meter is unbound in ACPI; NVML exposes it (`nvidia-smi --query-gpu=module.power.draw.average`, srt-slurm #591 pending) and no package publishes it. Every series is integrated over the bound formal GPU window with the GPU leg's trapezoid, boundary interpolation, and 3.0 s gap limit; the sidecar's `cpu` block, mirrored as `power_audit.cpu`, records `sensor_kind: grace_socket`, `source`, socket and row counts, and reason codes.
 
-For srt-slurm recipes, `telemetry.enabled: true` with `telemetry.dcgm_exporter` enables official energy collection. The Git submodule pointer at `inferencex-e2e/utils/srt-slurm` is the source of truth for every srt-slurm job, including TileRT. CI derives `POWER_PRODUCER_SHA` from the launcher stamp. The aggregate-power and AgentX power tests validate telemetry and provenance. These local tests do not prove hardware power collection. Eligible recipe-gated `dynamo-sglang` dcgm-power lanes are validated.
+The CPU verdict is independent of `power_valid`: a failed leg records `cpu_power_valid: 0` with no CPU keys and leaves every GPU field unchanged. It fails the job only when power is required (`REQUIRE_POWER=1`, or always on AgentX lanes whose launcher validates power) and the row set `cpu-power`; missing CPU artifacts are then a verdict (`cpu_artifacts_missing`) rather than silence. Other reason codes: `cpu_samples_missing`, `cpu_samples_header_mismatch`, `cpu_samples_malformed`, `cpu_manifest_invalid`, `cpu_socket_count_mismatch` (also when a host reports only the DCGM CPU rail), `cpu_sample_gap_exceeded`, `cpu_window_not_bracketed`, `cpu_window_unavailable`, and the shared `non_finite_power_metric`.
 
-Power audit artifacts are named `power_audit_<result>` and contain `power_validation_<result>.json` for single-node runs or `power_validation_<result>_*.json` for multinode runs. They are uploaded even when validation fails.
+Every power result, valid or invalid, carries `power_metric_schema_version`. Version 2 defines each unprefixed `joules_per_*` field as whole-deployment GPU-board energy over the named denominator; role-scoped energy uses the explicit `prefill_*` / `decode_*` keys. Rows without the field predate the whole-deployment switch and their unprefixed joules are not comparable across topologies.
+
+A multinode master row with `power: true` enables official energy collection through the shared telemetry fragment; native single-node throughput and AgentX jobs enable telemetry through their bound recipe. Native single-node jobs inherit the exporter image, labels and metrics from the cluster's `default_gpu_exporter` in `inferencex-e2e/configs/runners.yaml`: DCGM on NVIDIA, the `kind: custom` AMD device-metrics-exporter on AMD. Multi-node power rows keep their shared DCGM telemetry block. Eval-only jobs omit collection. The Git submodule pointer at `inferencex-e2e/utils/srt-slurm` is the source of truth for every srt-slurm job, including TileRT. CI derives `POWER_PRODUCER_SHA` from the launcher stamp. The aggregate-power and AgentX power tests validate telemetry and provenance. These local tests do not prove hardware power collection. Eligible `dynamo-sglang` dcgm-power lanes are validated.
+
+Power audit artifacts are named `power_audit_<result>` and contain the `power_validation*.json` sidecars plus, for native telemetry jobs, `LOGS/power/` (`samples.csv` v3 with `temperature_c`, `manifest.json`, `windows/`). They are uploaded even when validation fails.
 
 ## Result artifacts and metrics
 

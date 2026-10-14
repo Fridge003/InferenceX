@@ -8,5 +8,4 @@ Each patch is a temporary fix for an open upstream PR. When the PR merges and th
 
 | Patch | Upstream PR | Fix |
 |-------|-------------|-----|
-| `548-atom-served-model-name.patch` | [NVIDIA/srt-slurm#548](https://github.com/NVIDIA/srt-slurm/pull/548) | ATOM serves evals the role's `served-model-name` instead of the literal `--model` path, so AToMesh accepts eval requests |
-| `553-cpu-exporter-submit-preflight.patch` | [NVIDIA/srt-slurm#553](https://github.com/NVIDIA/srt-slurm/pull/553) | Pass the resolved recipe into setup validation so CPU-enabled jobs reject unusable exporters before submission |
+| `573-participating-gpus.patch` | [NVIDIA/srt-slurm#573](https://github.com/NVIDIA/srt-slurm/pull/573) | Record only the GPUs workers occupy on a worker node; an exporter such as AMD's reports every GPU, which the collector otherwise flags as `unexpected_device`. |

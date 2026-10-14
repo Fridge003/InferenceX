@@ -7,11 +7,9 @@ import itertools
 import json
 import math
 import sys
-from collections.abc import Iterable, Mapping
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-
-from . import POWER_METRIC_SCHEMA_VERSION, with_power_metrics
 
 
 @dataclass(frozen=True)
@@ -28,6 +26,11 @@ class BenchmarkData:
     @property
     def integration_duration_s(self) -> float:
         return self.end_unix - self.start_unix
+
+
+# Widest gap between consecutive samples inside the integration window that
+# still counts as continuous coverage (srt-slurm contract.MAX_SAMPLE_GAP_SECONDS).
+MAX_SAMPLE_GAP_SECONDS = 3.0
 
 
 def _append_reason(reasons: list[str], reason: str) -> None:
@@ -111,7 +114,6 @@ def _percentile_total_power(
             slope_changes[left_t] = slope_changes.get(left_t, 0.0) + slope
             slope_changes[right_t] = slope_changes.get(right_t, 0.0) - slope
 
-    # The union of all device timestamps gives the exact knots of their sum.
     segments: list[tuple[float, float, float]] = []
     slope = 0.0
     times = sorted(slope_changes)
@@ -129,7 +131,6 @@ def _percentile_total_power(
     lower = min(low for low, _, _ in segments)
     upper = max(high for _, high, _ in segments)
     target_time = (end_unix - start_unix) * quantile
-    # Bisection includes point masses without averaging device percentiles.
     for _ in range(60):
         value = lower + (upper - lower) / 2
         time_below = sum(
@@ -237,6 +238,27 @@ def benchmark_window_payload(
     }
 
 
+def invalid_validation_payload(
+    *,
+    telemetry_source: Path,
+    bench_result: Path,
+    expected_gpu_count: int,
+    reasons: list[str],
+) -> dict:
+    """Build an auditable invalid sidecar when no validator could produce one."""
+    return {
+        "schema_version": 1,
+        "power_valid": False,
+        "reasons": reasons,
+        "telemetry_source": str(telemetry_source),
+        "benchmark_result": str(bench_result),
+        "benchmark_window": None,
+        "expected_gpu_count": expected_gpu_count,
+        "observed_gpu_count": 0,
+        "metrics": {},
+    }
+
+
 def audit_metrics(metrics: Mapping[str, float | None]) -> dict[str, float]:
     """Keep finite sidecar metrics at audit precision, independent of display units."""
     return {
@@ -244,26 +266,3 @@ def audit_metrics(metrics: Mapping[str, float | None]) -> dict[str, float]:
         for key, value in metrics.items()
         if value is not None and math.isfinite(value)
     }
-
-
-def patch_power_metrics(
-    path: Path,
-    *,
-    metric_keys: Iterable[str],
-    power_valid: bool,
-    metrics: Mapping[str, float],
-    cpu_power_valid: bool | None = None,
-    cpu_metrics: Mapping[str, float] | None = None,
-) -> None:
-    """Validate replacement metrics before atomically updating an aggregate."""
-    data = json.loads(path.read_text(encoding="utf-8"))
-    data = with_power_metrics(
-        data,
-        metric_keys=metric_keys,
-        schema_version=POWER_METRIC_SCHEMA_VERSION,
-        power_valid=power_valid,
-        metrics=metrics,
-        cpu_power_valid=cpu_power_valid,
-        cpu_metrics=cpu_metrics,
-    )
-    _write_json_atomic(path, data)

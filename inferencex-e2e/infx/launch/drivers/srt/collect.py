@@ -14,7 +14,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from infx.launch import proc
+from infx.bench.env import InputError
+from infx.bench.eval import meta as eval_meta
 from infx.launch.artifacts import (
     ArtifactError,
     bundle_server_logs,
@@ -23,12 +24,13 @@ from infx.launch.artifacts import (
     copy_eval_artifacts,
     copy_fixed_sequence_results,
     copy_to_workspace,
+    run_power_adapter,
     validate_agentic_power,
 )
 from infx.launch.backends.base import BackendError
 from infx.launch.drivers.srt.config import EXPORTER_PROVENANCE
+from infx.launch.drivers.srt.power import NVL72_POWER_CLUSTERS
 from infx.launch.drivers.srt.run import SrtRun, require
-from infx.launch.request import RequestError
 
 if TYPE_CHECKING:
     from infx.launch.backends.base import Job
@@ -48,10 +50,12 @@ def _copy_tree_into(source: Path, destination: Path) -> None:
     shutil.copytree(source, destination, symlinks=True, dirs_exist_ok=True)
 
 
-def finish_single_node(
-    run: SrtRun, submitted: Submitted, fetched: Path, power: PowerDecision | None = None
-) -> int:
-    """Exit cleanup of a single-node point: cancel a live job, then stage its artifacts."""
+def finish_single_node(run: SrtRun, submitted: Submitted, fetched: Path) -> int:
+    """Exit cleanup of a single-node point: cancel a live job, then stage its artifacts.
+
+    A power package that cannot be copied fails the point only when valid power was
+    required; otherwise the result stands and the package is reported incomplete.
+    """
     job = submitted.recover(run.backend)
     if job is None:
         return 0
@@ -61,65 +65,59 @@ def finish_single_node(
         return 0
     rc = 0
     logs = output / "logs"
-    if power is not None and power.dcgm:
-        power_dir = logs / "power"
-        try:
-            power_dir.mkdir(parents=True, exist_ok=True)
-            for name in (EXPORTER_PROVENANCE, "power-producer-sha.txt"):
-                shutil.copyfile(run.workspace / name, power_dir / name)
-        except OSError as error:
-            level = "ERROR" if power.require_power else "WARNING"
-            print(f"{level}: failed to stage power provenance: {error}", file=sys.stderr)
-            rc = int(power.require_power)
-        try:
-            shutil.copytree(logs, run.workspace / "LOGS", dirs_exist_ok=True)
-        except OSError as error:
-            level = "ERROR" if power.require_power else "WARNING"
-            print(f"{level}: failed to stage power artifacts: {error}", file=sys.stderr)
-            rc = int(power.require_power)
+    power_rc = 0 if run.request.eval_only else _stage_power_package(run, logs)
     bundle_server_logs(output, run.workspace / SINGLE_NODE_LOGS)
     result = logs / f"{run.request.result_filename}.json"
-    for artifact in [result, *sorted(logs.glob("gpu_metrics*"))]:
-        if artifact.is_file():
-            try:
-                copy_to_workspace(artifact, run.workspace / artifact.name)
-            except ArtifactError as error:
-                print(f"ERROR: {error}", file=sys.stderr)
-                rc = 1
+    if result.is_file():
+        try:
+            copy_to_workspace(result, run.workspace / result.name)
+        except ArtifactError as error:
+            print(f"ERROR: {error}", file=sys.stderr)
+            rc = 1
     if (logs / "agentic").is_dir():
         try:
             _copy_tree_into(logs / "agentic", run.workspace / "results")
         except OSError as error:
             print(f"ERROR: failed to stage AgentX artifacts: {error}", file=sys.stderr)
             rc = 1
-    return rc
+    return rc or power_rc
 
 
-def check_single_node(
-    run: SrtRun, logs: Path, power: PowerDecision | None = None, producer_sha: str = ""
-) -> int:
-    """Validate requested evals, benchmark output and AgentX power requirements.
+def _stage_power_package(run: SrtRun, logs: Path) -> int:
+    """Copy the native power package into LOGS; 1 when power was required and a copy failed."""
+    try:
+        power_dir = logs / "power"
+        power_dir.mkdir(parents=True, exist_ok=True)
+        for name in (EXPORTER_PROVENANCE, "power-producer-sha.txt"):
+            shutil.copyfile(run.workspace / name, power_dir / name)
+        shutil.copytree(logs, run.workspace / "LOGS", symlinks=True, dirs_exist_ok=True)
+    except OSError as error:
+        level = "ERROR" if run.request.require_power else "WARNING"
+        print(f"{level}: failed to stage the native power package: {error}", file=sys.stderr)
+        return int(run.request.require_power)
+    return 0
+
+
+def finalize_single_node_results(run: SrtRun, logs: Path, producer_sha: str) -> int:
+    """Write native AgentX power metrics, then validate evals and the benchmark result.
+
+    A single-node point publishes the fixed-sequence bundle shape: the validation
+    sidecar sits beside the result, named after it, and the audit names that file.
 
     srt-slurm treats a failed post-benchmark eval as non-fatal; InferenceX does not.
     """
     request = run.request
-    rc = 0
-    if not request.eval_only and power is not None and power.agentx:
-        require(request, "INFERENCEX_RESULTS_PYTHON", "GPU_COUNT")
-        argv = [
-            request.inferencex_results_python, "-m", "infx.results.agentic.power_adapter",
-            "--result-dir", str(logs / "agentic"),
-            "--agg-result", str(logs / f"{request.result_filename}.json"),
-            "--power-dir", str(logs / "power"),
-            "--logs-root", str(logs),
-            "--expected-producer-sha", producer_sha,
-            "--expected-num-gpus", request.env["GPU_COUNT"],
-            "--audit-source", "results/power_validation.json",
-            *(["--require-power"] if request.require_power else []),
-            *(["--expected-cpu-source", power.expected_cpu_source]
-              if power.expected_cpu_source else []),
-        ]  # fmt: skip
-        rc = proc.run(argv, env=run.env, cwd=run.workspace).returncode
+    power_rc = 0
+    if request.is_agentic and not request.eval_only:
+        require(request, "INFERENCEX_RESULTS_PYTHON")
+        sidecar = f"power_validation_{request.result_filename}.json"
+        power_rc = run_power_adapter(
+            request.inferencex_results_python, run.workspace, logs, logs / "agentic",
+            logs / f"{request.result_filename}.json", producer_sha,
+            "--validation-result", str(run.workspace / sidecar), "--audit-source", sidecar,
+            *(["--expected-cpu-power"] if run.cluster.id in NVL72_POWER_CLUSTERS else []),
+            require_power=request.require_power,
+        )  # fmt: skip
     if request.run_eval or request.eval_only:
         exit_file = logs / "infx-eval-exit-code"
         if not exit_file.is_file() or exit_file.read_text().rstrip("\n") != "0":
@@ -130,7 +128,7 @@ def check_single_node(
         if not result.is_file() or result.stat().st_size == 0:
             print(f"ERROR: benchmark result {result} is missing or empty", file=sys.stderr)
             return 1
-    return rc
+    return power_rc
 
 
 def _stage_logs(run: SrtRun, logs: Path, power: PowerDecision) -> None:
@@ -141,16 +139,11 @@ def _stage_logs(run: SrtRun, logs: Path, power: PowerDecision) -> None:
     if power.dcgm:
         power_dir = logs / "power"
         power_dir.mkdir(parents=True, exist_ok=True)
-        receipts = [
-            *logs.parent.glob("config*.yaml"),
-            workspace / EXPORTER_PROVENANCE,
-            workspace / "power-producer-sha.txt",
-        ]
-        for receipt in receipts:
+        for name in (EXPORTER_PROVENANCE, "power-producer-sha.txt"):
             try:
-                shutil.copyfile(receipt, power_dir / receipt.name)
+                shutil.copyfile(workspace / name, power_dir / name)
             except OSError as error:
-                print(f"WARNING: could not stage {receipt.name}: {error}", file=sys.stderr)
+                print(f"WARNING: could not stage {name}: {error}", file=sys.stderr)
     try:
         _copy_tree_into(logs, workspace / "LOGS")
     except OSError as error:
@@ -196,8 +189,7 @@ def collect(
                 infmax,
                 *audit,
                 results_python=python,
-                expected_cpu_source=power.expected_cpu_source,
-                require_power=power.require_power,
+                expected_cpu=power.cpu,
             )
         else:
             power_rc = validate_agentic_power(
@@ -205,7 +197,7 @@ def collect(
                 *audit,
                 results_python=python,
                 require_power=request.require_power,
-                expected_cpu_source=power.expected_cpu_source,
+                expected_cpu=power.cpu,
             )
         if power_rc:
             print(
@@ -239,18 +231,22 @@ def collect(
 
 
 def _write_eval_meta(run: SrtRun) -> int:
-    """Regenerate meta_env.json with the canonical writer in benchmark_lib.sh."""
-    conc = run.request.eval_conc
-    if conc is None:
-        raise RequestError.missing("EVAL_CONC")
-    argv = [
-        "bash", "-c", 'source "$1"; _write_lm_eval_meta_json "$2" "" "$3"', "bash",
-        str(run.workspace / "benchmarks/benchmark_lib.sh"), str(run.workspace / "meta_env.json"), conc,
-    ]  # fmt: skip
-    rc = proc.run(argv, env={**run.env, "IS_MULTINODE": "true"}).returncode
-    if rc == 0:
-        print(f"Wrote meta_env.json (conc={conc}, prefix={run.request.model_prefix})")
-    return rc
+    """Refresh the staged meta_env.json's identity and topology from the workflow inputs.
+
+    The eval container does not receive every workflow input (e.g. RECIPE_FINGERPRINT).
+    The suite, concurrency and batch manifest the eval recorded are kept.
+    """
+    path = run.workspace / "meta_env.json"
+    if not path.is_file():
+        print(f"WARNING: no staged eval metadata to refresh at {path}", file=sys.stderr)
+        return 0
+    try:
+        eval_meta.refresh(path, {**run.env, "IS_MULTINODE": "true"})
+    except (OSError, ValueError, KeyError, InputError) as error:
+        print(f"ERROR: failed to refresh {path}: {error}", file=sys.stderr)
+        return 1
+    print(f"Refreshed meta_env.json (prefix={run.request.model_prefix})")
+    return 0
 
 
 def cleanup_outputs(root: Path, *, sleep: Callable[[float], None] = time.sleep) -> None:

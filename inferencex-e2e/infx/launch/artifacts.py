@@ -153,8 +153,7 @@ def collect_agentic_power_results(
     concurrencies: Sequence[int],
     *,
     results_python: str | None,
-    expected_cpu_source: str | None = None,
-    require_power: bool = True,
+    expected_cpu: bool = False,
 ) -> int:
     """Stage the AgentX power audit inputs and validate each concurrency's power window.
 
@@ -177,8 +176,7 @@ def collect_agentic_power_results(
 
     if step := validate_agentic_power(
         logs_dir, workspace, result_filename, producer_sha, concurrencies,
-        results_python=results_python, require_power=require_power,
-        expected_cpu_source=expected_cpu_source,
+        results_python=results_python, require_power=True, expected_cpu=expected_cpu,
     ):  # fmt: skip
         rc = step
     return rc
@@ -193,11 +191,12 @@ def validate_agentic_power(
     *,
     results_python: str | None,
     require_power: bool,
-    expected_cpu_source: str | None = None,
+    expected_cpu: bool = False,
 ) -> int:
     """Run the AgentX power adapter for every concurrency; return the last failing code.
 
-    With ``require_power`` a concurrency without a valid power window fails.
+    With ``require_power`` a concurrency without a valid power window fails, and with
+    ``expected_cpu`` one without a valid Grace CPU leg fails too.
     """
     logs_dir = logs_dir.resolve()
     workspace = workspace.resolve()
@@ -207,22 +206,43 @@ def validate_agentic_power(
             _warn("ERROR: INFERENCEX_RESULTS_PYTHON is required")
             rc = 1
             continue
-        python_path = os.environ.get("PYTHONPATH")
-        env = {
-            **os.environ,
-            "PYTHONPATH": f"{_PROJECT_ROOT}:{python_path}" if python_path else str(_PROJECT_ROOT),
-        }
-        argv = [
-            results_python, "-m", "infx.results.agentic.power_adapter",
-            "--result-dir", str(logs_dir / "agentic" / f"conc_{concurrency}"),
-            "--agg-result", str(workspace / f"{result_filename}_conc{concurrency}.json"),
-            "--power-dir", str(logs_dir / "power"),
-            "--logs-root", str(logs_dir),
-            "--expected-producer-sha", producer_sha,
-            *(["--require-power"] if require_power else []),
-            *(["--expected-cpu-source", expected_cpu_source] if expected_cpu_source else []),
-        ]  # fmt: skip
-        step = proc.run(argv, env=env, cwd=workspace).returncode
-        if step:
+        if step := run_power_adapter(
+            results_python, workspace, logs_dir,
+            logs_dir / "agentic" / f"conc_{concurrency}",
+            workspace / f"{result_filename}_conc{concurrency}.json",
+            producer_sha,
+            "--audit-source", f"LOGS/agentic/conc_{concurrency}/power_validation.json",
+            *(["--expected-cpu-power"] if expected_cpu else []),
+            require_power=require_power,
+        ):  # fmt: skip
             rc = step
     return rc
+
+
+def run_power_adapter(
+    results_python: str,
+    workspace: Path,
+    logs_dir: Path,
+    result_dir: Path,
+    agg_result: Path,
+    producer_sha: str,
+    *extra: str,
+    require_power: bool,
+) -> int:
+    """Join one AgentX point's aggregate to the power package under ``logs_dir``."""
+    python_path = os.environ.get("PYTHONPATH")
+    env = {
+        **os.environ,
+        "PYTHONPATH": f"{_PROJECT_ROOT}:{python_path}" if python_path else str(_PROJECT_ROOT),
+    }
+    argv = [
+        results_python, "-m", "infx.results.agentic.power_adapter",
+        "--result-dir", str(result_dir),
+        "--agg-result", str(agg_result),
+        "--power-dir", str(logs_dir / "power"),
+        "--logs-root", str(logs_dir),
+        "--expected-producer-sha", producer_sha,
+        *extra,
+        *(["--require-power"] if require_power else []),
+    ]  # fmt: skip
+    return proc.run(argv, env=env, cwd=workspace).returncode
