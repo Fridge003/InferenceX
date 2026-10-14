@@ -112,6 +112,16 @@ def agentx_row(env=AGENTX_ENV):
     return round_floats(agentic.build_result(records, aggregate, {}, env))
 
 
+def agentx_power_row():
+    row = with_power_metrics(
+        agentx_row(), metric_keys=ALL_POWER_METRIC_KEYS,
+        schema_version=POWER_METRIC_SCHEMA_VERSION, power_valid=True,
+        metrics={"avg_power_w": 700.0, "total_gpu_energy_j": 1.2e6},
+    )
+    validation = {"reasons": [], "expected_gpu_count": 8, "observed_gpu_count": 8}
+    return row | audit_summary(validation, "power_validation_point.json")
+
+
 def agentx_multinode_row():
     return with_power_metrics(
         agentx_row(AGENTX_MULTINODE_ENV), metric_keys=ALL_POWER_METRIC_KEYS,
@@ -159,7 +169,7 @@ def test_benchmark_collector_publishes_valid_rows_and_quarantines_malformed_ones
         "bmk_single/agg_single.json": fixed_row(),
         "bmk_multinode/agg_multinode.json": multinode_row(),
         "bmk_aggregate/agg_aggregate.json": fixed_row(AGGREGATE_ENV),
-        "bmk_agentic_single/single.json": agentx_row(),
+        "bmk_agentic_single/single.json": agentx_power_row(),
         "bmk_agentic_multinode/multinode_conc8.json": agentx_multinode_row(),
         "bmk_dwdp/agg_dwdp.json": fixed_row(MULTINODE_ENV | DWDP_PREFILL | {"PREFILL_GPUS": "16"}),
         "bmk_agentic_dwdp/dwdp_conc8.json": agentx_row(AGENTX_MULTINODE_ENV | DWDP_PREFILL),

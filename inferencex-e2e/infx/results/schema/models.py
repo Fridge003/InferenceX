@@ -197,6 +197,8 @@ class _AgentXRow(BaseModel):
     warnings: list[str] = None
     power_metric_schema_version: PowerSchemaVersion = None
     power_valid: PowerValid = None
+    power_invalid_reasons: list[str] = None
+    power_audit: dict[str, JsonValue] = None
 
 
 class AgentXSingleNodeRow(_AgentXRow):

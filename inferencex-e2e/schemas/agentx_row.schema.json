@@ -197,6 +197,22 @@
           "title": "Power Valid",
           "type": "integer"
         },
+        "power_invalid_reasons": {
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "title": "Power Invalid Reasons",
+          "type": "array"
+        },
+        "power_audit": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "default": null,
+          "title": "Power Audit",
+          "type": "object"
+        },
         "is_multinode": {
           "const": true,
           "title": "Is Multinode",
@@ -551,6 +567,22 @@
           "minimum": 0,
           "title": "Power Valid",
           "type": "integer"
+        },
+        "power_invalid_reasons": {
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "title": "Power Invalid Reasons",
+          "type": "array"
+        },
+        "power_audit": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "default": null,
+          "title": "Power Audit",
+          "type": "object"
         },
         "is_multinode": {
           "const": false,
