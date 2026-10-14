@@ -184,10 +184,6 @@ class SrtSlurmSettings(Record):
     )
     single_node_time_limit: int | None = Field(default=None, alias="single-node-time-limit", gt=0)
     single_node_models: Literal["staged", "hub"] = Field(default="hub", alias="single-node-models")
-    # docker: single-node points run srtctl's launcher: docker inside an exclusive salloc.
-    single_node_launcher: Literal["slurm", "docker"] = Field(
-        default="slurm", alias="single-node-launcher"
-    )
     # docker: multi-node jobs run srtctl's launcher: docker on an exclusive salloc of their nodes.
     multi_node_launcher: Literal["slurm", "docker"] = Field(
         default="slurm", alias="multi-node-launcher"
@@ -209,8 +205,21 @@ class SrtSlurmSettings(Record):
         default_factory=dict, alias="agentic-volume-mounts"
     )
     mounts: dict[str, str] = Field(default_factory=dict)
+    workspace_mounts: dict[str, str] = Field(default_factory=dict, alias="workspace-mounts")
     power_exporter_port: int | None = Field(default=None, alias="power-exporter-port", gt=0)
     extra: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("workspace_mounts")
+    @classmethod
+    def _workspace_mount_paths(cls, mounts: dict[str, str]) -> dict[str, str]:
+        """Mount checked-in workspace assets at explicit absolute container paths."""
+        for source, target in mounts.items():
+            path = PurePosixPath(source)
+            if not source or path == PurePosixPath(".") or path.is_absolute() or ".." in path.parts:
+                raise ValueError(f"workspace-mounts source must be repository-relative: {source}")
+            if not PurePosixPath(target).is_absolute():
+                raise ValueError(f"workspace-mounts target must be absolute: {target}")
+        return mounts
 
     @model_validator(mode="before")
     @classmethod
