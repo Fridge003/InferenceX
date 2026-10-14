@@ -9729,4 +9729,4 @@
     - "LMCache in the prefill (256 GiB per stage): 1P2D with two DCP4 decodes at concurrency 56 (four draft tokens), and 1P3D with three TP4 decodes at concurrency 12, 16 and 24 (five draft tokens). Each decode has a node of its own."
     - "host_setup drops the page cache and compacts free memory on every node before each point."
     - "Patch srt-slurm so its ATOM backend passes -tp as the worker's GPUs over its pipeline and prefill-context stages (NVIDIA/srt-slurm#604); unpatched, the PP4 prefill launches with -tp 4."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4045
