@@ -213,6 +213,8 @@ override_tp8_c56:
     env:
       CONC: '56'
       KV_OFFLOADING: none
+      AIPERF_RUNTIME_PATCH: /infmax-workspace/infx/bench/agentic/patches/52-spawn-worker-pinning.patch
+      AIPERF_METRICS_LIST_BACKEND: tdigest
 
 override_tp8_c60:
   roles:

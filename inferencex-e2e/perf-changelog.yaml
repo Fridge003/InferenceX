@@ -9832,3 +9832,12 @@
     - "Use the same available, digest-pinned serving image in both AgentX memory-parity arms because the original September nightly was removed from the registry. This branch is diagnostic only."
   pr-link: https://github.com/SemiAnalysisAI/agentx-harness/pull/52
   no-evals: true
+
+- config-keys:
+    - qwen3.5-fp8-b200-sglang-agentic-mtp
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Compare the unchanged canonical TP8 c56 AgentX workload with SPAWN worker pinning and bounded list-metric storage. Only this diagnostic recipe enables the harness patch and tdigest backend."
+  pr-link: https://github.com/SemiAnalysisAI/agentx-harness/pull/52
+  no-evals: true
