@@ -752,6 +752,18 @@ def test_v2_samples_reject_mixed_versions_and_invalid_utilization(tmp_path, row)
     assert reasons == ("samples_csv_malformed",)
 
 
+@pytest.mark.parametrize("temperature", ["nan", "inf", "bad", "-300", "200.5", "9223372036854775794"])
+def test_v3_samples_reject_invalid_temperature(tmp_path, temperature):
+    path = tmp_path / "samples.csv"
+    path.write_text(
+        "schema_version,timestamp_unix,scrape_seq,hostname,gpu_index,gpu_uuid,power_w,gpu_util_pct,sm_active,temperature_c\n"
+        f"3,1000,0,node-a,0,GPU-a,400,,,{temperature}\n"
+    )
+    rows, reasons = apm.read_samples(path)
+    assert rows == ()
+    assert reasons == ("samples_csv_malformed",)
+
+
 # --- Grace CPU-side power leg (power/cpu/) -----------------------------------
 
 CPU_HOSTS = tuple(sorted({host for host, *_ in DEVICES}))
