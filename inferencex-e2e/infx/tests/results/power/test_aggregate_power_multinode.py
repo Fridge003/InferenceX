@@ -803,30 +803,13 @@ def _cpu_rows(kinds_by_host=None, *, hosts=CPU_HOSTS):
     return rows
 
 
-def add_cpu_package(pkg, rows, manifest_text=None):
+def add_cpu_package(pkg, rows):
     cpu_dir = pkg.power_dir / "cpu"
     cpu_dir.mkdir()
     with open(cpu_dir / "samples.csv", "w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(CPU_HEADER)
         writer.writerows(rows)
-    if manifest_text is None:
-        manifest_text = json.dumps(
-            {
-                "schema_version": 1,
-                "producer": "srt-slurm.cpu-power",
-                "producer_git_commit": PRODUCER_SHA,
-                "started_at_unix": 990.0,
-                "stopped_at_unix": 1070.0,
-                "nodes": {
-                    host: {"resolved_mode": "acpi", "scrape_count": 65, "error_count": 0}
-                    for host in CPU_HOSTS
-                },
-            },
-            indent=2,
-        )
-    (cpu_dir / "cpu_manifest.json").write_text(manifest_text)
-    return cpu_dir
 
 
 def _gpu_fields(agg):
