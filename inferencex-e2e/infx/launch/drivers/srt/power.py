@@ -155,8 +155,6 @@ def decide_power(cluster_id: str, path: LaunchPath, request: MultiNodeRequest) -
     default = cluster_id in NVL72_POWER_CLUSTERS and path == LaunchPath.SRT_MULTI
     if default and request.eval_only:
         return NO_POWER
-    if request.cpu_power and not (request.power or default):
-        raise PowerPolicyError("cpu-power requires power on the same point")
     if not request.power and not default:
         return NO_POWER
     lane = POWER_LANES.get((cluster_id, path))

@@ -9814,6 +9814,17 @@
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3416
 
 - config-keys:
+    - dsv41flash-fp4-gb300-dynamo-vllm-agentic-dspark-agg
+    - dsv41flash-fp4-gb300-dynamo-vllm-agentic-dspark-disagg
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Add GB300 DeepSeek-V4.1-Flash Dynamo + vLLM AgentX recipes: aggregated TP4 at conc 1 and 8, and disaggregated DEP2 prefill / DEP16 decode at 6P1D c2884 and 4P1D c1228."
+    - "Use master-config recipe selectors and composed AgentX fragments; preserve the dedicated frontend/client node and the c2884 and c1228 tuning."
+    - "Backport the vLLM Python sidecar reasoning-parser fix through the shared patch mechanism while retaining the main srt-slurm pin."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3941
+
+- config-keys:
     - qwen3.5-fp8-gb200-dynamo-sglang
     - qwen3.5-fp8-gb300-dynamo-sglang
     - kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-dcp16-agg

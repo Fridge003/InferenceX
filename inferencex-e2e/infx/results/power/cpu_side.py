@@ -1,9 +1,9 @@
 """Grace CPU-side power leg of the multinode srt-slurm package.
 
-srt-slurm's ``cpu_power_exporter`` leg writes ``power/cpu/samples.csv`` and a
-non-authoritative ``power/cpu/cpu_manifest.json`` beside the GPU DCGM package
-(srt-slurm ``src/srtctl/core/power/cpu_session.py``). The pinned producer writes
-the wide format: one row per (scrape, host, socket) whose ``sensor`` names the
+srt-slurm's ``cpu_power_exporter`` leg writes ``power/cpu/samples.csv`` beside
+the GPU DCGM package (srt-slurm ``src/srtctl/core/power/cpu_session.py``); its
+``cpu_manifest.json`` is debugging metadata and is not read. The pinned producer
+writes the wide format: one row per (scrape, host, socket) whose ``sensor`` names the
 Grace socket meter and whose ``cpu_rail_w`` / ``soc_w`` columns carry the ACPI
 component rails of that socket.
 
@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import csv
 import itertools
-import json
 import math
 from collections.abc import Iterable
 from dataclasses import dataclass, field
@@ -37,7 +36,6 @@ from .common import (
 
 CPU_DIRNAME = "cpu"
 CPU_SAMPLES_FILENAME = "samples.csv"
-CPU_MANIFEST_FILENAME = "cpu_manifest.json"
 
 # srt-slurm contract.CPU_SAMPLES_HEADER: the wide format every pinned producer writes.
 CPU_SAMPLES_HEADER = (
@@ -191,13 +189,6 @@ def read_cpu_samples(path: Path) -> tuple[tuple[CpuSampleRow, ...], tuple[str, .
     return tuple(rows), tuple(reasons)
 
 
-def _manifest_is_object(path: Path) -> bool:
-    try:
-        return isinstance(json.loads(path.read_text(encoding="utf-8")), dict)
-    except (OSError, UnicodeDecodeError, ValueError):
-        return False
-
-
 SocketKey = tuple[str, int]
 # (host, socket) -> family -> {timestamp: watts}; the Grace meter and its rails.
 SocketSeries = dict[SocketKey, dict[str, dict[float, float]]]
@@ -249,8 +240,6 @@ def validate_cpu_leg(
         audit.invalidate("cpu_artifacts_missing")
         return audit
     audit = CpuPowerAudit()
-    if not _manifest_is_object(cpu_dir / CPU_MANIFEST_FILENAME):
-        audit.invalidate("cpu_manifest_invalid")
     rows, sample_reasons = read_cpu_samples(cpu_dir / CPU_SAMPLES_FILENAME)
     audit.sample_row_count = len(rows)
     audit.invalidate(*sample_reasons)

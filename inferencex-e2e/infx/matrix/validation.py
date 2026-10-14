@@ -607,11 +607,11 @@ class SingleNodeSearchSpaceEntry(BaseModel):
         return _validate_tp_context_topology(self)
 
 
-def _cpu_power_rides_on_power[T](entry: T) -> T:
+def _cpu_power_rides_on_power(self: Any) -> Any:
     """``cpu-power`` adds the cluster's Grace CPU exporter to a point that measures power."""
-    if getattr(entry, "cpu_power", False) and not getattr(entry, "power", False):
+    if self.cpu_power and not self.power:
         raise ValueError(f"{Fields.CPU_POWER.value} requires {Fields.POWER.value} on the entry")
-    return entry
+    return self
 
 
 class MultiNodeSearchSpaceEntry(BaseModel):

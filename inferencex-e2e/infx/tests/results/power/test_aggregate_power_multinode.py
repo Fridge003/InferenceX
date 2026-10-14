@@ -752,6 +752,18 @@ def test_v2_samples_reject_mixed_versions_and_invalid_utilization(tmp_path, row)
     assert reasons == ("samples_csv_malformed",)
 
 
+@pytest.mark.parametrize("temperature", ["nan", "inf", "bad", "-300", "200.5", "9223372036854775794"])
+def test_v3_samples_reject_invalid_temperature(tmp_path, temperature):
+    path = tmp_path / "samples.csv"
+    path.write_text(
+        "schema_version,timestamp_unix,scrape_seq,hostname,gpu_index,gpu_uuid,power_w,gpu_util_pct,sm_active,temperature_c\n"
+        f"3,1000,0,node-a,0,GPU-a,400,,,{temperature}\n"
+    )
+    rows, reasons = apm.read_samples(path)
+    assert rows == ()
+    assert reasons == ("samples_csv_malformed",)
+
+
 # --- Grace CPU-side power leg (power/cpu/) -----------------------------------
 
 CPU_HOSTS = tuple(sorted({host for host, *_ in DEVICES}))
@@ -791,30 +803,13 @@ def _cpu_rows(kinds_by_host=None, *, hosts=CPU_HOSTS):
     return rows
 
 
-def add_cpu_package(pkg, rows, manifest_text=None):
+def add_cpu_package(pkg, rows):
     cpu_dir = pkg.power_dir / "cpu"
     cpu_dir.mkdir()
     with open(cpu_dir / "samples.csv", "w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(CPU_HEADER)
         writer.writerows(rows)
-    if manifest_text is None:
-        manifest_text = json.dumps(
-            {
-                "schema_version": 1,
-                "producer": "srt-slurm.cpu-power",
-                "producer_git_commit": PRODUCER_SHA,
-                "started_at_unix": 990.0,
-                "stopped_at_unix": 1070.0,
-                "nodes": {
-                    host: {"resolved_mode": "acpi", "scrape_count": 65, "error_count": 0}
-                    for host in CPU_HOSTS
-                },
-            },
-            indent=2,
-        )
-    (cpu_dir / "cpu_manifest.json").write_text(manifest_text)
-    return cpu_dir
 
 
 def _gpu_fields(agg):
