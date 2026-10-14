@@ -9840,4 +9840,4 @@
   description:
   - "Serve nvidia/Qwen3.5-397B-A17B-NVFP4-V2, the checkpoint the fixed-sequence SGLang keys already use; the original nvidia/Qwen3.5-397B-A17B-NVFP4 directory was removed from the B200 node-local model volume on 2026-10-13 at NVIDIA SRE's request, so these keys failed at srtctl startup with Model path does not exist."
   - "Keep images, deployment topology, speculative mode, concurrency points and evaluation coverage unchanged; only the served checkpoint and its served-model-name change."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/TBD
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4066
