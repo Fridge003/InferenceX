@@ -179,6 +179,10 @@ override_eval:
       dyn-tool-call-parser: kimi_k3
       dyn-reasoning-parser: kimi_k3
       dyn-enable-structural-tag: true
-  engine:
-    args:
-      reasoning-parser: kimi_k3
+  roles:
+    prefill:
+      args:
+        reasoning-parser: kimi_k3
+    decode:
+      args:
+        reasoning-parser: kimi_k3

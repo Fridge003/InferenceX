@@ -241,9 +241,22 @@ override_1p1d_dcp8_dcp8_dspark4_eval:
       dyn-tool-call-parser: kimi_k3
       dyn-reasoning-parser: kimi_k3
       dyn-enable-structural-tag: true
-  engine:
-    args:
-      reasoning-parser: kimi_k3
+  roles:
+    prefill:
+      env:
+        VLLM_ENABLE_GEMM_RS: '1'
+      args:
+        max-num-seqs: 64
+        enable-expert-parallel: true
+        moe-backend: deep_gemm_mega_moe
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        reasoning-parser: kimi_k3
+    decode:
+      nodes: 2
+      workers: 1
+      args:
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        reasoning-parser: kimi_k3
 
 override_1p2d_dcp8_dcp8_dspark4_eval:
   <<: *1p2d_dcp8_dcp8_dspark4
@@ -252,9 +265,22 @@ override_1p2d_dcp8_dcp8_dspark4_eval:
       dyn-tool-call-parser: kimi_k3
       dyn-reasoning-parser: kimi_k3
       dyn-enable-structural-tag: true
-  engine:
-    args:
-      reasoning-parser: kimi_k3
+  roles:
+    prefill:
+      env:
+        VLLM_ENABLE_GEMM_RS: '1'
+      args:
+        max-num-seqs: 64
+        enable-expert-parallel: true
+        moe-backend: deep_gemm_mega_moe
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        reasoning-parser: kimi_k3
+    decode:
+      nodes: 4
+      workers: 2
+      args:
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        reasoning-parser: kimi_k3
 
 override_1p3d_dcp8_dcp8_dspark7_eval:
   <<: *1p3d_dcp8_dcp8_dspark7
@@ -263,9 +289,17 @@ override_1p3d_dcp8_dcp8_dspark7_eval:
       dyn-tool-call-parser: kimi_k3
       dyn-reasoning-parser: kimi_k3
       dyn-enable-structural-tag: true
-  engine:
-    args:
-      reasoning-parser: kimi_k3
+  roles:
+    prefill:
+      args:
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        reasoning-parser: kimi_k3
+    decode:
+      nodes: 6
+      workers: 3
+      args:
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        reasoning-parser: kimi_k3
 
 override_1p3d_dcp8_dcp8_dspark4_eval:
   <<: *1p3d_dcp8_dcp8_dspark4
@@ -274,6 +308,19 @@ override_1p3d_dcp8_dcp8_dspark4_eval:
       dyn-tool-call-parser: kimi_k3
       dyn-reasoning-parser: kimi_k3
       dyn-enable-structural-tag: true
-  engine:
-    args:
-      reasoning-parser: kimi_k3
+  roles:
+    prefill:
+      env:
+        VLLM_ENABLE_GEMM_RS: '1'
+      args:
+        max-num-seqs: 64
+        enable-expert-parallel: true
+        moe-backend: deep_gemm_mega_moe
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        reasoning-parser: kimi_k3
+    decode:
+      nodes: 6
+      workers: 3
+      args:
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        reasoning-parser: kimi_k3

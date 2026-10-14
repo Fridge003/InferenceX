@@ -147,6 +147,13 @@ override_dcp8_dspark7_maxseq2_eval:
       dyn-tool-call-parser: kimi_k3
       dyn-reasoning-parser: kimi_k3
       dyn-enable-structural-tag: true
-  engine:
-    args:
-      reasoning-parser: kimi_k3
+  roles:
+    agg:
+      env:
+        VLLM_LOG_STATS_INTERVAL: '1'
+      args:
+        max-num-seqs: 2
+        max-num-batched-tokens: 8192
+        enable-cumem-allocator: true
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        reasoning-parser: kimi_k3
