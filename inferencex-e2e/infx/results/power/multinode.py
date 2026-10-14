@@ -1285,9 +1285,15 @@ def _select_window_for_result(
 
 
 # Per-window audit codes that describe GPU sample coverage rather than the
-# window's own contract; the CPU-side leg re-checks its own coverage.
+# window's own contract (srt-slurm power/windows.py _check_coverage); the
+# CPU-side leg re-checks its own coverage.
 _GPU_COVERAGE_REASONS = frozenset(
-    {"measurement_window_not_bracketed", "sample_gap_exceeded", "gpu_uuid_changed"}
+    {
+        "measurement_window_not_bracketed",
+        "sample_gap_exceeded",
+        "gpu_uuid_changed",
+        "sample_loss_exceeded",
+    }
 )
 
 

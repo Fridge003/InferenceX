@@ -915,6 +915,23 @@ class TestCpuSidePower:
                 # The DCGM CPU rail is not the Grace socket meter: no socket series.
                 assert pkg.sidecar()["cpu"]["reason_codes"] == ["cpu_socket_count_mismatch"]
 
+    @pytest.mark.parametrize(
+        "reason, window_trusted",
+        [
+            # srt-slurm power/windows.py _check_coverage: GPU coverage only.
+            ("measurement_window_not_bracketed", True),
+            ("sample_gap_exceeded", True),
+            ("gpu_uuid_changed", True),
+            ("sample_loss_exceeded", True),
+            # The window's own contract: the CPU leg has no window either.
+            ("measurement_window_clock_mismatch", False),
+        ],
+    )
+    def test_only_gpu_coverage_failures_leave_the_cpu_window_bound(self, reason, window_trusted):
+        window = {"benchmark_type": "sa-bench", "concurrency": 4}
+        validations = [{**window, "reason_codes": [reason], "power_coverage_valid": False}]
+        assert apm._window_contract_holds(window, validations) is window_trusted
+
     def test_package_without_cpu_dir_emits_no_cpu_fields(self, tmp_path):
         pkg = build_package(tmp_path)
         assert pkg.run() == 0
