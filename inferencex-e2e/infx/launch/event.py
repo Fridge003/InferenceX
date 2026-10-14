@@ -35,6 +35,7 @@ class Power(_Record):
     dcgm: bool
     agentx: bool
     adapter: bool
+    require: bool = False
 
 
 class JobError(_Record):
