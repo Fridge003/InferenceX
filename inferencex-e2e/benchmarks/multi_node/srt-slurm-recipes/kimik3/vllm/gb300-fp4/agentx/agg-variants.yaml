@@ -129,19 +129,18 @@ base:
     placement:
       node: head
 
-override_dcp8_dspark7_maxseq2: &dcp8_dspark7_maxseq2
+override_dcp8_dspark7_maxseq2:
   roles:
-    agg:
+    agg: &dcp8_dspark7_maxseq2_agg
       env:
         VLLM_LOG_STATS_INTERVAL: "1"
-      args:
+      args: &dcp8_dspark7_maxseq2_agg_args
         max-num-seqs: 2
         max-num-batched-tokens: 8192
         enable-cumem-allocator: true
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
 
 override_dcp8_dspark7_maxseq2_eval:
-  <<: *dcp8_dspark7_maxseq2
   frontend:
     args:
       dyn-tool-call-parser: kimi_k3
@@ -149,11 +148,7 @@ override_dcp8_dspark7_maxseq2_eval:
       dyn-enable-structural-tag: true
   roles:
     agg:
-      env:
-        VLLM_LOG_STATS_INTERVAL: '1'
+      <<: *dcp8_dspark7_maxseq2_agg
       args:
-        max-num-seqs: 2
-        max-num-batched-tokens: 8192
-        enable-cumem-allocator: true
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        <<: *dcp8_dspark7_maxseq2_agg_args
         reasoning-parser: kimi_k3
