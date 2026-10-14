@@ -141,14 +141,12 @@ override_dcp8_dspark7_maxseq2:
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
 
 override_dcp8_dspark7_maxseq2_eval:
-  frontend:
-    args:
-      dyn-tool-call-parser: kimi_k3
-      dyn-reasoning-parser: kimi_k3
-      dyn-enable-structural-tag: true
   roles:
     agg:
       <<: *dcp8_dspark7_maxseq2_agg
       args:
         <<: *dcp8_dspark7_maxseq2_agg_args
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true

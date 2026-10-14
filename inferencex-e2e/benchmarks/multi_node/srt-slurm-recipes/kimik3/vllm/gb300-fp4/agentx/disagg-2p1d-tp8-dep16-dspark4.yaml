@@ -173,15 +173,16 @@ base:
       AIPERF_DYNAMO_SESSION_TIMEOUT_SECONDS: '14400'
 
 override_eval:
-  frontend:
-    args:
-      dyn-tool-call-parser: kimi_k3
-      dyn-reasoning-parser: kimi_k3
-      dyn-enable-structural-tag: true
   roles:
     prefill:
       args:
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
     decode:
       args:
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true

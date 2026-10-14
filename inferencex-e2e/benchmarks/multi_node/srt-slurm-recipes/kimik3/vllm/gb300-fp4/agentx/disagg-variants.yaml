@@ -223,73 +223,77 @@ override_1p3d_dcp8_dcp8_dspark4:
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
 
 override_1p1d_dcp8_dcp8_dspark4_eval:
-  frontend:
-    args:
-      dyn-tool-call-parser: kimi_k3
-      dyn-reasoning-parser: kimi_k3
-      dyn-enable-structural-tag: true
   roles:
     prefill:
       <<: *1p1d_dcp8_dcp8_dspark4_prefill
       args:
         <<: *1p1d_dcp8_dcp8_dspark4_prefill_args
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
     decode:
       <<: *1p1d_dcp8_dcp8_dspark4_decode
       args:
         <<: *1p1d_dcp8_dcp8_dspark4_decode_args
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
 
 override_1p2d_dcp8_dcp8_dspark4_eval:
-  frontend:
-    args:
-      dyn-tool-call-parser: kimi_k3
-      dyn-reasoning-parser: kimi_k3
-      dyn-enable-structural-tag: true
   roles:
     prefill:
       <<: *1p2d_dcp8_dcp8_dspark4_prefill
       args:
         <<: *1p2d_dcp8_dcp8_dspark4_prefill_args
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
     decode:
       <<: *1p2d_dcp8_dcp8_dspark4_decode
       args:
         <<: *1p2d_dcp8_dcp8_dspark4_decode_args
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
 
 override_1p3d_dcp8_dcp8_dspark7_eval:
-  frontend:
-    args:
-      dyn-tool-call-parser: kimi_k3
-      dyn-reasoning-parser: kimi_k3
-      dyn-enable-structural-tag: true
   roles:
     prefill:
       <<: *1p3d_dcp8_dcp8_dspark7_prefill
       args:
         <<: *1p3d_dcp8_dcp8_dspark7_prefill_args
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
     decode:
       <<: *1p3d_dcp8_dcp8_dspark7_decode
       args:
         <<: *1p3d_dcp8_dcp8_dspark7_decode_args
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
 
 override_1p3d_dcp8_dcp8_dspark4_eval:
-  frontend:
-    args:
-      dyn-tool-call-parser: kimi_k3
-      dyn-reasoning-parser: kimi_k3
-      dyn-enable-structural-tag: true
   roles:
     prefill:
       <<: *1p3d_dcp8_dcp8_dspark4_prefill
       args:
         <<: *1p3d_dcp8_dcp8_dspark4_prefill_args
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
     decode:
       <<: *1p3d_dcp8_dcp8_dspark4_decode
       args:
         <<: *1p3d_dcp8_dcp8_dspark4_decode_args
         reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
