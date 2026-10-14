@@ -4,12 +4,11 @@ identity:
   model: {}
   container: {}
   frameworks:
-    dynamo: 712cf33ae693ade731e37231b122d39fa708db6e
+    dynamo: ffbbaaa6c44370e798687881317535ac17d66a76
 dynamo:
   install: true
   source:
-    git: https://github.com/wzhao18/dynamo.git
-    rev: 712cf33ae693ade731e37231b122d39fa708db6e
+    rev: ffbbaaa6c44370e798687881317535ac17d66a76
 slurm:
   time_limit: 04:00:00
 health_check:

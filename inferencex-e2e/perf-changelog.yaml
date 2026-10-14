@@ -9915,5 +9915,5 @@
     - "Add DEP16 with prefill EP8 and DeepGEMM MegaMoE, decode TokenSpeed MLA min-split-8, and capacity-only Mooncake with decode prefix caching disabled."
     - "Use the October 14 vLLM nightly image, 77154ca6116ae34cbfe314beef1016bde9b63989, containing vllm-project/vllm#61125, and remove explicit KV interleave settings."
     - "Enable Kimi K3 native tool and reasoning parsers with structural tags instead of generic JSON tool constraints."
-    - "Pin Dynamo frontend and workers to v1.5.1 with the exact upstream #16378 import compatibility backport (712cf33ae693ade731e37231b122d39fa708db6e), preserving default thinking and the unchanged vendor eval."
+    - "Pin Dynamo frontend and workers to official upstream commit ffbbaaa6c44370e798687881317535ac17d66a76; preserve default thinking and the unchanged vendor eval."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4047
