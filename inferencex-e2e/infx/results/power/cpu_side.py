@@ -27,7 +27,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from .common import _append_reason, _bracketing_sequence, _integrate_device, audit_metrics
+from .common import (
+    MAX_SAMPLE_GAP_SECONDS,
+    _append_reason,
+    _bracketing_sequence,
+    _integrate_device,
+    audit_metrics,
+)
 
 CPU_DIRNAME = "cpu"
 CPU_SAMPLES_FILENAME = "samples.csv"
@@ -51,8 +57,6 @@ CPU_SAMPLES_SCHEMA_VERSION = 2
 
 # One GB200/GB300 compute tray per worker host, two Grace sockets per tray.
 SOCKETS_PER_HOST = 2
-# Shared with the GPU leg (srt-slurm contract.MAX_SAMPLE_GAP_SECONDS).
-MAX_SAMPLE_GAP_SECONDS = 3.0
 
 # The headline meter: "Grace Power Socket N", the whole socket (CPU rail, SysIO,
 # LPDDR5X and regulator loss). srt-slurm names its wide-format rows

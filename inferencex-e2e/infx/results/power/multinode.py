@@ -59,6 +59,7 @@ from . import (
     with_power_metrics,
 )
 from .common import (
+    MAX_SAMPLE_GAP_SECONDS,
     BenchmarkData,
     _append_reason,
     _bracketing_sequence,
@@ -94,7 +95,6 @@ SAMPLES_HEADER_V2 = (*SAMPLES_HEADER, "gpu_util_pct", "sm_active")
 SAMPLES_HEADER_V3 = (*SAMPLES_HEADER_V2, "temperature_c")
 SAMPLES_HEADERS = {1: SAMPLES_HEADER, 2: SAMPLES_HEADER_V2, 3: SAMPLES_HEADER_V3}
 
-MAX_SAMPLE_GAP_SECONDS = 3.0
 MAX_TEMPERATURE_C = 200.0
 
 WORKER_ROLES = ("prefill", "decode", "agg")
@@ -893,9 +893,8 @@ class MultinodePowerAudit:
     observed_gpu_count: int = 0
     expected_gpu_count: int = 0
     metrics: dict[str, float] = field(default_factory=dict)
-    # Inputs the CPU-side leg borrows from the GPU package; not serialized.
+    # Input the CPU-side leg borrows from the GPU package; not serialized.
     expected_worker_hosts: tuple[str, ...] = ()
-    formal_window_trusted: bool = False
     # None when the package carried no cpu/ sub-package.
     cpu: CpuPowerAudit | None = None
 
@@ -942,7 +941,7 @@ def validate_and_integrate(
         expected_producer_sha=expected_producer_sha,
     )
     window = None
-    if audit.window is not None and audit.formal_window_trusted:
+    if audit.window is not None and _window_contract_holds(audit.window, audit.window_validations):
         window = (audit.window["start_time_unix"], audit.window["end_time_unix"])
     audit.cpu = validate_cpu_leg(
         power_dir / CPU_DIRNAME,
@@ -1118,9 +1117,6 @@ def _validate_gpu_leg(
     window = _select_window_for_result(
         audit, parsed_windows, logs_root, bench_result_path, benchmark
     )
-    if window is not None:
-        audit.formal_window_trusted = _window_contract_holds(window, validations)
-
     if (
         not audit.package_integrity_valid
         or not topology_valid
@@ -1295,12 +1291,12 @@ _GPU_COVERAGE_REASONS = frozenset(
 )
 
 
-def _window_contract_holds(window: ParsedWindow, validations: list[dict]) -> bool:
+def _window_contract_holds(window: dict, validations: list[dict]) -> bool:
     """True when the bound window passed every check that is not GPU coverage."""
     for validation in validations:
         if (validation["benchmark_type"], validation["concurrency"]) == (
-            window.benchmark_type,
-            window.concurrency,
+            window["benchmark_type"],
+            window["concurrency"],
         ):
             return all(reason in _GPU_COVERAGE_REASONS for reason in validation["reason_codes"])
     return False
