@@ -9,8 +9,6 @@ resources:
   gpus_per_node: 4
 
 dynamo:
-  # Dynamo 0.8.0 was the default when this recipe was written; pin it explicitly.
-  # Use NATS for a recipe prior to Dynamo commit 39d2a68.
   request_plane: "nats"
 
   source:
@@ -62,8 +60,8 @@ roles:
       max-running-requests: 128
       load-balance-method: "round_robin"
       scheduler-recv-interval: 10
-      enable-flashinfer-allreduce-fusion: false # to save mem
-      enable-symm-mem: false # to save mem
+      enable-flashinfer-allreduce-fusion: false
+      enable-symm-mem: false
       tensor-parallel-size: 4
       data-parallel-size: 1
       expert-parallel-size: 1
@@ -105,12 +103,12 @@ roles:
       disaggregation-mode: "decode"
       disaggregation-transfer-backend: nixl
       mem-fraction-static: 0.85
-      chunked-prefill-size: -1 # save mem
+      chunked-prefill-size: -1
       cuda-graph-max-bs: 128
       max-running-requests: 128
-      scheduler-recv-interval: 1  # save mem
-      enable-flashinfer-allreduce-fusion: false # to save mem
-      enable-symm-mem: false # to save mem
+      scheduler-recv-interval: 1
+      enable-flashinfer-allreduce-fusion: false
+      enable-symm-mem: false
       prefill-round-robin-balance: true
       tensor-parallel-size: 4
       data-parallel-size: 1
