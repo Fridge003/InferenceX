@@ -7868,6 +7868,7 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
         kv-offload-backend: { name: mooncake, version: "0.3.13.post1" }
         conc-list: [64, 80]
         srt-recipe: disagg-variants.yaml:override_1p1d_dcp8_dcp8_dspark4
+        eval-srt-recipe: disagg-variants.yaml:override_1p1d_dcp8_dcp8_dspark4_eval
         power: true
         prefill:
           num-worker: 1
@@ -7881,6 +7882,7 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
         kv-offload-backend: { name: mooncake, version: "0.3.13.post1" }
         conc-list: [48, 64, 80]
         srt-recipe: disagg-variants.yaml:override_1p2d_dcp8_dcp8_dspark4
+        eval-srt-recipe: disagg-variants.yaml:override_1p2d_dcp8_dcp8_dspark4_eval
         power: true
         prefill:
           num-worker: 1
@@ -7894,6 +7896,7 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
         kv-offload-backend: { name: mooncake, version: "0.3.13.post1" }
         conc-list: [1]
         srt-recipe: disagg-variants.yaml:override_1p3d_dcp8_dcp8_dspark7
+        eval-srt-recipe: disagg-variants.yaml:override_1p3d_dcp8_dcp8_dspark7_eval
         power: true
         prefill:
           num-worker: 1
@@ -7907,6 +7910,7 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
         kv-offload-backend: { name: mooncake, version: "0.3.13.post1" }
         conc-list: [32, 48]
         srt-recipe: disagg-variants.yaml:override_1p3d_dcp8_dcp8_dspark4
+        eval-srt-recipe: disagg-variants.yaml:override_1p3d_dcp8_dcp8_dspark4_eval
         power: true
         prefill:
           num-worker: 1
@@ -7936,6 +7940,7 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-agg:
         conc-list: [1, 4]
         num-nodes: 2
         srt-recipe: agg-variants.yaml:override_dcp8_dspark7_maxseq2
+        eval-srt-recipe: agg-variants.yaml:override_dcp8_dspark7_maxseq2_eval
         power: true
         worker:
           num-worker: 1
@@ -7964,7 +7969,8 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dep16-disagg:
         kv-offloading: dram
         kv-offload-backend: { name: mooncake, version: "0.3.13.post1" }
         conc-list: [320]
-        srt-recipe: disagg-2p1d-tp8-dep16-dspark4.yaml
+        srt-recipe: disagg-2p1d-tp8-dep16-dspark4.yaml:base
+        eval-srt-recipe: disagg-2p1d-tp8-dep16-dspark4.yaml:override_eval
         power: true
         prefill: { num-worker: 2, tp: 8, ep: 8, dp-attn: false }
         decode: { num-worker: 1, tp: 16, ep: 16, dp-attn: true }

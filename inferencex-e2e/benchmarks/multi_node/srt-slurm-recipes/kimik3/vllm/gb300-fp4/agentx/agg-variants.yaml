@@ -129,7 +129,7 @@ base:
     placement:
       node: head
 
-override_dcp8_dspark7_maxseq2:
+override_dcp8_dspark7_maxseq2: &dcp8_dspark7_maxseq2
   roles:
     agg:
       env:
@@ -139,3 +139,14 @@ override_dcp8_dspark7_maxseq2:
         max-num-batched-tokens: 8192
         enable-cumem-allocator: true
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+
+override_dcp8_dspark7_maxseq2_eval:
+  <<: *dcp8_dspark7_maxseq2
+  frontend:
+    args:
+      dyn-tool-call-parser: kimi_k3
+      dyn-reasoning-parser: kimi_k3
+      dyn-enable-structural-tag: true
+  engine:
+    args:
+      reasoning-parser: kimi_k3

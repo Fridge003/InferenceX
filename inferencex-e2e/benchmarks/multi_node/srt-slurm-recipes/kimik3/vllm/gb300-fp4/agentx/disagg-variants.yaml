@@ -174,7 +174,7 @@ base:
       AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: "true"
       AIPERF_DYNAMO_SESSION_TIMEOUT_SECONDS: "14400"
 
-override_1p1d_dcp8_dcp8_dspark4:
+override_1p1d_dcp8_dcp8_dspark4: &1p1d_dcp8_dcp8_dspark4
   roles:
     prefill:
       env:
@@ -190,7 +190,7 @@ override_1p1d_dcp8_dcp8_dspark4:
       args:
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
 
-override_1p2d_dcp8_dcp8_dspark4:
+override_1p2d_dcp8_dcp8_dspark4: &1p2d_dcp8_dcp8_dspark4
   roles:
     prefill:
       env:
@@ -206,7 +206,7 @@ override_1p2d_dcp8_dcp8_dspark4:
       args:
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
 
-override_1p3d_dcp8_dcp8_dspark7:
+override_1p3d_dcp8_dcp8_dspark7: &1p3d_dcp8_dcp8_dspark7
   roles:
     prefill:
       args:
@@ -217,7 +217,7 @@ override_1p3d_dcp8_dcp8_dspark7:
       args:
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
 
-override_1p3d_dcp8_dcp8_dspark4:
+override_1p3d_dcp8_dcp8_dspark4: &1p3d_dcp8_dcp8_dspark4
   roles:
     prefill:
       env:
@@ -227,8 +227,53 @@ override_1p3d_dcp8_dcp8_dspark4:
         enable-expert-parallel: true
         moe-backend: deep_gemm_mega_moe
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+
     decode:
       nodes: 6
       workers: 3
       args:
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+
+override_1p1d_dcp8_dcp8_dspark4_eval:
+  <<: *1p1d_dcp8_dcp8_dspark4
+  frontend:
+    args:
+      dyn-tool-call-parser: kimi_k3
+      dyn-reasoning-parser: kimi_k3
+      dyn-enable-structural-tag: true
+  engine:
+    args:
+      reasoning-parser: kimi_k3
+
+override_1p2d_dcp8_dcp8_dspark4_eval:
+  <<: *1p2d_dcp8_dcp8_dspark4
+  frontend:
+    args:
+      dyn-tool-call-parser: kimi_k3
+      dyn-reasoning-parser: kimi_k3
+      dyn-enable-structural-tag: true
+  engine:
+    args:
+      reasoning-parser: kimi_k3
+
+override_1p3d_dcp8_dcp8_dspark7_eval:
+  <<: *1p3d_dcp8_dcp8_dspark7
+  frontend:
+    args:
+      dyn-tool-call-parser: kimi_k3
+      dyn-reasoning-parser: kimi_k3
+      dyn-enable-structural-tag: true
+  engine:
+    args:
+      reasoning-parser: kimi_k3
+
+override_1p3d_dcp8_dcp8_dspark4_eval:
+  <<: *1p3d_dcp8_dcp8_dspark4
+  frontend:
+    args:
+      dyn-tool-call-parser: kimi_k3
+      dyn-reasoning-parser: kimi_k3
+      dyn-enable-structural-tag: true
+  engine:
+    args:
+      reasoning-parser: kimi_k3
