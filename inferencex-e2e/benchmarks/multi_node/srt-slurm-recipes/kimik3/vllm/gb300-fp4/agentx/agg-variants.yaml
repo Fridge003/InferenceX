@@ -5,12 +5,12 @@ base:
     model: {}
     container: {}
     frameworks:
-      dynamo: "v1.5.1"
+      dynamo: "v1.4.2"
 
   dynamo:
     install: true
     source:
-      rev: "v1.5.1"
+      rev: "v1.4.2"
 
   slurm:
     time_limit: "04:00:00"
