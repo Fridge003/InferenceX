@@ -9914,6 +9914,6 @@
     - "Match the validated local DCP recipes with prefill EP/SP, DeepGEMM MegaMoE, GEMM-RS and automatic KV interleaving. Preserve the existing 1P3D DSpark7 c1 recipe."
     - "Add DEP16 with prefill EP8 and DeepGEMM MegaMoE, decode TokenSpeed MLA min-split-8, and capacity-only Mooncake with decode prefix caching disabled."
     - "Use the October 14 vLLM nightly image, 77154ca6116ae34cbfe314beef1016bde9b63989, containing vllm-project/vllm#61125, and remove explicit KV interleave settings."
-    - "Enable Kimi K3 native tool and reasoning parsers with structural tags instead of generic JSON tool constraints."
+    - "Leave tool and reasoning parser settings unset for both performance and evaluation, using Dynamo's default tool-choice handling."
     - "Pin Dynamo frontend and workers to official upstream commit ffbbaaa6c44370e798687881317535ac17d66a76; preserve default thinking and the unchanged vendor eval."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4047
