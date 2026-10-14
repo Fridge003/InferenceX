@@ -112,6 +112,7 @@ base:
         dyn-tool-call-parser: kimi_k3
         dyn-reasoning-parser: kimi_k3
         dyn-enable-structural-tag: true
+        reasoning-parser: kimi_k3
         prefix-match-unit: 128
         load-format: "fastsafetensors"
         kv-cache-dtype: "fp8"
@@ -140,6 +141,7 @@ base:
         dyn-tool-call-parser: kimi_k3
         dyn-reasoning-parser: kimi_k3
         dyn-enable-structural-tag: true
+        reasoning-parser: kimi_k3
         prefix-match-unit: 128
         load-format: "fastsafetensors"
         kv-cache-dtype: "fp8"

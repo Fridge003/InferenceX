@@ -94,6 +94,7 @@ base:
         dyn-tool-call-parser: kimi_k3
         dyn-reasoning-parser: kimi_k3
         dyn-enable-structural-tag: true
+        reasoning-parser: kimi_k3
         load-format: "fastsafetensors"
         kv-cache-dtype: "fp8"
         mamba-ssm-cache-dtype: "bfloat16"

@@ -50,11 +50,13 @@ def build_pytest_command(
 ) -> list[str]:
     """Build the fixed invocation of the pinned upstream verifier."""
     _expected_total(task_name)
-    thinking_args = (
-        ["--think-mode", "opensource", "--thinking"]
-        if model_prefix == "dsv4"
-        else ["--think-mode", "none"]
-    )
+    if model_prefix == "dsv4":
+        thinking_args = ["--think-mode", "opensource", "--thinking"]
+    elif model_prefix == "kimik3":
+        # Send thinking=False explicitly; "none" leaves Kimi's default enabled.
+        thinking_args = ["--think-mode", "opensource"]
+    else:
+        thinking_args = ["--think-mode", "none"]
     parallel_args = ["-n", str(FULL_WORKERS)] if task_name == FULL_TASK_NAME else []
     selection_args = (
         ["--selection", "all"]
