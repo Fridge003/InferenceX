@@ -81,12 +81,7 @@ def _n_eff(output_dir: Path, task_name: str = kve.TASK_NAME) -> int:
     return _result(output_dir)["n-samples"][task_name]["effective"]
 
 
-@pytest.mark.parametrize(
-    "model_prefix,think_mode", [("", "none"), ("kimik3", "opensource")]
-)
-def test_builds_fixed_upstream_pytest_command(
-    tmp_path: Path, model_prefix: str, think_mode: str
-) -> None:
+def test_builds_fixed_upstream_pytest_command(tmp_path: Path) -> None:
     report = tmp_path / kve.NATIVE_REPORT_FILENAME
 
     assert kve.build_pytest_command(
@@ -94,7 +89,6 @@ def test_builds_fixed_upstream_pytest_command(
         api_key="EMPTY",
         model="test-model",
         report_path=report,
-        model_prefix=model_prefix,
     ) == [
         sys.executable,
         "-m",
@@ -107,7 +101,7 @@ def test_builds_fixed_upstream_pytest_command(
         "--smoke-model",
         "test-model",
         "--think-mode",
-        think_mode,
+        "none",
         "--selection",
         "object",
         "--max-cases",
