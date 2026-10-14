@@ -10,8 +10,7 @@ from infx.results.agentic.common import gauge_stat, normalize_fraction, series_s
 
 from .base import ServerMetricsBackend, counter_int
 
-# Prefix reuse happens where prompts are prefilled. A P/D decode worker re-counts the same
-# prompts in prefix_cache_full_tokens on first admission without serving any reuse.
+# P/D decode workers re-count prefilled prompts in prefix_cache_full_tokens without reuse.
 ACCOUNTED_ROLES = frozenset({"prefill", "unified"})
 FULL = "prefix_cache_full_tokens"
 CACHED = "prefix_cache_cached_tokens"
@@ -235,7 +234,6 @@ def account_cache(
         offload = 0.0
     else:
         validity["cpu_component"] = "MISSING"
-    # The invariants hold on every CPU branch, including the contract zero set just above.
     if not math.isfinite(full) or full <= 0:
         return refuse("INVALID_COUNTER", "no prompt tokens in the accounting window")
     if not math.isfinite(cached) or not 0 <= cached <= full:

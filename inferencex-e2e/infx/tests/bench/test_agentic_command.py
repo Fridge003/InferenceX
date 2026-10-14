@@ -389,9 +389,6 @@ def test_srt_shim_builds_the_runtime_waits_for_the_server_and_writes_the_point(
     assert (aggregate["conc"], aggregate["num_requests_total"]) == (8, 1)
 
 
-# The replay writes ATOM P/D counters for exactly the endpoints the launcher told it to scrape.
-# The prefill endpoint is the one the servers were started with (SRT_PREFILL_ENDPOINTS), not a
-# position in argv.
 FAKE_ATOM_AIPERF_SCRIPT = (
     FAKE_AIPERF_SCRIPT
     + r"""
