@@ -117,9 +117,21 @@ def acceptance_length(
     spec = spec_parameters(generation, engine)
     if not (synthetic and spec):
         return None
-    return golden_length(
-        environment["MODEL_PREFIX"], spec, environment["THINKING_MODE"], golden_dir
-    )
+    al = golden_length(environment["MODEL_PREFIX"], spec, environment["THINKING_MODE"], golden_dir)
+    if (
+        engine == "sglang"
+        and environment["MODEL_PREFIX"] == "qwen3.5"
+        and spec.get("method") in ("eagle", "nextn", "mtp")
+    ):
+        # The generation role's MTP window includes one verification token.
+        drafts = generation.get("args", {}).get("speculative-num-draft-tokens")
+        expected = spec["num_speculative_tokens"] + 1
+        if not isinstance(drafts, int) or isinstance(drafts, bool) or drafts != expected:
+            raise ValueError(
+                "Qwen3.5 SGLang generation role speculative-num-draft-tokens "
+                f"must be an integer equal to speculative-num-steps + 1 ({expected})"
+            )
+    return al
 
 
 def build_overrides(
