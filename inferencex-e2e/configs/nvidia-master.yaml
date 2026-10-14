@@ -7333,14 +7333,15 @@ glm5.2-fp8-b300-sglang-agentic-mtp-tuned:
   precision: fp8
   framework: sglang
   multinode: false
+  srt-recipe-dir: glm5.2/sglang/b300-fp8-mtp
   scenarios:
     agentic-coding:
     - dram-utilization: 0.80
       search-space:
-      - { tp: 8, spec-decoding: mtp, kv-offloading: none, conc-list: [4, 8], srt-recipe: benchmarks/single_node/srt-slurm-recipes/glm5.2/sglang/b300-fp8-mtp/agentic-tuned.yaml }
-      - { tp: 8, spec-decoding: mtp, kv-offloading: dram, kv-offload-backend: { name: hicache }, conc-list: [16, 32], srt-recipe: benchmarks/single_node/srt-slurm-recipes/glm5.2/sglang/b300-fp8-mtp/agentic-tuned.yaml }
-      - { tp: 4, spec-decoding: mtp, kv-offloading: none, conc-list: [1], srt-recipe: benchmarks/single_node/srt-slurm-recipes/glm5.2/sglang/b300-fp8-mtp/agentic-tuned.yaml }
-      - { tp: 4, spec-decoding: mtp, kv-offloading: dram, kv-offload-backend: { name: hicache }, conc-list: [8, 12], srt-recipe: benchmarks/single_node/srt-slurm-recipes/glm5.2/sglang/b300-fp8-mtp/agentic-tuned.yaml }
+      - { tp: 8, spec-decoding: mtp, kv-offloading: none, conc-list: [4, 8], srt-recipe: agentic-tuned.yaml }
+      - { tp: 8, spec-decoding: mtp, kv-offloading: dram, kv-offload-backend: { name: hicache }, conc-list: [16, 32], srt-recipe: agentic-tuned.yaml }
+      - { tp: 4, spec-decoding: mtp, kv-offloading: none, conc-list: [1], srt-recipe: agentic-tuned.yaml }
+      - { tp: 4, spec-decoding: mtp, kv-offloading: dram, kv-offload-backend: { name: hicache }, conc-list: [8, 12], srt-recipe: agentic-tuned.yaml }
 
 # GLM-5.2 NVFP4 B200 AgentX on Dynamo + SGLang. EAGLE uses the model's
 # built-in nextn head, with acceptance pinned to the golden thinking-on AL in
