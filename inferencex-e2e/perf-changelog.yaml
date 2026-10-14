@@ -9748,4 +9748,4 @@
     - "Keep the EAGLE draft with 5 steps, top-k 1 and 6 draft tokens, FP8 KV, the triton DSA prefill and decode backends, admission at twice the concurrency and a decode graph limit of min(2 x concurrency, 64)."
     - "Validate decode-context-parallel-size against the matrix DCP size for SGLang recipes as well as vLLM and ATOM."
     - "Requires an SGLang ROCm image with sgl-project/sglang#43735 and the triton sparse-MLA LSE path for DCP."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4064
