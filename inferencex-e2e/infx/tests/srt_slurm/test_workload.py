@@ -106,6 +106,9 @@ def test_bundles_take_the_shared_block_under_base_and_keep_their_variants(projec
     ({"environment": {"ROUTER_VERSION": "0.1.14"}}, True, False, "environment.ROUTER_VERSION (= '0.1.14')"),
     ({"base": {}, "override_c": {"services": [{"name": "m", "env": {"KV_OFFLOAD_BACKEND_VERSION": "1"}}]}},
      True, True, "override_c.services[0].env.KV_OFFLOAD_BACKEND_VERSION (= '1')"),
+    # The workflow exports the matrix point; a fragment pins none of it.
+    ({"benchmark": {"env": {"REQUIRE_POWER": "1", "MODEL": "/model"}}}, True, True,
+     "benchmark.env.MODEL (= '/model'), benchmark.env.REQUIRE_POWER (= '1')"),
 ])  # fmt: skip
 def test_a_fragment_that_sets_a_bound_key_is_rejected(project, data, agentic, multinode, reported):
     path = fragment(project, data)

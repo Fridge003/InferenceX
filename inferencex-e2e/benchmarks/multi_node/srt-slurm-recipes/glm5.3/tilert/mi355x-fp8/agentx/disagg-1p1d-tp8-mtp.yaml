@@ -8,7 +8,6 @@ resources:
 setup_script: glm5.3-tilert-rocm.sh
 environment:
   RDMAV_FORK_SAFE: "1"
-  PYTHONDONTWRITEBYTECODE: "1"
   NCCL_SOCKET_IFNAME: "@fabric.socket-ifname"
   GLOO_SOCKET_IFNAME: "@fabric.socket-ifname"
   NCCL_IB_HCA: "@fabric.rdma-devices"
@@ -95,7 +94,7 @@ health_check:
   interval_seconds: 5
 benchmark:
   env:
-    MODEL: /model
+    TOKENIZER: /model
     SERVED_MODEL_NAME: glm5_2
     AIPERF_MAX_CONTEXT_LENGTH: "1048576"
     AIPERF_REQUIRED_SERVER_METRIC_PREFIX: "vllm:"

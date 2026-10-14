@@ -48,17 +48,14 @@ base:
         # indexer does not support.
         speculative-config: '{"method":"dspark","num_speculative_tokens":5,"draft_sample_method":"probabilistic","rejection_sample_method":"block","enable_adaptive_verification":false}'
         max-model-len: 1048576
-        # The ROCm sparse SWA path lacks the replay window clamp; bounded replay
-        # memory-faulted at the first prefix hit with a replay start.
-        no-swa-bounded-replay: true
+        # Mono decode kernels (vllm-project/vllm#60397, #61082): two persistent
+        # launches a layer on all 40 backbone layers for decode steps of up to
+        # 48 rows (c8 with five drafts); larger steps take the regular path.
+        monokernel: true
         disable-uvicorn-access-log: true
       env:
         VLLM_ROCM_USE_AITER: '1'
         VLLM_ROCM_USE_AITER_MOE: '1'
-        # Mono decode kernels (vllm-project/vllm#60397): two persistent
-        # launches a layer for decode steps of up to 48 rows (c8 with five
-        # drafts); larger steps take the regular path.
-        VLLM_ROCM_MONO_DECODE: '1'
         # INT4 quick all-reduce above its size threshold
         # (vllm-project/recipes#1061).
         VLLM_ROCM_QUICK_REDUCE_QUANTIZATION: INT4
@@ -68,7 +65,6 @@ base:
         # graphs keep FULL_AND_PIECEWISE capture working.
         VLLM_USE_BREAKABLE_CUDAGRAPH: '1'
         OMP_NUM_THREADS: '1'
-        VLLM_ENGINE_READY_TIMEOUT_S: '3600'
         VLLM_USE_RUST_FRONTEND: '1'
         PYTHONUNBUFFERED: '1'
   benchmark:
