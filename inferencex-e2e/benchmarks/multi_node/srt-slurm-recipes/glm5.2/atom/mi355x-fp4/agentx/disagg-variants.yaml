@@ -27,9 +27,9 @@ base:
         <<: &environment
           PYTHONUNBUFFERED: "1"
           PYTHONHASHSEED: "0"
-          # srtctl downloads an hf: checkpoint once into the shared hub cache only when HF_HOME is set.
-          HF_HOME: /hf_hub_cache
-          HF_HUB_CACHE: /hf_hub_cache/hub
+          # srtctl fills the first node's hub cache before workers start only when HF_HOME is set.
+          HF_HOME: /tmp/hf_home
+          HF_HUB_CACHE: /mnt/hf_hub_cache
           AITER_LOG_LEVEL: WARNING
           AITER_QUICK_REDUCE_QUANTIZATION: INT4
           AITER_USE_FLYDSL_MOE_SORTING: "1"
@@ -79,6 +79,9 @@ base:
     mem: "0"
     container-writable: ""
     container-remap-root: ""
+  extra_mount:
+    # The node-local hub cache the single-node GLM-5.2 points already fill.
+    - /var/lib/hf-hub-cache:/mnt/hf_hub_cache
   health_check:
     max_attempts: 1080
     interval_seconds: 5
