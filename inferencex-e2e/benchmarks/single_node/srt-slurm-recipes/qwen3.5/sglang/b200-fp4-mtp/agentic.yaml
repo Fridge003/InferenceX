@@ -65,7 +65,7 @@ base:
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: 'sglang:'
 
 # One variant per point. Admission is 2x CONC and the graph batch is CONC,
-# capped at 64, except TP2 C1/C4 use 2x CONC with deeper NEXTN drafting.
+# capped at 64, except TP2 C1 uses 2x CONC with deeper NEXTN drafting.
 # TP4 tokenizes in parallel to keep 256k warmups within the
 # client timeout; TP2 keeps the single tokenizer, whose multi-worker startup
 # races with TP2 HiCache shared-memory initialization. HiCache sizes each of
@@ -408,9 +408,7 @@ override_tp2_c4:
       args:
         tensor-parallel-size: 2
         max-running-requests: 8
-        cuda-graph-max-bs: 8
-        speculative-num-steps: 4
-        speculative-num-draft-tokens: 5
+        cuda-graph-max-bs: 4
   benchmark:
     env:
       CONC: '4'

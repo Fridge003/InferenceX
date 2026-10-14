@@ -9650,6 +9650,6 @@
 - config-keys:
     - qwen3.5-fp4-b200-sglang-agentic-mtp
   description:
-    - "Raise the TP2 C1 and C4 CUDA graph max batch to 2 and 8 to cover the admission limit."
-    - "Deepen NEXTN speculation for TP2 C1 and C4 to 5 and 4 steps (6 and 5 draft tokens)."
+    - "Raise the TP2 C1 CUDA graph max batch to 2 to cover the admission limit."
+    - "Deepen NEXTN speculation for TP2 C1 to 5 steps (6 draft tokens)."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3966
