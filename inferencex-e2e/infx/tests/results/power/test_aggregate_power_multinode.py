@@ -61,7 +61,7 @@ class Package:
         aggregate_gpus=0,
         sha=PRODUCER_SHA,
         require_power=False,
-        expected_cpu_source=None,
+        expected_cpu=False,
     ):
         return apm.run(
             self.power_dir,
@@ -74,7 +74,7 @@ class Package:
             logs_root=self.logs_root,
             validation_result=self.validation_result,
             require_power=require_power,
-            expected_cpu_source=expected_cpu_source,
+            expected_cpu=expected_cpu,
         )
 
     def agg(self):
@@ -900,7 +900,7 @@ class TestCpuSidePower:
             add_cpu_package(pkg, _cpu_rows())
         elif cpu == "dcgm_only":
             add_cpu_package(pkg, _cpu_rows({host: {"dcgm": DCGM_W} for host in CPU_HOSTS}))
-        assert pkg.run(require_power=require_power, expected_cpu_source="acpi") == int(
+        assert pkg.run(require_power=require_power, expected_cpu=True) == int(
             require_power and cpu != "complete"
         )
         assert _gpu_fields(pkg.agg()) == _reference_agg(tmp_path)

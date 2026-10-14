@@ -174,10 +174,6 @@ def run_multinode(launch: Launch) -> int:
     )
     if rc := submit.bind_recipe(run, checkout, staged, recipe, power_port, cpu_source, client_env):
         return rc
-    decision = power.with_cpu_source(decision, Path(recipe))
-    if github_env := request.env.get("GITHUB_ENV"):
-        with Path(github_env).open("a") as handle:
-            handle.write(f"POWER_EXPECTED_CPU_SOURCE={decision.expected_cpu_source or ''}\n")
     prepare_recipe(Path(recipe), srtctl_job_name(request.runner_name), run.srt.dist_timeout_s)
     arguments = submit.multinode_arguments(run, lane, recipe, overrides, preflight=preflight)
     manifest = run.workspace / submit.MULTINODE_SUBMISSION

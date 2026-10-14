@@ -677,7 +677,6 @@ def test_launch_cpu_expectation_reaches_fixed_sequence_processor(harness, monkey
         build_package,
     )
 
-    github_env = harness.tmp / "github-env"
     env = lane_env(
         harness,
         "gb300-nv",
@@ -689,7 +688,6 @@ def test_launch_cpu_expectation_reaches_fixed_sequence_processor(harness, monkey
         REQUIRE_POWER="1",
         POWER="1",
         CPU_POWER="1",
-        GITHUB_ENV=str(github_env),
     )
     assert_ok(launch(env, harness.config, harness.workspace))
     [checkout] = harness.workspace.glob("srt-slurm-9001-*")
@@ -698,11 +696,11 @@ def test_launch_cpu_expectation_reaches_fixed_sequence_processor(harness, monkey
     assert bound["telemetry"]["dcgm_exporter"]["port"] == 19401
     [setup] = [call for call in lines(harness.logs, "make") if call.startswith("setup ")]
     assert "CPU_POWER_EXPORTER_RELEASE=v2.51.1" in setup.split()
-    exported = dict(line.split("=", 1) for line in github_env.read_text().splitlines())
     pkg = build_package(harness.tmp / "power-input")
     monkeypatch.chdir(harness.tmp)
+    # The workflow exports CPU_POWER once; the launcher and the processor both read it.
     result_env = {
-        **exported,
+        "CPU_POWER": "1",
         "REQUIRE_POWER": "1",
         "IS_MULTINODE": "true",
         "RESULT_FILENAME": "fixture",

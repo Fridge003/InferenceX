@@ -231,11 +231,15 @@ def validate_cpu_leg(
     *,
     window: tuple[float, float] | None,
     expected_hosts: Iterable[str],
-    expected_source: str | None = None,
+    expected: bool = False,
 ) -> CpuPowerAudit | None:
-    """Validate and integrate the CPU sub-package; None when the run carried none."""
+    """Validate and integrate the CPU sub-package; None when the run carried none.
+
+    ``expected`` is the point's ``cpu-power`` switch: a missing sub-package is
+    then a verdict rather than silence.
+    """
     if not cpu_dir.is_dir():
-        if expected_source is None:
+        if not expected:
             return None
         audit = CpuPowerAudit()
         audit.invalidate("cpu_artifacts_missing")
@@ -263,9 +267,6 @@ def validate_cpu_leg(
         return audit
     audit.sensor_kind = SENSOR_GRACE
     audit.source = next(iter(sources))
-    if expected_source is not None and audit.source != expected_source:
-        audit.invalidate("cpu_sensor_source_mismatch")
-        return audit
 
     # A rail is published only when every socket reports it, gap-free; the Grace
     # meter must be gap-free on every socket or the whole leg is invalid.

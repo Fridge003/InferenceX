@@ -156,7 +156,7 @@ def test_agentic_collection_requires_declared_cpu_and_keeps_gpu_valid(tmp_path):
         PRODUCER_SHA,
         [4],
         results_python=sys.executable,
-        expected_cpu_source="acpi",
+        expected_cpu=True,
     ) == 1
     result = json.loads((workspace / "point_conc4.json").read_text())
     assert result["power_valid"] == 1

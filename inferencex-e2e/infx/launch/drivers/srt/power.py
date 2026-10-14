@@ -6,11 +6,8 @@ requests that may have it.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
-from pathlib import Path
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
-
-import yaml
 
 from infx.launch.context import LaunchError
 from infx.launch.policy import LaunchPath, Match, any_of
@@ -143,7 +140,6 @@ class PowerDecision:
     require: bool = False
     # The point selected cpu-power: the cluster's Grace CPU exporter is bound and expected.
     cpu: bool = False
-    expected_cpu_source: str | None = None
 
 
 NO_POWER = PowerDecision(dcgm=False, agentx=False)
@@ -172,14 +168,3 @@ def decide_power(cluster_id: str, path: LaunchPath, request: MultiNodeRequest) -
             )
     message = lane.agentic_error if request.is_agentic and lane.agentic_error else lane.error
     raise PowerPolicyError(message)
-
-
-def with_cpu_source(decision: PowerDecision, recipe: Path) -> PowerDecision:
-    """Read the CPU source from the fully bound recipe used for this job."""
-    if not decision.dcgm:
-        return decision
-    bound = yaml.safe_load(recipe.read_text())
-    telemetry = bound.get("telemetry", {})
-    cpu = telemetry.get("cpu_power_exporter", {})
-    source = cpu.get("source") if isinstance(cpu, dict) else None
-    return replace(decision, expected_cpu_source=source if source in {"acpi", "dcgm"} else None)

@@ -355,7 +355,7 @@ def run_native_agentic_power(
     logs_root: Path,
     expected_producer_sha: str,
     require_power: bool = False,
-    expected_cpu_source: str | None = None,
+    expected_cpu: bool = False,
     audit_source: str | None = None,
     validation_result: Path | None = None,
 ) -> int:
@@ -416,7 +416,7 @@ def run_native_agentic_power(
             logs_root=logs_root,
             validation_result=validation_result,
             require_power=require_power,
-            expected_cpu_source=expected_cpu_source,
+            expected_cpu=expected_cpu,
         )
     if audit_source is not None:
         try:
@@ -449,7 +449,7 @@ def main() -> int:
         action="store_true",
         default=os.environ.get("REQUIRE_POWER", "").lower() in {"1", "true", "yes"},
     )
-    parser.add_argument("--expected-cpu-source", choices=("acpi", "dcgm"))
+    parser.add_argument("--expected-cpu-power", action="store_true")
     args = parser.parse_args()
     if args.multinode_contract_missing:
         if args.agg_result is None:
@@ -502,7 +502,7 @@ def main() -> int:
         logs_root=args.logs_root,
         expected_producer_sha=args.expected_producer_sha,
         require_power=args.require_power,
-        expected_cpu_source=args.expected_cpu_source,
+        expected_cpu=args.expected_cpu_power,
         audit_source=args.audit_source,
         validation_result=args.validation_result,
     )

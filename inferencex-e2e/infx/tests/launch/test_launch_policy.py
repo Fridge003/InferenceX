@@ -10,12 +10,7 @@ from infx.launch.__main__ import launch
 from infx.launch.context import LaunchError
 from infx.launch.drivers import check_tables
 from infx.launch.drivers.srt import models, power
-from infx.launch.drivers.srt.power import (
-    PowerDecision,
-    PowerPolicyError,
-    decide_power,
-    with_cpu_source,
-)
+from infx.launch.drivers.srt.power import PowerPolicyError, decide_power
 from infx.launch.lifecycle import Lifecycle
 from infx.launch.policy import LaunchPath, Match, salloc_time_limit
 from infx.launch.request import LaunchRequest, MultiNodeRequest
@@ -101,20 +96,6 @@ def test_gb200_reports_agentic_misses_distinctly():
                          FRAMEWORK="dynamo-sglang", CONC="4", CONC_LIST="4", POWER="1")  # fmt: skip
     with pytest.raises(PowerPolicyError, match="AgentX dcgm-power requires GLM-5.2"):
         decide_power("gb200-nv", MULTI, request)
-
-
-@pytest.mark.parametrize(
-    ("source", "expected"),
-    [("acpi", "acpi"), ("dcgm", "dcgm"), (None, None)],
-)
-def test_power_cpu_source_comes_from_bound_recipe(tmp_path, source, expected):
-    recipe = tmp_path / "bound.yaml"
-    cpu = f"  cpu_power_exporter:\n    source: {source}\n" if source else ""
-    recipe.write_text(f"telemetry:\n  enabled: true\n{cpu}")
-    decision = PowerDecision(dcgm=True, agentx=True, require=True)
-    resolved = with_cpu_source(decision, recipe)
-    assert resolved.expected_cpu_source == expected
-    assert resolved.require is True
 
 
 def test_a_power_lane_needs_its_clusters_exporter_port(monkeypatch):
