@@ -4,11 +4,10 @@
 # (qwen3.5 MTP, thinking_on, draft 6: AL 4.80), so this recipe does not set it.
 #
 # Every point uses piecewise CUDA graphs for steps that carry context tokens.
-# Three per-concurrency settings sit on top of that base:
+# Two per-concurrency settings sit on top of that base:
 #   c4, c8:   TRTLLM-gen MoE and two torch.compile streams
-#   c16:      the base alone (CUTEDSL MoE, no context batching)
-#   c24-c64:  TRTLLM-gen MoE and context batching (batch_wait 0.9 / 24)
-# Context batching lets several prompts share one context step. At c16 and
+#   c24, c52, c64: TRTLLM-gen MoE and context batching (batch_wait 0.9 / 24)
+# Context batching lets several prompts share one context step. At c8 and
 # below it adds more first-token wait than it saves end to end.
 #
 # kv_cache_config.host_cache_size is TRT-LLM's native host KV tier: 128 GiB per
@@ -66,6 +65,7 @@ base:
           allowed_backends: [cutlass, cublaslt, cutedsl, cuda_core]
         kv_cache_config:
           dtype: fp8
+          iteration_stats_interval: 20
           free_gpu_memory_fraction: 0.8
           tokens_per_block: 64
           use_kv_cache_manager_v2: true
@@ -86,7 +86,7 @@ base:
           max_draft_len: 6
         stream_interval: 20
         num_postprocess_workers: 4
-        enable_iter_perf_stats: false
+        enable_iter_perf_stats: true
         enable_iter_req_stats: false
         print_iter_log: true
         trust_remote_code: true
@@ -154,13 +154,6 @@ override_c8:
       KV_OFFLOADING: dram
       TOTAL_CPU_DRAM_GB: '1100'
 
-override_c16:
-  benchmark:
-    env:
-      CONC: '16'
-      KV_OFFLOADING: dram
-      TOTAL_CPU_DRAM_GB: '1100'
-
 # Throughput end: TRTLLM-gen MoE and context batching. A context step waits up
 # to 24 iterations, or until 90% of max_num_tokens is queued.
 override_c24:
@@ -174,20 +167,6 @@ override_c24:
   benchmark:
     env:
       CONC: '24'
-      KV_OFFLOADING: dram
-      TOTAL_CPU_DRAM_GB: '1100'
-
-override_c32:
-  roles:
-    agg:
-      args:
-        moe_config:
-          backend: TRTLLM
-        batch_wait_max_tokens_ratio: 0.9
-        batch_wait_timeout_iters: 24
-  benchmark:
-    env:
-      CONC: '32'
       KV_OFFLOADING: dram
       TOTAL_CPU_DRAM_GB: '1100'
 
