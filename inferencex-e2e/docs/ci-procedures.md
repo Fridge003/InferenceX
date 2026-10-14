@@ -1,12 +1,6 @@
 # CI Procedures
 
-<div align="center">
-
-**English** | [中文](ci-procedures_zh.md)
-
-</div>
-
-Use this page for matrix generation, CI dispatch, PR sweeps, result staging, artifact reuse, and post-merge publication. English is the source version. Keep the Chinese page structurally synchronized with it. Record the repository, commit SHA, workflow run ID, run attempt, and artifact name whenever CI output is used as evidence.
+Use this page for matrix generation, CI dispatch, PR sweeps, result staging, artifact reuse, and post-merge publication. Record the repository, commit SHA, workflow run ID, run attempt, and artifact name whenever CI output is used as evidence.
 
 ## Procedure index
 
@@ -297,6 +291,8 @@ Execution stays on the trusted default branch and serializes per PR. Starting Cl
 
 The verifier associates one advisory comment with each sign-off resource and includes the assessed SHA. Editing the same checklist updates only its associated verdict; a different checklist receives a separate verdict, so an older sign-off's verdict is never overwritten. Later pushes do not extend that assessment or trigger another run. Dispatch manually to reassess, including after a review event was missed during a merge conflict. The verifier publishes no commit status, and GitHub's separate human approval requirements still apply.
 
+Before finishing, the verifier checks its verdict file with `python -m infx.workflows.signoff_validate`, which applies the publisher's format rules without publishing. The publisher rewrites `✅` to `➖` on N/A rows; any other malformed verdict is still replaced with "The verifier did not produce a valid verdict" and needs a manual reassessment.
+
 Do not rerun an in-progress run blindly. A completed failed run can rerun only failed jobs and their dependents:
 
 ```bash
@@ -395,7 +391,9 @@ An authorized maintainer comments exactly one of:
 /stage-results <run-id>
 ```
 
-Without an ID, the workflow selects the latest stageable completed run on the PR branch whose head SHA remains in the PR commit list. A pinned ID permits an explicitly associated historical run. The workflow acknowledges the run, dispatches the `stage-results` event to InferenceX-app, and [`stage-results-callback.yml`](../../.github/workflows/stage-results-callback.yml) replaces the acknowledgement with a success chart or failure link.
+Without an ID, the workflow selects the latest stageable completed run on the PR branch whose head SHA remains in the PR commit list. A pinned ID permits an explicitly associated historical run. The workflow acknowledges the run, dispatches the `stage-results` event to InferenceX-app, and [`stage-results-callback.yml`](../../.github/workflows/stage-results-callback.yml) replaces the acknowledgement with links to the staged Pareto lines or a failure link.
+
+After ingest, InferenceX-app supplies a `chart-links` list containing a label and URL for each staged model/workload/precision/hardware series. Each link selects that series with `i_gpus` and the exact run with `i_dates=YYYY-MM-DD~rRUN_ID`, together with its model, workload, and precision. Multiple staged lines receive separate links; evaluation-only runs with no performance curves do not get an invented chart link. The callback validates the staging origin and run selection before posting. Older app callbacks without `chart-links` retain the run/date-only link during rollout.
 
 A well-formed `/use <run-id>` reuse request also triggers this workflow and stages that pinned run under the same rules, in addition to the normal reuse handling. Malformed `/use` comments are left to the reuse workflow and do not stage.
 
@@ -582,4 +580,3 @@ four-GPU Arm nodes; the other pools use eight-GPU x86 nodes. GEMM and attention
 use one GPU per measurement. AMD attention supports both torch and AITER.
 See [OperatorX GitHub Actions](../../operatorx/CI.md) for dispatch,
 coverage, artifacts, cancellation, and validation.
-

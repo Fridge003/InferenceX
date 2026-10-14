@@ -1,11 +1,5 @@
 # Klaud Cold auto-sweep
 
-<div align="center">
-
-**English** | [中文](klaud_zh.md)
-
-</div>
-
 [`klaud-plan.yml`](../../.github/workflows/klaud-plan.yml) reconciles recorded interrupted sessions, prepares candidates with Python, uses a read-only Claude review to exclude overlapping PRs, then calls [`klaud-candidate.yml`](../../.github/workflows/klaud-candidate.yml). One autonomous Klaud Cold session owns each candidate’s edits, diagnosis and repairs. The `finish` command verifies validation or performs cleanup and posts its completion receipt; the read-only Stop hook and diagnostics verify that receipt against GitHub. Recovery uses the next existing autosweep, with no second agent or additional workflow.
 
 The PR review resolves overlaps, target clusters and public baseline model names for a bounded candidate batch. Candidate execution owns upstream image research. Models and turn limits are set in `klaud-plan.yml` and `klaud-candidate.yml`. The agent's display name is **Klaud Cold**; workflow filenames, CLI, artifacts, branches and runtime environment variables use `klaud` / `KLAUD`. Existing candidate branches with the previous spelling still block duplicate selection. Configure `DASH_API_KEY` before dispatching; workflows pass it to the existing `KLAUD_DASHBOARD_API_KEY` runtime variable.
@@ -104,7 +98,7 @@ The app also has useful **unpublished UI readers**: `/api/unofficial-run` normal
 
 ## Change scope and PR policy
 
-The authoritative [candidate instructions](../../.github/klaud-candidate-prompt.md) permit only the selected master image and source-backed compatibility flags/environment in its already referenced, unshared single-node recipe or srt-slurm YAML. Preserve model, precision, topology, speculation, workload/dataset, duration, resources, all points and evals. `model.container` and `identity.container.image` must match. No broad tuning or shared script/launcher/library/workflow edits by Klaud. ZERO runtime engine/serving-stack patching, including existing patches on the selected path: no source/container/site-packages rewrites, overlays, monkey patches or rebuilt/forked wheels. Use an unmodified supported image or report incompatible.
+The authoritative [candidate instructions](../../.github/klaud-candidate-prompt.md) permit only the selected master image and source-backed compatibility flags/environment in its already referenced, unshared single-node recipe or srt-slurm YAML. Preserve model, precision, topology, speculation, workload/dataset, duration, resources, all points and evals. No broad tuning or shared script/launcher/library/workflow edits by Klaud. ZERO runtime engine/serving-stack patching, including existing patches on the selected path: no source/container/site-packages rewrites, overlays, monkey patches or rebuilt/forked wheels. Use an unmodified supported image or report incompatible.
 
 After smoke benchmarks and representative evals pass, append the changelog at its physical tail without altering prior bytes, push the exact head, generate/check the full matrix and recheck capacity. Keep DRAFT and apply `full-sweep-fail-fast` as the sole sweep label. A final failure stays draft without sweep labels before repair. Only `finish` marks ready after verified results and final reporting; readiness triggers reviews but no new sweep. Klaud then records the verified final run with `/use`; maintainers retain review, staging and merge authority.
 
