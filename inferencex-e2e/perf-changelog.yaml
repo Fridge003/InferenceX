@@ -9750,3 +9750,9 @@
     - "Replace aliases removed in this image (cuda-graph-max-bs becomes cuda-graph-max-bs-decode; SGLANG_DISABLE_TP_MEMORY_INBALANCE_CHECK=1 becomes SGLANG_ENABLE_TP_MEMORY_INBALANCE_CHECK=0) and drop settings that have no effect in it."
     - "Run the TP2/EP2 point with the default linear-replayssm-cache-len (16) instead of 8: this image's GDN ReplaySSM spec-verify commit kernel needs a replay window of at least 16, and 8 fails to compile at the first verify."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/2978
+
+- config-keys:
+    - qwen3.8next-fp4-b300-sglang-agentic-mtp
+  description:
+    - "Update the SGLang image to v0.5.21-cu130 and rename cuda-graph-max-bs to cuda-graph-max-bs-decode."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4069
