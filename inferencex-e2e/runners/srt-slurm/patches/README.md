@@ -8,3 +8,4 @@ Each patch is a temporary fix for an open upstream PR. When the PR merges and th
 
 | Patch | Upstream PR | Fix |
 |-------|-------------|-----|
+| `atom-tp-from-pp.patch` | [NVIDIA/srt-slurm#604](https://github.com/NVIDIA/srt-slurm/pull/604) | ATOM's `-tp` is the worker's GPUs divided by its pipeline and prefill-context stages, so a 4-GPU PP4 prefill launches with `-tp 1` instead of `-tp 4` |
