@@ -9729,7 +9729,7 @@
   no-evals: true
   description:
     - "DNM: 20-minute AgentX multi-node points through srt-slurm launcher: docker on h200-dgxc."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4043
 
 - config-keys:
     - dsr1-fp8-h200-dynamo-sglang
@@ -9737,4 +9737,4 @@
     - fixed-seq-len
   description:
     - "DNM: fixed-sequence multi-node disaggregated point through srt-slurm launcher: docker on h200-dgxc."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4043
