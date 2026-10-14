@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import re
 import shlex
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -33,6 +34,12 @@ NGINX_IMAGE = "nginx:1.27.4"
 DCGM_EXPORTER_IMAGE = "nvcr.io/nvidia/k8s/dcgm-exporter:4.6.0-4.8.3-distroless"
 EXPORTER_PROVENANCE = "exporter-image.sha256"
 HEALTH_CHECK = {"max_attempts": HEALTH_ATTEMPTS, "interval_seconds": 10}
+# Host-specific names; docker gets every other launch variable, as pyxis would.
+DOCKER_HOST_ENV = re.compile(
+    r"PATH|HOME|USER|LOGNAME|SHELL|PWD|OLDPWD|SHLVL|HOSTNAME|TERM|TMPDIR|MAIL|_|"
+    r"PYTHONPATH|PYTHONHOME|VIRTUAL_ENV|CUDA_VISIBLE_DEVICES|INVOCATION_ID|JOURNAL_STREAM|"
+    r"(LD|LC|XDG|SSH|DBUS|UV|SLURM|SBATCH|SALLOC|SRUN|GITHUB|RUNNER|ACTIONS|NVIDIA)_\w*"
+)
 
 
 @dataclass(frozen=True)
@@ -155,6 +162,18 @@ def render(cluster: Cluster, job: SrtJob) -> dict[str, Any]:
     return config
 
 
+def use_docker(config: dict[str, Any], env: Mapping[str, str]) -> None:
+    """Switch ``config`` to srtctl's ``launcher: docker``.
+
+    Pyxis hands a container the whole submit environment; docker only what it is told.
+    """
+    names = sorted(n for n in env if n.isidentifier() and not DOCKER_HOST_ENV.fullmatch(n))
+    config["launcher"] = "docker"
+    config["docker_args"] = [
+        "-w", "/infmax-workspace", *(arg for name in names for arg in ("-e", name)),
+    ]  # fmt: skip
+
+
 def write(path: Path, config: Mapping[str, Any]) -> None:
     """Write ``config`` as YAML; one that does not serialize leaves ``path`` untouched."""
     path.write_text(yaml.safe_dump(dict(config), sort_keys=False))
@@ -258,22 +277,33 @@ def write_lane_config(
     checkout: Checkout,
     power: PowerDecision,
     model_paths: dict[str, str],
-) -> None:
-    """Stage a multi-node job's images, create its mounts, and write its srtslurm.yaml."""
+    *,
+    docker: bool = False,
+) -> dict[str, Any]:
+    """Stage a multi-node job's images, create its mounts, and write its srtslurm.yaml.
+
+    Under ``docker`` each node pulls the images itself, so none are staged.
+    """
     backend, request = run.backend, run.request
-    container = backend.stage_image(
-        request.image, framework=request.framework, model_prefix=request.model_prefix
-    ).reference
-    nginx = (
-        backend.stage_image(NGINX_IMAGE, helper="nginx").reference
-        if run.srt.nginx_aliases
-        else None
+    container = (
+        request.image
+        if docker
+        else backend.stage_image(
+            request.image, framework=request.framework, model_prefix=request.model_prefix
+        ).reference
     )
+    nginx = None
+    if run.srt.nginx_aliases:
+        nginx = (
+            NGINX_IMAGE if docker else backend.stage_image(NGINX_IMAGE, helper="nginx").reference
+        )
     containers: dict[str, str] = {}
     if request.framework == "tilert":
         prefill_image = request.env["PREFILL_IMAGE"]
         containers[prefill_image] = backend.stage_image(prefill_image).reference
-    if power.dcgm:
+    if power.dcgm and docker:
+        containers["dcgm-exporter"] = DCGM_EXPORTER_IMAGE
+    elif power.dcgm:
         exporter = backend.stage_image(DCGM_EXPORTER_IMAGE, helper="dcgm-exporter")
         (run.workspace / EXPORTER_PROVENANCE).write_text(f"{backend.image_provenance(exporter)}\n")
         containers["dcgm-exporter"] = exporter.reference
@@ -290,6 +320,10 @@ def write_lane_config(
         mounts=lane_mounts(run, lane),
         account=run.account,
     )
+    rendered = render(run.cluster, job)
+    if docker:
+        use_docker(rendered, run.env)
     config_yaml = checkout.root / "srtslurm.yaml"
-    write(config_yaml, render(run.cluster, job))
+    write(config_yaml, rendered)
     print(f"Generated srtslurm.yaml:\n{config_yaml.read_text()}", flush=True)
+    return rendered

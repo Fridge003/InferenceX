@@ -9718,3 +9718,23 @@
     - "Enable INT4 QuickReduce with a 256 MiB size limit and FlyDSL stage-2 FP8 on prefill and decode workers."
     - "Configure MoRIIO READ and prefill-only SimpleCPUOffloadConnector through native role arguments. Use recipe-scoped draft checkpoint and RDMA device/provider mounts. Use the upstream discovery-template fix from srt-slurm #508 through the shared v2.51.1 dependency."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3582
+
+- config-keys:
+    - glm5.2-fp8-h200-dynamo-sglang-agentic-mtp-1p1d-hicache
+    - glm5.2-fp8-h200-dynamo-sglang-agentic-mtp-2p2d
+    - glm5.2-fp8-h200-dynamo-sglang-agentic-mtp-agg
+    - kimik3-fp4-h200-vllm-agentic-latency
+  scenario-type:
+    - agentic-coding
+  no-evals: true
+  description:
+    - "DNM: 20-minute AgentX multi-node points through srt-slurm launcher: docker on h200-dgxc."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXXX
+
+- config-keys:
+    - dsr1-fp8-h200-dynamo-sglang
+  scenario-type:
+    - fixed-seq-len
+  description:
+    - "DNM: fixed-sequence multi-node disaggregated point through srt-slurm launcher: docker on h200-dgxc."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXXX
