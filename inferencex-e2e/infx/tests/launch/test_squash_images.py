@@ -240,6 +240,21 @@ def test_srtctl_multi_node_jobs_import_first_unless_the_cluster_opts_out(tools, 
     assert reusing.stage_image(IMAGE).reference == str(squash)
 
 
+def test_single_node_import_replaces_invalid_squash_before_submission(tools, tmp_path):
+    _, logs = tools
+    backend = srtctl_backend(tmp_path, **{"single-node-import": True})
+    squash = tmp_path / "squash" / SQUASH_NAME
+    squash.parent.mkdir()
+    squash.write_text("truncated")
+
+    staged = backend.stage_image(IMAGE, framework="sglang", single_node=True)
+
+    assert staged.reference == str(squash)
+    assert squash.read_text() == VALID
+    assert len(calls(logs["enroot"])) == 1
+    assert backend.image_provenance(staged) == f"{VALID_SHA256}  {squash}"
+
+
 def test_unchecked_images_are_handed_to_jobs_without_validation_or_import(tools, tmp_path):
     _, logs = tools
     backend = srtctl_backend(tmp_path, **{

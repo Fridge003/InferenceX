@@ -491,6 +491,7 @@ clusters:
         visibility: shared
         import: compute
         lock-timeout-s: 1800
+        single-node-import: true
         framework-dirs:
           dynamo-sglang:
             key-style: plus
