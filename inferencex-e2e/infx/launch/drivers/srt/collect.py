@@ -93,9 +93,11 @@ def _stage_power_package(run: SrtRun, logs: Path) -> int:
             shutil.copyfile(run.workspace / name, power_dir / name)
         shutil.copytree(logs, run.workspace / "LOGS", symlinks=True, dirs_exist_ok=True)
     except OSError as error:
-        level = "ERROR" if run.request.require_power else "WARNING"
-        print(f"{level}: failed to stage the native power package: {error}", file=sys.stderr)
-        return int(run.request.require_power)
+        message = f"failed to stage the native power package: {error}"
+        if run.request.require_power:
+            run.life.event.fail("ArtifactError", message)
+            return 1
+        print(f"WARNING: {message}", file=sys.stderr)
     return 0
 
 
@@ -118,6 +120,8 @@ def finalize_single_node_results(run: SrtRun, logs: Path, producer_sha: str) -> 
             "--validation-result", str(run.workspace / sidecar), "--audit-source", sidecar,
             require_power=request.require_power,
         )  # fmt: skip
+        if power_rc:
+            event.fail("PowerValidationFailed", "AgentX power validation failed", report=False)
     if request.run_eval or request.eval_only:
         exit_file = logs / "infx-eval-exit-code"
         if not exit_file.is_file() or exit_file.read_text().rstrip("\n") != "0":

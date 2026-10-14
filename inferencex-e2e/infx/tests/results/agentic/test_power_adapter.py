@@ -59,7 +59,11 @@ def test_single_node_collector_finalizes_native_agentx_power(
                               result_filename="point", env=env)
     run = SimpleNamespace(request=request, env=env, workspace=tmp_path, life=Lifecycle())
     producer_sha = "b" * 40 if failure == "producer_commit_mismatch" else PRODUCER_SHA
-    assert finalize_single_node_results(run, pkg.logs_root, producer_sha) == int(require_power and failure is not None)
+    failed = require_power and failure is not None
+    rc = finalize_single_node_results(run, pkg.logs_root, producer_sha)
+    assert rc == int(failed)
+    error = run.life.event.finish(rc).error
+    assert (error.type if error else None) == ("PowerValidationFailed" if failed else None)
     aggregate = json.loads(aggregate_path.read_text())
     validation = json.loads((tmp_path / "power_validation_point.json").read_text())
     assert not (result_dir / "power_validation.json").exists()

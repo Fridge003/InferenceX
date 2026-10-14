@@ -58,6 +58,11 @@ def test_power_package_copy_failure_fails_the_point_only_when_power_is_required(
     assert (workspace / "point.json").read_text() == '{"completed": 2}\n'
     level = "ERROR" if require_power else "WARNING"
     assert f"{level}: failed to stage the native power package" in capsys.readouterr().err
+    error = run.life.event.finish(rc).error
+    if require_power:
+        assert (error.stage, error.type) == ("collect", "ArtifactError")
+    else:
+        assert error is None
 
 
 def test_power_package_is_staged_beside_the_result(tmp_path: Path) -> None:
