@@ -112,7 +112,6 @@ base:
         attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true}'
         enable-prefix-caching: true
         prefix-match-unit: 128
-        prefix-cache-retention-interval: 0
 
   sbatch_directives:
     mem: "0"
