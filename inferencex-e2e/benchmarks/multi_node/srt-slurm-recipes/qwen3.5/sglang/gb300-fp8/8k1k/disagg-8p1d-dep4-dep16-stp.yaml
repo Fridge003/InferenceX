@@ -158,8 +158,3 @@ roles:
 benchmark:
   placement:
     node: head
-
-telemetry:
-  cpu_power_exporter:
-    port: 9405
-    source: acpi

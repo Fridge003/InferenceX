@@ -83,6 +83,19 @@ def test_power_eligibility_of_each_cluster_lane(
     assert not decide_power(cluster, path, _multinode(**env, POWER="0")).dcgm
 
 
+@pytest.mark.parametrize(("power", "cpu_power", "expected"), [
+    ("1", "1", True), ("1", "0", False), ("0", "1", ERR),
+])  # fmt: skip
+def test_cpu_power_rides_on_a_power_point(power, cpu_power, expected):
+    request = _multinode(IS_AGENTIC="0", MODEL_PREFIX="dsr1", PRECISION="fp8",
+                         FRAMEWORK="dynamo-sglang", POWER=power, CPU_POWER=cpu_power)  # fmt: skip
+    if expected == ERR:
+        with pytest.raises(PowerPolicyError, match="cpu-power requires power"):
+            decide_power("gb200-nv", MULTI, request)
+        return
+    assert decide_power("gb200-nv", MULTI, request).cpu is expected
+
+
 def test_gb200_reports_agentic_misses_distinctly():
     request = _multinode(IS_AGENTIC="1", MODEL_PREFIX="dsv4", PRECISION="fp4",
                          FRAMEWORK="dynamo-sglang", CONC="4", CONC_LIST="4", POWER="1")  # fmt: skip

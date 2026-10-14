@@ -131,9 +131,6 @@ srun_options:
   container-remap-root: ""
 
 telemetry:
-  cpu_power_exporter:
-    port: 9405
-    source: acpi
   collector_join_timeout_seconds: 12
 
 benchmark:

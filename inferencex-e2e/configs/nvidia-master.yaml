@@ -3976,13 +3976,12 @@ qwen3.5-fp8-gb200-dynamo-sglang:
         conc-list: [1, 2, 4, 8, 16, 32, 64, 128]
         srt-recipe: disagg-1p1d-tp4-tp4-stp.yaml
         power: true
+        cpu-power: true
         prefill:
           num-worker: 1
           tp: 4
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode:
           num-worker: 1
           tp: 4
@@ -3993,13 +3992,12 @@ qwen3.5-fp8-gb200-dynamo-sglang:
         conc-list: [1024]
         srt-recipe: disagg-4p1d-dep4-dep16-stp.yaml
         power: true
+        cpu-power: true
         prefill:
           num-worker: 4
           tp: 4
           ep: 4
           dp-attn: true
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode:
           num-worker: 1
           tp: 16
@@ -4010,13 +4008,12 @@ qwen3.5-fp8-gb200-dynamo-sglang:
         conc-list: [2048, 4096]
         srt-recipe: disagg-8p1d-dep4-dep16-stp.yaml
         power: true
+        cpu-power: true
         prefill:
           num-worker: 8
           tp: 4
           ep: 4
           dp-attn: true
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode:
           num-worker: 1
           tp: 16
@@ -6373,7 +6370,6 @@ kimik3-fp4-gb200-dynamo-vllm-agentic:
           dp-attn: true
 # Kimi-K3 GB200 TP16/DCP16 profiles using Mooncake DRAM offload.
 kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-dcp16-agg:
-  # Recipes declare ACPI Grace CPU power; strict AgentX power fails the job on an invalid CPU leg.
   image: vllm/vllm-openai:nightly-dev-arm64-cu13.0.1-75c2eef
   model: moonshotai/Kimi-K3
   model-prefix: kimik3
@@ -6394,17 +6390,15 @@ kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-dcp16-agg:
         num-nodes: 4
         srt-recipe: agg-dcp16-dspark4-maxseq2-mooncake.yaml
         power: true
+        cpu-power: true
         worker:
           num-worker: 1
           tp: 16
           dcp-size: 16
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
 
 kimik3-fp4-gb200-dynamo-vllm-agentic-mooncake-dcp16-agg:
-  # Recipes declare ACPI Grace CPU power; strict AgentX power fails the job on an invalid CPU leg.
   image: vllm/vllm-openai:nightly-dev-arm64-cu13.0.1-75c2eef
   model: moonshotai/Kimi-K3
   model-prefix: kimik3
@@ -6424,14 +6418,13 @@ kimik3-fp4-gb200-dynamo-vllm-agentic-mooncake-dcp16-agg:
         num-nodes: 4
         srt-recipe: agg-dcp16-nospec-mooncake.yaml
         power: true
+        cpu-power: true
         worker:
           num-worker: 1
           tp: 16
           dcp-size: 16
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
 
 dsv4-fp4-gb300-dynamo-trt-agentx:
   image: nvcr.io#nvidia/tensorrt-llm/release:1.3.0rc24
@@ -6542,7 +6535,6 @@ dsv4-fp4-gb300-dynamo-trt-agentx:
 # Add GB200 TP8 x PP2/DCP8 AgentX operating points. The runtime topology uses
 # 16 GPUs total, allocated across four 4-GPU GB200 nodes.
 kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-tp8pp2:
-  # Recipes declare ACPI Grace CPU power; strict AgentX power fails the job on an invalid CPU leg.
   image: vllm/vllm-openai:nightly-dev-arm64-cu13.0.1-728d3ad
   model: moonshotai/Kimi-K3
   model-prefix: kimik3
@@ -6563,6 +6555,7 @@ kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-tp8pp2:
         num-nodes: 4
         srt-recipe: agg-tp8pp2-variants.yaml:override_tp8pp2_c16
         power: true
+        cpu-power: true
         worker:
           num-worker: 1
           tp: 8
@@ -6570,8 +6563,6 @@ kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-tp8pp2:
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
       - spec-decoding: mtp
         kv-offloading: dram
         kv-offload-backend: { name: mooncake, version: "0.3.11.post1" }
@@ -6579,6 +6570,7 @@ kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-tp8pp2:
         num-nodes: 4
         srt-recipe: agg-tp8pp2-variants.yaml:override_tp8pp2_c32
         power: true
+        cpu-power: true
         worker:
           num-worker: 1
           tp: 8
@@ -6586,14 +6578,13 @@ kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-tp8pp2:
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
       - kv-offloading: dram
         kv-offload-backend: { name: mooncake, version: "0.3.11.post1" }
         conc-list: [48]
         num-nodes: 4
         srt-recipe: agg-tp8pp2-variants.yaml:override_tp8pp2_c48
         power: true
+        cpu-power: true
         worker:
           num-worker: 1
           tp: 8
@@ -6601,14 +6592,13 @@ kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-tp8pp2:
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
       - kv-offloading: dram
         kv-offload-backend: { name: mooncake, version: "0.3.11.post1" }
         conc-list: [72]
         num-nodes: 4
         srt-recipe: agg-tp8pp2-variants.yaml:override_tp8pp2_c72
         power: true
+        cpu-power: true
         worker:
           num-worker: 1
           tp: 8
@@ -6616,14 +6606,13 @@ kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-tp8pp2:
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
       - kv-offloading: dram
         kv-offload-backend: { name: mooncake, version: "0.3.11.post1" }
         conc-list: [96]
         num-nodes: 4
         srt-recipe: agg-tp8pp2-variants.yaml:override_tp8pp2_c96
         power: true
+        cpu-power: true
         worker:
           num-worker: 1
           tp: 8
@@ -6631,8 +6620,6 @@ kimik3-fp4-gb200-dynamo-vllm-agentic-dspark-mooncake-tp8pp2:
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
 dsv4-fp4-gb200-dynamo-sglang-agentic-agg:
   image: lmsysorg/sglang:nightly-dev-20260916-c9a8fba9
   model: deepseek-ai/DeepSeek-V4-Pro-0813
@@ -6898,13 +6885,12 @@ qwen3.5-fp8-gb300-dynamo-sglang:
         conc-list: [1, 2, 4, 8, 16, 32, 64, 128]
         srt-recipe: disagg-1p1d-tp4-tp4-stp.yaml
         power: true
+        cpu-power: true
         prefill:
           num-worker: 1
           tp: 4
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode:
           num-worker: 1
           tp: 4
@@ -6915,13 +6901,12 @@ qwen3.5-fp8-gb300-dynamo-sglang:
         conc-list: [1024]
         srt-recipe: disagg-4p1d-dep4-dep16-stp.yaml
         power: true
+        cpu-power: true
         prefill:
           num-worker: 4
           tp: 4
           ep: 4
           dp-attn: true
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode:
           num-worker: 1
           tp: 16
@@ -6932,13 +6917,12 @@ qwen3.5-fp8-gb300-dynamo-sglang:
         conc-list: [2048, 4096]
         srt-recipe: disagg-8p1d-dep4-dep16-stp.yaml
         power: true
+        cpu-power: true
         prefill:
           num-worker: 8
           tp: 4
           ep: 4
           dp-attn: true
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode:
           num-worker: 1
           tp: 16
@@ -8066,7 +8050,6 @@ qwen3.5-fp8-gb200-dynamo-sglang-mtp:
 # Kimi-K3 GB300 points on the measured global p90-ITL Pareto front. Each
 # DCP8 worker spans two 4-GPU nodes.
 kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
-  # Recipes declare ACPI Grace CPU power; strict AgentX power fails the job on an invalid CPU leg.
   image: vllm/vllm-openai:nightly-dc36fcce902a63eab06c1b93a5c4a5ee178a0c56
   model: moonshotai/Kimi-K3
   model-prefix: kimik3
@@ -8090,14 +8073,13 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
         conc-list: [48, 56]
         srt-recipe: disagg-variants.yaml:override_1p1d_dcp8_dcp8_dspark4
         power: true
+        cpu-power: true
         prefill:
           num-worker: 1
           tp: 8
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode: { num-worker: 1, tp: 8, dcp-size: 8, ep: 1, dp-attn: false }
       - spec-decoding: mtp
         kv-offloading: dram
@@ -8105,14 +8087,13 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
         conc-list: [48, 64]
         srt-recipe: disagg-variants.yaml:override_1p2d_dcp8_dcp8_dspark4
         power: true
+        cpu-power: true
         prefill:
           num-worker: 1
           tp: 8
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode: { num-worker: 2, tp: 8, dcp-size: 8, ep: 1, dp-attn: false }
       - spec-decoding: mtp
         kv-offloading: dram
@@ -8120,14 +8101,13 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
         conc-list: [1]
         srt-recipe: disagg-variants.yaml:override_1p3d_dcp8_dcp8_dspark7
         power: true
+        cpu-power: true
         prefill:
           num-worker: 1
           tp: 8
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode: { num-worker: 3, tp: 8, dcp-size: 8, ep: 1, dp-attn: false }
       - spec-decoding: mtp
         kv-offloading: dram
@@ -8135,18 +8115,16 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
         conc-list: [48]
         srt-recipe: disagg-variants.yaml:override_1p3d_dcp8_dcp8_dspark4
         power: true
+        cpu-power: true
         prefill:
           num-worker: 1
           tp: 8
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
         decode: { num-worker: 3, tp: 8, dcp-size: 8, ep: 1, dp-attn: false }
 
 kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-agg:
-  # Recipes declare ACPI Grace CPU power; strict AgentX power fails the job on an invalid CPU leg.
   image: vllm/vllm-openai:nightly-dc36fcce902a63eab06c1b93a5c4a5ee178a0c56
   model: moonshotai/Kimi-K3
   model-prefix: kimik3
@@ -8167,14 +8145,13 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-agg:
         num-nodes: 2
         srt-recipe: agg-variants.yaml:override_dcp8_dspark7_maxseq2
         power: true
+        cpu-power: true
         worker:
           num-worker: 1
           tp: 8
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
       - spec-decoding: mtp
         kv-offloading: dram
         kv-offload-backend: { name: mooncake, version: "0.3.13.post1" }
@@ -8182,14 +8159,13 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-agg:
         num-nodes: 2
         srt-recipe: agg-variants.yaml:override_dcp8_dspark4
         power: true
+        cpu-power: true
         worker:
           num-worker: 1
           tp: 8
           dcp-size: 8
           ep: 1
           dp-attn: false
-          additional-settings:
-          - "CPU_POWER_EXPORTER_RELEASE=v2.51.1"
 
 # Kimi-K3 MXFP4 B200 aggregated vLLM (TP8 x PP2, 2 nodes / 16 GPUs), agentic
 # coding. The native MXFP4 checkpoint (2.8T total params, ~1.4TB weights) does

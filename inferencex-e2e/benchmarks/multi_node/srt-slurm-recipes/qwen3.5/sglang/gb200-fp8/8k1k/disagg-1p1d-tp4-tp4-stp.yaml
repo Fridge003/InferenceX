@@ -108,8 +108,3 @@ roles:
       decode-log-interval: 1
       stream-interval: 50
       disaggregation-mode: "decode"
-
-telemetry:
-  cpu_power_exporter:
-    port: 9405
-    source: acpi

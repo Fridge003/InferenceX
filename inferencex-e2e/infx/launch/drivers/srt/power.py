@@ -141,6 +141,8 @@ class PowerDecision:
     agentx: bool
     adapter: bool = False
     require: bool = False
+    # The point selected cpu-power: the cluster's Grace CPU exporter is bound and expected.
+    cpu: bool = False
     expected_cpu_source: str | None = None
 
 
@@ -152,6 +154,8 @@ def decide_power(cluster_id: str, path: LaunchPath, request: MultiNodeRequest) -
 
     Raises ``PowerPolicyError`` for a combination the lane does not allow.
     """
+    if request.cpu_power and not request.power:
+        raise PowerPolicyError("cpu-power requires power on the same point")
     if not request.power:
         return NO_POWER
     lane = POWER_LANES.get((cluster_id, path))
@@ -160,7 +164,11 @@ def decide_power(cluster_id: str, path: LaunchPath, request: MultiNodeRequest) -
     for rule in lane.rules:
         if rule.when(request):
             return PowerDecision(
-                dcgm=True, agentx=rule.agentx, adapter=rule.adapter, require=rule.require
+                dcgm=True,
+                agentx=rule.agentx,
+                adapter=rule.adapter,
+                require=rule.require,
+                cpu=request.cpu_power,
             )
     message = lane.agentic_error if request.is_agentic and lane.agentic_error else lane.error
     raise PowerPolicyError(message)

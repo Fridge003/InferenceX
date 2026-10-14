@@ -144,8 +144,3 @@ roles:
 
       decode-log-interval: 1
       stream-interval: 50
-
-telemetry:
-  cpu_power_exporter:
-    port: 9405
-    source: acpi

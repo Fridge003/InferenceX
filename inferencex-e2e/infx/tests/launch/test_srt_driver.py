@@ -376,6 +376,8 @@ def test_power_lane_stages_provenance_and_validates_each_concurrency(
     assert bound["benchmark"]["env"]["REQUIRE_POWER"] == require_power
     assert bound["telemetry"]["collector_join_timeout_seconds"] == 12
     assert (bound["telemetry"]["enabled"], bound["telemetry"]["dcgm_exporter"]["port"]) == (True, 9401)
+    assert "cpu_power_exporter" not in bound["telemetry"]
+    assert all("CPU_POWER_EXPORTER_RELEASE" not in call for call in lines(harness.logs, "make"))
 
     runs = lines(harness.logs, "adapter")
     assert [run.split("--result-dir ")[1].split()[0].rsplit("/", 1)[1] for run in runs] == ["conc_4"]
@@ -676,20 +678,26 @@ def test_launch_cpu_expectation_reaches_fixed_sequence_processor(harness, monkey
     )
 
     github_env = harness.tmp / "github-env"
-    recipe = LANE_FRAGMENT + POWER_TELEMETRY + "  cpu_power_exporter:\n    source: acpi\n"
     env = lane_env(
         harness,
         "gb300-nv",
-        recipe,
+        LANE_FRAGMENT + POWER_TELEMETRY,
         MODEL_PREFIX="qwen3.5",
         PRECISION="fp8",
         FRAMEWORK="dynamo-sglang",
         MODEL="Qwen/Qwen3.5-397B-A17B-FP8",
         REQUIRE_POWER="1",
         POWER="1",
+        CPU_POWER="1",
         GITHUB_ENV=str(github_env),
     )
     assert_ok(launch(env, harness.config, harness.workspace))
+    [checkout] = harness.workspace.glob("srt-slurm-9001-*")
+    bound = yaml.safe_load((checkout / "recipe.yaml").read_text())
+    assert bound["telemetry"]["cpu_power_exporter"] == {"source": "acpi"}
+    assert bound["telemetry"]["dcgm_exporter"]["port"] == 19401
+    [setup] = [call for call in lines(harness.logs, "make") if call.startswith("setup ")]
+    assert "CPU_POWER_EXPORTER_RELEASE=v2.51.1" in setup.split()
     exported = dict(line.split("=", 1) for line in github_env.read_text().splitlines())
     pkg = build_package(harness.tmp / "power-input")
     monkeypatch.chdir(harness.tmp)

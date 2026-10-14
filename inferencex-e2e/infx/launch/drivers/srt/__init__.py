@@ -163,14 +163,16 @@ def run_multinode(launch: Launch) -> int:
     )
     install_srtctl(run, checkout, python=system_python)
     config.write_lane_config(run, lane, checkout, decision, model_paths)
-    if rc := run_setup(run, checkout):
+    if rc := run_setup(run, checkout, cpu_power_exporter=decision.cpu):
         return rc
     infmax = compute_workspace(run, checkout, shared=shared)
     run.env["INFMAX_WORKSPACE"] = str(infmax)
 
     recipe = str(checkout.root / BOUND_RECIPE)
-    power_port, client_env = config.binder_inputs(run.cluster, run.srt, lane, request, decision)
-    if rc := submit.bind_recipe(run, checkout, staged, recipe, power_port, client_env):
+    power_port, cpu_source, client_env = config.binder_inputs(
+        run.cluster, run.srt, lane, request, decision
+    )
+    if rc := submit.bind_recipe(run, checkout, staged, recipe, power_port, cpu_source, client_env):
         return rc
     decision = power.with_cpu_source(decision, Path(recipe))
     if github_env := request.env.get("GITHUB_ENV"):
