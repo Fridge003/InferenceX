@@ -18,15 +18,6 @@ base:
       decode-policy: round_robin
       atom-pd-rank-mapping-policy: none
   engine: atom
-  # A recipe host_setup replaces the cluster default, so run that first (NIC
-  # checks, GPU drain, release of hugepages a previous job left). Then reclaim
-  # memory on every node: drop the clean page cache and compact what is free.
-  host_setup:
-    nodes: all
-    timeout_seconds: 1800
-    commands:
-      - &cluster_setup IBDEVICES=rdma0,rdma1,rdma2,rdma3,rdma4,rdma5,rdma6,rdma7 bash "${GITHUB_WORKSPACE}/runners/srt-slurm/hooks/mi355x-amds/setup.sh"
-      - &reclaim_memory sync && echo 1 | sudo -n tee /proc/sys/vm/drop_caches >/dev/null && echo 1 | sudo -n tee /proc/sys/vm/compact_memory >/dev/null
   roles:
     prefill:
       nodes: 1
@@ -36,6 +27,9 @@ base:
         <<: &environment
           PYTHONUNBUFFERED: "1"
           PYTHONHASHSEED: "0"
+          # srtctl downloads an hf: checkpoint once into the shared hub cache only when HF_HOME is set.
+          HF_HOME: /hf_hub_cache
+          HF_HUB_CACHE: /hf_hub_cache/hub
           AITER_LOG_LEVEL: WARNING
           AITER_QUICK_REDUCE_QUANTIZATION: INT4
           AITER_USE_FLYDSL_MOE_SORTING: "1"
@@ -95,23 +89,18 @@ base:
       TOKENIZERS_PARALLELISM: "false"
       TRANSFORMERS_VERBOSITY: error
 
-# One variant per point. A DCP4 decode admits 512 and captures every batch up
-# to 256; a 1P3D decode admits twice CONC and captures up to that.
-
-override_1p1d_mcstore_c56: &mcstore_1p1d
+override_1p1d_mcstore:
   host_setup:
     nodes: all
     timeout_seconds: 1800
     commands:
-      - *cluster_setup
-      - *reclaim_memory
-      # Owners bind NUMA0 (rdma0-1) and NUMA1 (rdma2-3), 178,688 2 MiB pages
-      # each, so each NUMA node needs 357,376 free. Reserve both nodes' share
-      # with 2 GiB spare each on the prefill node, and fail the node here when
-      # the kernel grants fewer.
+      # A recipe host_setup replaces the cluster default, which also drops the page cache under DRAM KV offloading.
+      - IBDEVICES=rdma0,rdma1,rdma2,rdma3,rdma4,rdma5,rdma6,rdma7 bash "${GITHUB_WORKSPACE}/runners/srt-slurm/hooks/mi355x-amds/setup.sh"
+      # Owners take 714752 2 MiB pages, half per NUMA node; reserve 2% more above the pages host services hold.
       - >-
         if [[ "$(hostname -s)" == "$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)" ]]; then
-        HUGEPAGES_TARGET=716800 HUGEPAGE_GROW_TOLERANCE_PCT=0
+        held=$(awk '/^HugePages_Total:/ {total = $2} /^HugePages_Free:/ {free = $2} /^HugePages_Rsvd:/ {rsvd = $2} END {print total - free + rsvd}' /proc/meminfo);
+        HUGEPAGES_TARGET=$(( held + 714752 * 102 / 100 )) HUGEPAGE_GROW_TOLERANCE_PCT=1
         bash "${GITHUB_WORKSPACE}/runners/srt-slurm/hooks/mi355x-amds/hugepage_sanity.sh" || exit 1;
         for node in 0 1; do
         free=$(cat /sys/devices/system/node/node$node/hugepages/hugepages-2048kB/free_hugepages);
@@ -120,10 +109,6 @@ override_1p1d_mcstore_c56: &mcstore_1p1d
         done; fi
     teardown:
       - HUGEPAGES_TARGET=0 bash "${GITHUB_WORKSPACE}/runners/srt-slurm/hooks/mi355x-amds/hugepage_sanity.sh"
-  # Pool k is rdma k: its master listens on 26051 + 100k (HTTP metadata on
-  # 26080 + 100k), and its owner registers a 349 GiB segment on rdma k.
-  # numa_exec.py (shipped in the image) binds each process's CPUs and memory
-  # to one NUMA node.
   services:
     - &master
       name: mc-master-rdma0
@@ -133,6 +118,7 @@ override_1p1d_mcstore_c56: &mcstore_1p1d
       start: before_workers
       critical: true
       inherit_discovery_env: false
+      # numa_exec.py <node> binds the process's CPUs and memory to that NUMA node.
       command: [python3, /app/ATOM/.github/scripts/atomesh/numa_exec.py, "1", mooncake_master, --rpc_port=26051, --rpc_thread_num=32, --enable_http_metadata_server=true, --http_metadata_server_host=0.0.0.0, --http_metadata_server_port=26080, --metrics_port=26090, --default_kv_lease_ttl=10000, --eviction_high_watermark_ratio=0.90, --eviction_ratio=0.05, --allocation_strategy=random, --memory_allocator=offset, --client_ttl=10]
       env: &store_env
         # A Mooncake process that sees a GPU probes every buffer through HIP.
@@ -168,8 +154,7 @@ override_1p1d_mcstore_c56: &mcstore_1p1d
       command: [python3, /app/ATOM/.github/scripts/atomesh/numa_exec.py, "0", mooncake_client, "--host={node_ip}", --port=26052, --master_server_address=127.0.0.1:26051, --metadata_server=http://127.0.0.1:26080/metadata, --protocol=rdma, --device_names=rdma0, --global_segment_size=374735896576, --local_buffer_size=0, --threads=4]
       env:
         <<: *store_env
-        # Map the segment from the reserved 2 MiB pages, never 4 KiB ones the
-        # NIC cannot register in 64 GiB regions.
+        # Back the segment with the reserved 2 MiB pages; the NIC cannot register 64 GiB regions of 4 KiB pages.
         MC_STORE_USE_HUGEPAGE: "1"
         MC_MAX_MR_SIZE: "68719476736"
         MC_TCP_BIND_ADDRESS: "{node_ip}"
@@ -222,12 +207,6 @@ override_1p1d_mcstore_c56: &mcstore_1p1d
           max-num-batched-tokens: 2048
           cudagraph-capture-sizes: '[1,2,4,8,16,24,32,40,48,56,64,72,80,88,96,104,112,120,128,136,144,152,160,168,176,184,192,200,208,216,224,232,240,248,256]'
         num-speculative-tokens: 3
-
-override_1p1d_mcstore_c72: *mcstore_1p1d
-
-override_1p1d_mcstore_c96: *mcstore_1p1d
-
-override_1p1d_mcstore_c112: *mcstore_1p1d
 
 override_1p2d_lmcache_c56:
   resources: &spread
