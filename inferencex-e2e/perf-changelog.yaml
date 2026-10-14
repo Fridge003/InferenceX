@@ -9830,5 +9830,6 @@
     - agentic-coding
   description:
     - "Append the GB300 DeepSeek-V4.1-Flash Dynamo + vLLM AgentX 8P1D c5120 and 10P1D c6656 points to the existing curve."
+    - "Use AgentX 1.0.9 with the SPAWN worker-pinning patch and t-digest timing storage only for these new high-concurrency points."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4074
   append-only: true

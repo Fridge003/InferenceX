@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import shutil
 import sys
@@ -79,7 +80,18 @@ def bootstrap(runtime: Runtime) -> int:
         )
     if not (_executable(runtime.agentx) and _executable(runtime.hf)):
         raise BenchError(f"isolated AgentX environment is incomplete at {runtime.venv}")
+    if patch := os.environ.get("AIPERF_RUNTIME_PATCH"):
+        apply_patch(runtime, Path(patch))
     return 0
+
+
+def apply_patch(runtime: Runtime, patch: Path) -> None:
+    """Apply a recipe-selected source patch to the isolated installed harness."""
+    digest = hashlib.sha256(patch.read_bytes()).hexdigest()
+    site_packages = runtime.venv / "lib" / f"python{PYTHON_VERSION}" / "site-packages"
+    print(f"Applying AgentX runtime patch {patch.name} sha256={digest}", flush=True)
+    if proc.call(["git", "apply", "-p2", str(patch.resolve())], cwd=site_packages):
+        raise BenchError(f"AgentX runtime patch failed: {patch}")
 
 
 def _executable(path: Path) -> bool:

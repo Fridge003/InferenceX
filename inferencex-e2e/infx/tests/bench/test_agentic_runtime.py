@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from infx.bench.agentic.venv import Runtime, bootstrap
+from infx.bench.agentic.venv import Runtime, apply_patch, bootstrap
 from infx.bench.env import BenchError
 from infx.tests.bench.stubs import executable
 
@@ -123,3 +123,23 @@ def test_unusable_runtime_fails_with_the_reason(tmp_path, tools, monkeypatch, fa
 
     with pytest.raises(BenchError, match=message):
         bootstrap(Runtime(tmp_path / "runtime"))
+
+
+def test_runtime_patch_changes_installed_code_and_rejects_mismatch(tmp_path):
+    runtime = Runtime(tmp_path / "runtime")
+    site = runtime.venv / "lib" / "python3.11" / "site-packages"
+    site.mkdir(parents=True)
+    installed = site / "example.py"
+    installed.write_text("value = 1\n")
+    patch = tmp_path / "example.patch"
+    patch.write_text(
+        "diff --git a/src/example.py b/src/example.py\n"
+        "--- a/src/example.py\n+++ b/src/example.py\n"
+        "@@ -1 +1 @@\n-value = 1\n+value = 2\n"
+    )
+
+    apply_patch(runtime, patch)
+
+    assert installed.read_text() == "value = 2\n"
+    with pytest.raises(BenchError, match="runtime patch failed"):
+        apply_patch(runtime, patch)
