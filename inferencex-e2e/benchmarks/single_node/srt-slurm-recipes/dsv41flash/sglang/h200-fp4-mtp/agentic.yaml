@@ -22,14 +22,25 @@ base:
         data-parallel-size: 1
         expert-parallel-size: 1
         attention-backend: dsv4
+        # Native Marlin pads the TP-sharded 2304-wide experts (TP4=576, TP8=288)
+        # that the SM90 CUTLASS method rejects; both consume the MXFP4 weights.
         moe-runner-backend: marlin
+        # Below the cookbook's 0.8, with a bounded prefill chunk: the sparse
+        # attention indexer and DSpark prefill buffers scale with chunk times the
+        # 1M context. The default 16384 chunk exhausted HBM on 66k-99k-token
+        # prompts, and 8192 OOMed c32 (run 35308550355).
         mem-fraction-static: 0.70
         chunked-prefill-size: 4096
         prefill-decode-interval: 16
         enable-decoder-swa-bounded-replay: true
+        # The default 4*max-running-requests retained too few SWA prefix tails:
+        # C16 exhausted its 94,976-slot SWA pool while the full pool had room.
         swa-prefix-tails: 1024
         speculative-algorithm: DSPARK
         speculative-dspark-block-size: 5
+        # A verify step above the captured batch runs eagerly and allocates its
+        # attention workspace, which OOMed the eval at 128 running requests
+        # (run 35306704553), so admission never exceeds the graph batch.
         cuda-graph-max-bs-decode: 64
         reasoning-parser: auto
         tool-call-parser: auto
@@ -41,6 +52,8 @@ base:
         SGLANG_TIMEOUT_KEEP_ALIVE: '900'
         SGLANG_DEFAULT_THINKING: '1'
         SGLANG_DSV41_REASONING_EFFORT: high
+        # Move the fp8 Engram tables to row-sharded host memory, freeing ~23 GiB
+        # of HBM per GPU. With them on GPU, c128 died at startup (run 35304458924).
         SGLANG_ENABLE_DSV41_ENGRAM_HOST_TABLE: '1'
         SGLANG_DSV41_ENGRAM_HOST_TABLE_LAYOUT: per_rank
   benchmark:

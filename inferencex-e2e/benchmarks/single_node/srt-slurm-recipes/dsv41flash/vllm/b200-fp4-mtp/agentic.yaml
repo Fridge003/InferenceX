@@ -71,6 +71,9 @@ zip_override_tp4:
     env:
       CONC: ['1', '4', '8', '16', '32', '64', '128']
 
+# DEP2: TP1 x DP2 + EP2 with MegaMoE behind a consistent-hash router. Each
+# B200 rank holds ~150 GiB of weights, so batched tokens stay at 4096 and
+# graph capture stops at 576 tokens.
 zip_override_dep2:
   frontend:
     type: vllm-router

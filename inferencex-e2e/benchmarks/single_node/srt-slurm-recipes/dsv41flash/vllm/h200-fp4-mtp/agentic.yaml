@@ -31,6 +31,10 @@ base:
         engram-config: '{"cpu_offload":true}'
         speculative-config: '{"method":"dspark","num_speculative_tokens":5,"draft_sample_method":"probabilistic","rejection_sample_method":"block","enable_adaptive_verification":false}'
         max-model-len: 1048576
+        # The HF cache here is a VIRTIOFS mount, which vLLM does not treat as a
+        # network FS, so it memory-maps the 475 GiB checkpoint lazily: 19/48 shards
+        # loaded in the 3600 s readiness window (run 35012494184). Stream the shards
+        # into page cache with parallel readers first.
         safetensors-load-strategy: prefetch
         disable-uvicorn-access-log: true
       env:

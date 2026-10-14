@@ -45,6 +45,7 @@ base:
           mode: "embedded"
           enable_offload: false
   environment:
+    # Mooncake prefix-block hashes must match across processes and nodes.
     PYTHONHASHSEED: "0"
   frontend:
     type: dynamo

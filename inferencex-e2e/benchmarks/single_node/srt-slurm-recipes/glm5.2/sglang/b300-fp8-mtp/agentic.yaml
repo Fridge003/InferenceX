@@ -26,6 +26,7 @@ base:
         bf16-gemm-backend: cutedsl
         max-prefill-tokens: 8192
         quantization: fp8
+        # GLM-5.2 emits the GLM-4.7 tool-call format.
         tool-call-parser: glm47
         reasoning-parser: glm45
         chunked-prefill-size: 8192

@@ -32,6 +32,8 @@ base:
         speculative-num-steps: 1
         speculative-eagle-topk: 1
         speculative-num-draft-tokens: 7
+        # The checkpoint lives on Lustre: prefetch sequentially across local
+        # ranks so post-load repacking reads from page cache.
         weight-loader-prefetch-checkpoints: true
         model-loader-extra-config: '{"enable_multithread_load": true}'
         enable-metrics: true

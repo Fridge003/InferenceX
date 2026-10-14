@@ -35,6 +35,9 @@ base:
         SGLANG_DEFAULT_THINKING: '1'
         SGLANG_DSV41_REASONING_EFFORT: high
         SGLANG_DSPARK_OPT_MARKOV_W2_BF16: 'True'
+        # Fold DSpark draft sampling into the draft CUDA graph. AUTO leaves it eager
+        # for V4.1 TP shards, which left c1 decode launch-bound (~6 ms GPU idle per
+        # step in nsys at TP4 c1).
         SGLANG_DSPARK_FOLDED_SAMPLING: '2'
   health_check:
     max_attempts: 1440

@@ -25,6 +25,7 @@ base:
         expert-parallel-size: 1
         linear-attn-prefill-backend: flashinfer
         linear-attn-decode-backend: flashinfer
+        # SM100+ flashinfer linear-attn decode requires a bf16 SSM state.
         mamba-ssm-dtype: bfloat16
         speculative-algorithm: NEXTN
         speculative-num-steps: 3

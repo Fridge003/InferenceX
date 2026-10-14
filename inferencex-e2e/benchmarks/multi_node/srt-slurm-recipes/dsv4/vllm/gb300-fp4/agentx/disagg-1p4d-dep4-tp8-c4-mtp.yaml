@@ -132,6 +132,8 @@ roles:
 
     args:
       kv-transfer-config: '{"kv_connector":"NixlConnector","kv_role":"kv_both","kv_load_failure_policy":"fail","kv_buffer_device":"cuda","kv_connector_extra_config":{"enforce_handshake_compat":false,"enable_cross_layers_blocks":false}}'
+      # TP8 spans two GB300 nodes; custom all-reduce is single-node only, so
+      # decode uses the FlashInfer allreduce path like the agg TP8 recipes.
       disable-custom-all-reduce: true
       served-model-name: "deepseek-ai/DeepSeek-V4-Pro"
       safetensors-load-strategy: "prefetch"

@@ -8,6 +8,7 @@ base:
   dynamo:
     install: true
   environment:
+    # Mooncake prefix-block hashes must match across processes and nodes.
     PYTHONHASHSEED: "0"
   setup_script: vllm-container-deps.sh
   slurm:

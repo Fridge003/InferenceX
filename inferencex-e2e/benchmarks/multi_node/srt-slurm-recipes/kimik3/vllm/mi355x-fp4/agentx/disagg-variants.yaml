@@ -13,6 +13,7 @@ base:
     /dev/infiniband: /dev/infiniband
   extra_mount:
     - /it-share/data/Inferact-Kimi-K3-DSpark:/models/Inferact-Kimi-K3-DSpark
+    # Match the host's Ionic provider without replacing the image's verbs core.
     - /usr/lib/x86_64-linux-gnu/libibverbs/libionic-rdmav34.so:/usr/lib/x86_64-linux-gnu/libibverbs/libionic-rdmav34.so:ro
   resources:
     gpu_type: mi355x
@@ -165,6 +166,7 @@ override_1p1d_c48: &tp8_c48
         max-num-batched-tokens: 8192
         compilation-config: '{"mode":3,"cudagraph_mode":"NONE","max_cudagraph_capture_size":0,"custom_ops":["+fused_rms_norm_gated","+quant_fp8","+grouped_topk","+sparse_attn_indexer","none"]}'
       env:
+        # Short-tail segmented MLA can require ~4.1 GB of non-reclaimable scratch.
         HSA_NO_SCRATCH_RECLAIM: '0'
     decode: &tp8_c48_decode
       args: &tp8_c48_decode_args

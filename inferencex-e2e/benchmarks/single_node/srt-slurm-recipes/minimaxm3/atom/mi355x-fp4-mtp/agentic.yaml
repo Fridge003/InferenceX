@@ -195,6 +195,10 @@ override_tp2_c4:
     env:
       CONC: '4'
 
+# DRAM variants: LMCache's in-process CPU tier with ATOM's segmented LRU and
+# all-rank lookup, sized at TOTAL_CPU_DRAM_GB / TP (257 GB) per rank.
+# PYTHONHASHSEED keeps every rank's chunk keys identical; without it the
+# offload hit rate is zero.
 override_tp2_c20_lmcache:
   roles:
     agg:

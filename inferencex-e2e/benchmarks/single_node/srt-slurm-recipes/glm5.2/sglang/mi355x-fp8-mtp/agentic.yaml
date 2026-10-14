@@ -22,6 +22,8 @@ base:
         kv-cache-dtype: fp8_e4m3
         dsa-prefill-backend: tilelang
         dsa-decode-backend: tilelang
+        # GLM-5.2 emits GLM-4.7-style tool calls; glm45 keeps hybrid thinking
+        # in reasoning_content.
         tool-call-parser: glm47
         reasoning-parser: glm45
         chunked-prefill-size: 32768

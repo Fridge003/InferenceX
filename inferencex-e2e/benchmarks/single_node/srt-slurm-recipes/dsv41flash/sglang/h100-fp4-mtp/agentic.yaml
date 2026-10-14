@@ -26,7 +26,12 @@ base:
         tensor-parallel-size: 8
         data-parallel-size: 1
         expert-parallel-size: 8
+        # Native MXFP4 Marlin supports Hopper with BF16 activations; dense FP8
+        # operators and shipped DSpark precision remain unchanged.
         moe-runner-backend: marlin
+        # 0.7 leaves 24 GB for the 4096-token chunk's working set: 0.8/4096
+        # OOMed c8 (run 35304509605), and a 2048 chunk failed c4's latency
+        # coverage at ~1,000 prefill tok/s (run 35307250127).
         mem-fraction-static: 0.7
         chunked-prefill-size: 4096
         speculative-algorithm: DSPARK
@@ -39,6 +44,8 @@ base:
       env:
         PYTHONNOUSERSITE: '1'
         PYTHONUNBUFFERED: '1'
+        # Long-context indexer masks change allocation sizes across requests. At
+        # C20 the stock allocator OOMed on a 2.39 GiB mask with 5.61 GiB reserved.
         PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
         SGLANG_TIMEOUT_KEEP_ALIVE: '900'
         SGLANG_DEFAULT_THINKING: '1'
@@ -116,6 +123,9 @@ override_tp8_c20:
     env:
       CONC: '20'
 
+# DP8 attention: the shipped MoE DSpark worker requires attn_tp=1. SGLang divides
+# the engine-wide 4096-token chunk by DP (512 tokens/rank). The DP-aware router
+# hashes AIPerf's per-session correlation ID so prefixes stay on one rank.
 override_dp8_c4:
   frontend:
     type: sglang-router

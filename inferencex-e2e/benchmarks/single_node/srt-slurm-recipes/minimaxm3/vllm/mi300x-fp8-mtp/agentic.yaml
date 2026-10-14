@@ -28,6 +28,8 @@ base:
         trust-remote-code: true
         block-size: 128
         gpu-memory-utilization: 0.90
+        # MiniMaxM3SparseForConditionalGeneration is not torch-compiled, so
+        # without breakable graphs the default FULL_AND_PIECEWISE mode aborts.
         compilation-config: '{"cudagraph_mode":"FULL_DECODE_ONLY"}'
         enable-chunked-prefill: true
         max-num-batched-tokens: 16384

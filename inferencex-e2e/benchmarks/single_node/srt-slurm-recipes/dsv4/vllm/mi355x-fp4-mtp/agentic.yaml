@@ -52,7 +52,10 @@ base:
         VLLM_ROCM_USE_AITER: '1'
         VLLM_ROCM_QUICK_REDUCE_QUANTIZATION: INT4
         VLLM_ROCM_USE_AITER_MOE: '1'
+        # Packed MXFP4 routed experts beside a full-width FP8 shared expert fail
+        # to load through the fused path.
         VLLM_ROCM_USE_AITER_FUSION_SHARED_EXPERTS: '0'
+        # vLLM only clamps torch threads after weight loading.
         OMP_NUM_THREADS: '1'
   benchmark:
     env:

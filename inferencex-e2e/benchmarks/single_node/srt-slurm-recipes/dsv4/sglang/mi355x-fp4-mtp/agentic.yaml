@@ -29,6 +29,8 @@ base:
         swa-full-tokens-ratio: 0.1
         kv-cache-dtype: fp8_e4m3
         enforce-shared-experts-fusion: true
+        # No chat-template override: deepseek_v4_thinking.jinja drops tool
+        # definitions and tool messages.
         tool-call-parser: deepseekv4
         reasoning-parser: deepseek-v4
         chunked-prefill-size: 16384
