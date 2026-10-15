@@ -295,12 +295,14 @@ and gb200 hand references were confirmed against two-pass fleet artifacts (runs 
 31089556516). Both `p50` and `p99` are
 emitted either way and `summarize.py` prints both. MAX is the fresh-entry family's reduction because
 a layer is not finished until its slowest rank is, so MAX is the completion cost, and it charges
-inter-rank entry stagger to whichever component the ranks entered unevenly. That stagger depends on
-the code path AND the precision, not only on the fleet: on identical h200 low-latency decode cells
-the per-iteration spread is ~9.3 us for deepep-v2 and uccl-ep at BF16 (they share the legacy
-`Buffer` path) against ~2.6 us for nccl-ep, and collapses to ~2.8 us for those same two under FP8,
-where in-kernel quantisation makes the heavier dispatch self-align the ranks. The term is not
-subtractable in any principled way, so MAX alone taxes some rows more than others.
+inter-rank entry stagger to whichever component the ranks entered unevenly. Before per-sample
+alignment (CUDA Graph Replay below) that stagger depended on the code path AND the precision, not
+only on the fleet: on identical h200 low-latency decode cells the per-iteration spread was ~9.3 us
+for deepep-v2 and uccl-ep at BF16 (they share the legacy `Buffer` path) against ~2.6 us for
+nccl-ep, and collapsed to ~2.8 us for those same two under FP8, where in-kernel quantisation makes
+the heavier dispatch self-align the ranks. Alignment removes most entry stagger; ranks still leave a
+window unevenly (h200 uccl-ep prefill spreads 11-67 us at p50), and that term is not subtractable
+in any principled way, so MAX alone taxes some rows more than others.
 
 Every row therefore also carries `cross_rank_min_us` (the same iterations reduced with MIN, the
 skew-excluded floor) and `cross_rank_spread_us` (per-iteration MAX minus MIN). Read MAX and MIN as a
@@ -353,10 +355,85 @@ drained pair (`cuda_graph_last_output_passed`). Graphed rows carry a `-cudagraph
 `kernel_generation`, so the durable store never pools them with eager rows; the artifact also
 records `implementation.cuda_graph_replay` and `cuda_graph_supported`.
 
+**Eager rows align the same way.** A row that stays eager (no graph-safe mode, or
+`COLLX_CUDA_GRAPH=0`) opens each fresh-entry sample the way DeepEP's `bench_kineto` does: a GPU
+spin, then a device all-reduce, both queued ahead of the sample with no host sync before the start
+event. The spin lasts 2 ms of wall time (`COLLX_ALIGN_SPIN_US`; DeepEP spins about 10 ms) and is
+calibrated after each series' warm-up, because `torch.cuda._sleep` counts SM cycles. It outlasts
+the host's enqueue of the sample, so the last rank to arrive already has its timed work queued when
+the all-reduce releases everyone, and every rank's window opens at the barrier's exit instead of at
+its host's launch: the entry skew and the first kernel's launch latency both leave the window
+(about 25 µs off `cross_rank_min_us` as well as MAX on h200). A 500 µs spin covered the typical
+50-70 µs enqueue but not its occasional stalls: h200 uccl-ep normal decode roundtrip p99 roughly
+doubled and spread p99 rose from ~20 to 185-293 µs.
+
+A sample counts as **missed** when some rank's host took longer than the spin to get from the
+spin's enqueue to the start event's record, so that rank's window may have opened after the barrier
+released the others. Each eager row publishes `rank_alignment.missed_samples` per series and
+`missed_fraction`, the largest share among roundtrip, dispatch and combine (staging is local work).
+Every fresh-entry tail in the row (components, `cross_rank_min_us` and the token rates) is withheld
+once the samples that were missed or host-stalled (below), each counted once, could fill everything
+above it: p99 at 1% of samples, p95 at 5%, p90 at 10%. `implementation.rank_alignment` records the
+method and spin; graphed rows say `in-graph-all-reduce` and carry `rank_alignment: null`.
+
+**Host-synced series wait out a throttled host.** In modes whose dispatch waits on the host
+(uccl-ep normal, deepep-v2 normal prefill) the barrier aligns the dispatch launch, and the host's
+poll and relaunch sit inside the window. That is their production cost, and it carries the host's
+speed into the window. While uccl-ep EP16 runs, b200-nscale nodes intermittently run the cores of
+both sockets at about 200 MHz effective (`scaling_cur_freq`, an APERF/MPERF average) for 100-200 ms,
+every 2-5 s, while the GPUs keep their clocks and the thermal-throttle counters stay at zero. An
+idle pinned process outside the benchmark runs ~16x slow over the same spans, then takes another
+10-20 ms to wind back up through 3-7x. The same nodes show none of it idle, with 40 cores busy,
+during uccl-ep EP8, or during deepep-v2 EP16, whose RDMA is GPU-initiated where uccl-ep posts its
+own from 32 busy-polling CPU proxies per node; base and eager runs see it at the same rate. It is
+the platform's response to uccl-ep's multi-node host load, not to the alignment. The 50-100 µs of
+uccl-ep host work between the notify and the end event then takes 1-2 ms, every rank's transfer
+waits on the late one, and `cross_rank_min_us` rises with MAX. On 2026-10-14 that hit 0.7-1.2% of
+EP16 decode samples, enough to put roundtrip p99 at 2-3.8 ms instead of ~0.6 ms at whichever rungs
+collected more than 1%.
+
+So each sample of these series first times a fixed loop of interpreter work (~20 µs at speed)
+outside the window, and while it runs more than 2.5x slower than the lowest median any of the run's
+series calibrated, the rank keeps probing instead of opening the sample; the other ranks wait at
+the barrier. A second probe after the sample's final sync catches a throttle that began inside the
+window. A sample waits at most 0.5 s and a run 60 s in total, so a host throttled for good cannot
+stall the run; past the budget its throttled samples count as stalled. One node did that on
+2026-10-14: under uccl-ep EP16 its second socket ran throttled a third of the time, 5-30% of the
+samples counted as stalled, and every tail was withheld. Rows publish, per series,
+`host_held_samples`: samples whose start some rank held for more than 1 ms (a shorter hold is an
+interrupt on one probe), which then opened at speed and gate nothing; and `host_stalled_samples`:
+samples where a probe on either side of some rank's window ran more than 5x slow, a throttle that
+began inside the window or outlasted the hold, which gate the tails like missed ones. Each count
+carries its largest series share (`host_held_fraction`, `host_stalled_fraction`); all four are null
+in series whose dispatch does not wait on the host. The bars come from the same diagnostics: away
+from throttles, a ~50 µs slice of Python on a rank's own core runs more than 2.5x its median in at
+most 0.2% of samples and more than 5x in about 0.001%.
+
+Holding measures the library on a host running at speed. A uccl-ep EP16 decode loop on this
+platform pays the throttles too, and `host_held_fraction` shows how often they came. Rows timed
+before the alignment (the bare family) kept them, inconsistently: the whole launch path sat in
+their window, and the throttles put their roundtrip p99 at 2.9-4.3 ms at every rung of three
+runs that day. Their loop is paced by the host, though: it slows ~8x during a throttle, where the
+spin-paced eager loop slows ~2.4x, so a throttle holds a smaller share of their samples and a run
+with few throttles can look clean.
+
+Three limits:
+
+- A series whose untimed setup contains a host wait (FP8 `stage` in normal mode) is not aligned at
+  all, and counts its misses without gating the row.
+- The probes see the host only at the two ends of a sample, a spin and a window apart: a slowdown
+  under 5x after the sample opened, or a throttle that starts and ends between them, still lands in
+  the window uncounted. The chained family is not held.
+- Unlike `bench_kineto`, nothing flushes L2 between samples.
+
+Each chain sibling is aligned once, before its first event, as the graph chain is. Eager rows carry
+the `-eager-spin-ar` suffix. Earlier eager rows (the bare family) had no per-sample alignment, so
+their small-T latency included host launch skew.
+
 ### Chained Pair Period
 
 The eager pipeline measures **fresh entry**: drained around each timed window, so every
-sample starts from an idle pipeline and the ranks re-stagger before each one. A decode loop never
+sample starts from an idle pipeline behind the rank barrier. A decode loop never
 stops, and what it pays per MoE layer is the pipeline's steady-state **period**. Every eager row
 therefore carries the chained family, measured by `benchmark_chain`: dispatch→combine pairs issued
 back-to-back with CUDA events enqueued on-stream and **no host synchronization inside the loop**,
@@ -497,13 +574,14 @@ All timing happens after every shape is warmed and checked. Conditioning rounds 
 measured or emitted.
 
 Comparing these figures against a vendor table is not like-for-like, in a knowable direction.
-Every sample here is an eager per-call measurement that includes kernel-launch cost and
-inter-rank entry skew, reduced across ranks by MAX. Vendor microbenchmarks published for these
-same kernels variously time the named kernel only via a profiler (DeepEP, UCCL low-latency),
-replay CUDA graphs (MoRI), average across ranks instead of taking the max (all of them), delete
-entry skew with a pre-iteration sleep or an amortized barrier (DeepEP, MoRI), and report the
-best of a config sweep (DeepEP V1, MoRI). Expect our headline to read roughly 5-10% above such
-a table on a healthy fabric. `cross_rank_min_us` is the per-row figure to place beside one.
+Every fresh-entry sample here is one event window per call, opened behind a device barrier that
+removes entry skew (as DeepEP's pre-iteration sleep and MoRI's barrier do) and reduced across ranks
+by MAX, so it keeps any host work inside the window and the slowest rank's exit. Vendor
+microbenchmarks published for these same kernels variously time the named kernel only via a
+profiler (DeepEP, UCCL low-latency), replay CUDA graphs (MoRI), average across ranks instead of
+taking the max (all of them), and report the best of a config sweep (DeepEP V1, MoRI). Expect our
+headline to read above such a table by at least the max-versus-mean gap; the earlier 5-10% estimate
+predates per-sample alignment. `cross_rank_min_us` is the per-row figure to place beside one.
 Where a like-for-like comparison exists we match or beat: our skew-excluded MoRI dispatch is
 0.96x MoRI's own shipped tuning-config best at the same shape and byte count, DeepEP V2 on B300
 reproduces DeepEP's published 8x2 figure within 3%, and FlashInfer EP matches NVIDIA's published
@@ -691,8 +769,9 @@ One raw case document, committed at `results/<sku>/<case_id>.json`, carries `rec
 - `outcome`: `status` (`success` or `invalid`) and `reasons`.
 
 Each `rows` entry carries point latency (`components`, graph-replayed by default where supported,
-plus `components.pair_period`, `chain_floor_us` and `chain_health` (see Chained Pair Period)), byte
-accounting, token rate, correctness, load, and fanout, while
+plus `components.pair_period`, `chain_floor_us` and `chain_health` (see Chained Pair Period)), the
+eager alignment's `rank_alignment` misses (see CUDA Graph Replay), byte accounting, token rate,
+correctness, load, and fanout, while
 per-point statistics are summarized in place, not emitted as separate documents. Each run of a case
 writes exactly this one raw result document, replacing the case's previous file, while unsupported
 or never-run cells produce no synthetic record.
