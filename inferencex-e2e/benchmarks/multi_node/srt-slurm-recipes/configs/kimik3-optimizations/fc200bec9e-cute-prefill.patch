@@ -1,0 +1,111 @@
+From b4b98eea0872b5a706a27702258a1edb685d0466 Mon Sep 17 00:00:00 2001
+From: Wei Zhao <51183510+wzhao18@users.noreply.github.com>
+Date: Wed, 14 Oct 2026 12:39:44 -0700
+Subject: [PATCH] [Perf] Add copy-free CuTe DSL MLA prefill selectors
+
+Expose independent context and new-token prefill selectors, keeping TRTLLM as the default. Align packed indptr slices on the host without additional GPU copies.
+
+Co-authored-by: Codex <noreply@openai.com>
+
+Signed-off-by: Wei Zhao <51183510+wzhao18@users.noreply.github.com>
+---
+ tests/v1/attention/test_mla_context_chunks.py           | 5 +++++
+ vllm/config/attention.py                                | 6 ++++++
+ vllm/model_executor/layers/attention/mla_attention.py   | 8 ++++++++
+ vllm/v1/attention/backends/mla/prefill/trtllm_ragged.py | 8 ++++++++
+ 4 files changed, 27 insertions(+)
+
+diff --git a/tests/v1/attention/test_mla_context_chunks.py b/tests/v1/attention/test_mla_context_chunks.py
+index 2d63b16..dc6f7fc 100644
+--- a/tests/v1/attention/test_mla_context_chunks.py
++++ b/tests/v1/attention/test_mla_context_chunks.py
+@@ -120,6 +120,8 @@ def test_chunks_gather_every_context_row_exactly_once(context_lens, workspace_si
+     previous_request_start = -1
+     for chunk in metadata.chunks:
+         assert chunk.all_rows_active
++        assert chunk.query_start_loc.data_ptr() % 16 == 0
++        assert chunk.cu_seq_lens.data_ptr() % 16 == 0
+         assert chunk.num_context_tokens <= workspace_size
+         assert chunk.num_context_tokens == int(chunk.cu_seq_lens[-1])
+         assert chunk.token_to_seq.shape[0] == chunk.num_context_tokens
+@@ -261,6 +263,9 @@ def test_dcp_chunks_fit_the_per_rank_row_budget():
+     local_cursor: dict[int, int] = {}
+     for chunk in metadata.chunks:
+         assert chunk.num_local_context_tokens <= workspace_size // dcp_world_size
++        assert chunk.query_start_loc.data_ptr() % 16 == 0
++        assert chunk.cu_seq_lens.data_ptr() % 16 == 0
++        assert chunk.padded_local_cu_seq_lens.data_ptr() % 16 == 0
+         assert chunk.local_starts == chunk.starts.tolist()
+         assert chunk.padded_local_cu_seq_lens.tolist() == [0] + list(
+             torch.tensor(chunk.padded_local_seq_lens).cumsum(0)
+diff --git a/vllm/config/attention.py b/vllm/config/attention.py
+index 67605f3..d74fafa 100644
+--- a/vllm/config/attention.py
++++ b/vllm/config/attention.py
+@@ -85,6 +85,12 @@ class AttentionConfig:
+     use_prefill_query_quantization: bool = False
+     """If set, quantize query for attention in prefill."""
+ 
++    use_cute_dsl_prefill_context: bool = False
++    """Use CuTe DSL for cached-context attention with TRTLLM_RAGGED prefill."""
++
++    use_cute_dsl_prefill_new_tokens: bool = False
++    """Use CuTe DSL for causal new-token attention with TRTLLM_RAGGED prefill."""
++
+     indexer_kv_dtype: IndexerKVDType = "auto"
+     """Data type for the sparse-attention indexer K cache. "auto" picks the
+     model's default (bf16 for MiniMax M3, fp8 for the DeepSeek sparse
+diff --git a/vllm/model_executor/layers/attention/mla_attention.py b/vllm/model_executor/layers/attention/mla_attention.py
+index 806faba..c243ec8 100644
+--- a/vllm/model_executor/layers/attention/mla_attention.py
++++ b/vllm/model_executor/layers/attention/mla_attention.py
+@@ -2117,6 +2117,14 @@ def build_mla_chunked_context_metadata(
+         num_tokens = sum(plan.seq_lens)
+         num_local_tokens = num_tokens
+ 
++        # Align every int32 indptr slice to 16 bytes for CuTe prefill.
++        padding = -boundary_offset % 4
++        cu_seq_lens_flat.extend([0] * padding)
++        cu_seqlens_q_flat.extend([0] * padding)
++        if use_dcp:
++            padded_local_cu_seq_lens_flat.extend([0] * padding)
++        boundary_offset += padding
++
+         seq_lens_flat.extend(plan.seq_lens)
+         cu_seq_lens_flat.extend(itertools.accumulate(plan.seq_lens, initial=0))
+         query_base = query_start_loc[plan.request_start]
+diff --git a/vllm/v1/attention/backends/mla/prefill/trtllm_ragged.py b/vllm/v1/attention/backends/mla/prefill/trtllm_ragged.py
+index 266fd83..7646ed7 100644
+--- a/vllm/v1/attention/backends/mla/prefill/trtllm_ragged.py
++++ b/vllm/v1/attention/backends/mla/prefill/trtllm_ragged.py
+@@ -79,6 +79,12 @@ class TrtllmRaggedPrefillBackend(MLAPrefillBackend):
+             v_head_dim=v_head_dim,
+             vllm_config=vllm_config,
+         )
++        self._use_cute_context = (
++            vllm_config.attention_config.use_cute_dsl_prefill_context
++        )
++        self._use_cute_new_tokens = (
++            vllm_config.attention_config.use_cute_dsl_prefill_new_tokens
++        )
+         self._workspace_spec = (
+             (envs.VLLM_FLASHINFER_WORKSPACE_BUFFER_SIZE,),
+             torch.uint8,
+@@ -172,6 +178,7 @@ class TrtllmRaggedPrefillBackend(MLAPrefillBackend):
+             cum_seq_lens_kv=self._prefill_metadata.query_start_loc,
+             enable_pdl=False,
+             is_causal=True,
++            backend="cute-dsl" if self._use_cute_new_tokens else "trtllm-gen",
+             return_lse=return_softmax_lse,
+             out=out,
+             skip_all_rows_active_check=True,
+@@ -223,6 +230,7 @@ class TrtllmRaggedPrefillBackend(MLAPrefillBackend):
+             cum_seq_lens_kv=chunk.cu_seq_lens,
+             enable_pdl=False,
+             is_causal=False,
++            backend="cute-dsl" if self._use_cute_context else "trtllm-gen",
+             return_lse=True,
+             out=out,
+             skip_all_rows_active_check=True,
+-- 
+2.50.1 (Apple Git-155)

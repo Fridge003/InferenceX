@@ -7,6 +7,8 @@ base:
     frameworks:
       dynamo: "ffbbaaa6c44370e798687881317535ac17d66a76"
 
+  setup_script: kimik3-optimizations.sh
+
   dynamo:
     install: true
     source:
@@ -107,6 +109,9 @@ base:
         UCX_TCP_AF_PRIO: "inet"
         VLLM_SSM_CONV_STATE_LAYOUT: "DS"
       args:
+        enable-expert-parallel: true
+        moe-backend: deep_gemm_mega_moe
+        max-num-seqs: 64
         kv-transfer-config: '{"kv_connector":"MultiConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"connectors":[{"kv_connector":"NixlConnector","kv_role":"kv_both","kv_load_failure_policy":"fail","kv_buffer_device":"cuda","kv_connector_extra_config":{"enforce_handshake_compat":false,"enable_cross_layers_blocks":false}},{"kv_connector":"MooncakeStoreConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"load_async":true,"lookup_async":true,"compact_group_io":true,"max_load_batch_keys":2,"enable_cross_layers_blocks":false,"enable_offload":false}}]}}'
         served-model-name: "moonshotai/Kimi-K3"
         prefix-match-unit: 128
@@ -124,7 +129,7 @@ base:
         stream-interval: 10
         language-model-only: true
         attention-backend: "TOKENSPEED_MLA"
-        attention-config: '{"mla_prefill_backend": "TRTLLM_RAGGED", "use_prefill_query_quantization": true}'
+        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true,"use_cute_dsl_prefill_context":true}'
         enable-prefix-caching: true
       kv_events: true
     decode:

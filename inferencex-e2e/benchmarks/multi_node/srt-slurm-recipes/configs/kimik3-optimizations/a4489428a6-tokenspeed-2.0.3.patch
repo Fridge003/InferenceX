@@ -1,0 +1,27 @@
+From 59a20dde1628333a0ee82ee722715ca79fd0b393 Mon Sep 17 00:00:00 2001
+From: Wei Zhao <51183510+wzhao18@users.noreply.github.com>
+Date: Wed, 14 Oct 2026 16:03:23 -0400
+Subject: [PATCH] [Dependency] Upgrade TokenSpeed MLA to 2.0.3
+
+Co-authored-by: Codex <noreply@openai.com>
+
+Signed-off-by: Wei Zhao <51183510+wzhao18@users.noreply.github.com>
+---
+ requirements/cuda.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/requirements/cuda.txt b/requirements/cuda.txt
+index 5e193ba..4ddd5ce 100644
+--- a/requirements/cuda.txt
++++ b/requirements/cuda.txt
+@@ -25,7 +25,7 @@ nvidia-cutlass-dsl[cu13]==4.8.0
+ quack-kernels==0.6.5  # Required by MSA
+ 
+ # Tokenspeed_MLA for faster mla with spec decode
+-tokenspeed-mla==2.0.2; platform_system == "Linux"
++tokenspeed-mla==2.0.3; platform_system == "Linux"
+ 
+ # Humming kernels for quantization gemm
+ humming-kernels[cu13]==0.1.16
+-- 
+2.50.1 (Apple Git-155)

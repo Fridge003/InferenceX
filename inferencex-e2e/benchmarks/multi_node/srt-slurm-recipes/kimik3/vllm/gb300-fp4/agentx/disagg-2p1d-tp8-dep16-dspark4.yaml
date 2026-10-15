@@ -7,6 +7,8 @@ base:
     container: {}
     frameworks:
       dynamo: ffbbaaa6c44370e798687881317535ac17d66a76
+  setup_script: kimik3-optimizations.sh
+
   dynamo:
     install: true
     source:
@@ -118,7 +120,7 @@ base:
         stream-interval: 10
         language-model-only: true
         attention-backend: TOKENSPEED_MLA
-        attention-config: '{"mla_prefill_backend": "TRTLLM_RAGGED", "use_prefill_query_quantization": true}'
+        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true,"use_cute_dsl_prefill_context":true}'
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"rejection_sample_method":"block","draft_sample_method":"probabilistic"}'
         enable-prefix-caching: true
       kv_events: true
@@ -130,6 +132,7 @@ base:
         <<: *kimi_env
         VLLM_ENABLE_GEMM_RS: '1'
       args:
+        quantization-config: '{"linear":"fp8_per_channel"}'
         kv-transfer-config: '{"kv_connector":"MultiConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"connectors":[{"kv_connector":"NixlConnector","kv_role":"kv_both","kv_load_failure_policy":"fail","kv_buffer_device":"cuda","kv_connector_extra_config":{"enforce_handshake_compat":false,"enable_cross_layers_blocks":false}},{"kv_connector":"MooncakeStoreConnector","kv_role":"kv_consumer","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"load_async":true,"lookup_async":true,"enable_lookup":false,"enable_cross_layers_blocks":false,"enable_offload":false}}]}}'
         no-enable-prefix-caching: true
         served-model-name: moonshotai/Kimi-K3
