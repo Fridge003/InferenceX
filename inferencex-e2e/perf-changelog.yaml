@@ -9910,4 +9910,5 @@
   scenario-type:
     - agentic-coding
   description: [""]
+  no-evals: true
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4047
