@@ -571,6 +571,8 @@ For multi-node `all-evals`, `EVAL_CONC` is a space-separated list. When it conta
   `test-sweep-multi-node-agentic-evals` (multi-node agentic)
 - `run-sweep.yml`: `sweep-evals`, `sweep-multi-node-evals`, `sweep-agentic-evals`, and
   `sweep-multi-node-agentic-evals` (same four-way split)
+- In `run-sweep.yml`, the eval jobs wait for every throughput job to finish (any result), so
+  performance runs go first; with `evals-only` the throughput jobs are skipped and evals start immediately
 - All four use their respective benchmark templates (`benchmark-tmpl.yml` for single-node,
   `benchmark-multinode-tmpl.yml` for multi-node) with `eval-only: true`, `run-eval: true`
 - `collect-evals` depends on all four eval jobs; `collect-results` only runs when benchmark jobs ran
