@@ -179,48 +179,48 @@ override_1p1d_dcp8_dcp8_dspark4:
     prefill: &1p1d_dcp8_dcp8_dspark4_prefill
       args: &1p1d_dcp8_dcp8_dspark4_prefill_args
         max-num-seqs: 64
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
     decode: &1p1d_dcp8_dcp8_dspark4_decode
       nodes: 2
       workers: 1
       args: &1p1d_dcp8_dcp8_dspark4_decode_args
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
 
 override_1p2d_dcp8_dcp8_dspark4:
   roles:
     prefill: &1p2d_dcp8_dcp8_dspark4_prefill
       args: &1p2d_dcp8_dcp8_dspark4_prefill_args
         max-num-seqs: 64
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
     decode: &1p2d_dcp8_dcp8_dspark4_decode
       nodes: 4
       workers: 2
       args: &1p2d_dcp8_dcp8_dspark4_decode_args
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
 
 override_1p3d_dcp8_dcp8_dspark7:
   roles:
     prefill: &1p3d_dcp8_dcp8_dspark7_prefill
       args: &1p3d_dcp8_dcp8_dspark7_prefill_args
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
     decode: &1p3d_dcp8_dcp8_dspark7_decode
       nodes: 6
       workers: 3
       args: &1p3d_dcp8_dcp8_dspark7_decode_args
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
 
 override_1p3d_dcp8_dcp8_dspark4:
   roles:
     prefill: &1p3d_dcp8_dcp8_dspark4_prefill
       args: &1p3d_dcp8_dcp8_dspark4_prefill_args
         max-num-seqs: 64
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
 
     decode: &1p3d_dcp8_dcp8_dspark4_decode
       nodes: 6
       workers: 3
       args: &1p3d_dcp8_dcp8_dspark4_decode_args
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"greedy","rejection_sample_method":"block"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
 
 override_1p1d_dcp8_dcp8_dspark4_eval:
   roles:

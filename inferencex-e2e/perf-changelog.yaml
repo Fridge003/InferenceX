@@ -9914,6 +9914,7 @@
     - "Use TP prefill without EP/SP and automatic KV interleaving for DCP disaggregation. Preserve the existing 1P3D DSpark7 c1 recipe."
     - "Add DEP16 with TP8 prefill without EP/SP, decode DeepGEMM MegaMoE and TokenSpeed MLA min-split-8, and capacity-only Mooncake with decode prefix caching disabled."
     - "Use the October 14 vLLM nightly image, 77154ca6116ae34cbfe314beef1016bde9b63989, containing vllm-project/vllm#61125, and remove explicit KV interleave settings."
+    - "Use probabilistic DSpark draft sampling across all recipes, with acceptance lengths selected automatically from the matching golden curve."
     - "Keep performance recipes unparsed; select eval-only recipe variants with Kimi-K3 tool/reasoning parsers and structural tags, without changing model, topology, or vendor eval."
     - "Pin Dynamo frontend and workers to official upstream commit ffbbaaa6c44370e798687881317535ac17d66a76; preserve default thinking and the unchanged vendor eval."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4047

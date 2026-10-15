@@ -119,7 +119,7 @@ base:
         language-model-only: true
         attention-backend: TOKENSPEED_MLA
         attention-config: '{"mla_prefill_backend": "TRTLLM_RAGGED", "use_prefill_query_quantization": true}'
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"rejection_sample_method":"block","draft_sample_method":"greedy"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"rejection_sample_method":"block","draft_sample_method":"probabilistic"}'
         enable-prefix-caching: true
       kv_events: true
     decode:
@@ -154,7 +154,7 @@ base:
         language-model-only: true
         attention-backend: TOKENSPEED_MLA
         attention-config: '{"mla_prefill_backend": "TRTLLM_RAGGED", "use_prefill_query_quantization": true, "tokenspeed_mla_min_split_kv": 8}'
-        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"rejection_sample_method":"block","draft_sample_method":"greedy"}'
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"rejection_sample_method":"block","draft_sample_method":"probabilistic"}'
   sbatch_directives:
     mem: '0'
     cpus-per-task: '72'
