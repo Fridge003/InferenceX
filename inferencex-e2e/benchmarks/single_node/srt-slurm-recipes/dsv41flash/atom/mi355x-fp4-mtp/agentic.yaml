@@ -1,15 +1,6 @@
-# DeepSeek-V4.1-Flash AgentX on MI355X with ATOM DSpark (five draft tokens),
-# following ROCm/ATOM recipes/DeepSeek-V4.1-Flash-Agentic.md at the image's
-# revision (e6182e08b85f0e58bc15f7393ef57899220bfbaf). TP2 and TP4, no expert
-# parallelism, DP attention with prefill TBO (ROCm/ATOM#2376) from concurrency
-# 32; the KV cache is GPU-resident.
 base:
   schema: 2
   name: dsv41flash-fp4-mi355x-atom-agentic
-  model:
-    path: hf:deepseek-ai/DeepSeek-V4.1-Flash
-    container: rocm/atom-dev:nightly_202610151507
-    precision: fp4
   resources:
     gpu_type: mi355x
     gpus_per_node: 8
@@ -53,12 +44,7 @@ base:
         ATOM_DISABLE_MMAP: 'true'
         AITER_LOG_LEVEL: WARNING
   benchmark:
-    type: custom
-    command: bash /infmax-workspace/benchmarks/srt_agentic.sh
     env:
-      MODEL: deepseek-ai/DeepSeek-V4.1-Flash
-      # Full-context corpus for this 1M-context recipe.
-      WEKA_LOADER_OVERRIDE: semianalysis_cc_traces_weka_062126
       # The upstream one-hour profile warms five requests per lane.
       AIPERF_WARMUP_REQUESTS_PER_LANE: '5'
       # Long AgentX stalls exceed AIPerf's 30 s TCP_USER_TIMEOUT default.
