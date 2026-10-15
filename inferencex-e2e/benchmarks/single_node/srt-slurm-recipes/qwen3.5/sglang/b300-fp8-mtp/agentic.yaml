@@ -52,7 +52,7 @@ base:
     env:
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: 'sglang:'
       # Diagnostic branch only: build the harness from this agentx-harness commit.
-      AGENTX_HARNESS_REF: 58ddb81377db24d03ef1c5db17d48f60b88031f7
+      AGENTX_HARNESS_REF: eb877f7bf99360bdac147d09e1f79e277e6fa097
 
 # One variant per point. Admission is 2x CONC and the graph batch is CONC,
 # capped at 64. TP4 tokenizes with six workers to keep 256k warmups inside the
@@ -194,7 +194,7 @@ override_tp4_c32:
     env:
       CONC: '32'
       KV_OFFLOADING: 'none'
-      AGENTX_HARNESS_REF: 58ddb81377db24d03ef1c5db17d48f60b88031f7
+      AGENTX_HARNESS_REF: eb877f7bf99360bdac147d09e1f79e277e6fa097
 
 override_tp4_c40:
   roles:
@@ -270,7 +270,7 @@ override_tp4_c64:
     env:
       CONC: '64'
       KV_OFFLOADING: 'none'
-      AGENTX_HARNESS_REF: 58ddb81377db24d03ef1c5db17d48f60b88031f7
+      AGENTX_HARNESS_REF: eb877f7bf99360bdac147d09e1f79e277e6fa097
 
 override_tp4_c68:
   roles:
