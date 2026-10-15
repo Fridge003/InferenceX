@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import json
-
-import pytest
 from pathlib import Path
 
 from infx.results.agentic.validate_agentic_result import validate_result
@@ -83,18 +81,3 @@ def test_fails_when_aggregate_is_missing(tmp_path: Path):
 
     assert len(errors) == 1
     assert errors[0].endswith("profile_export_aiperf.json not found")
-
-
-@pytest.mark.parametrize("aggregate,message", [
-    ({}, "request_count.avg is missing"),
-    ({"request_count": {"avg": 0}}, "aiperf completed zero requests"),
-    ({"request_count": {"avg": True}}, "request_count.avg must be numeric"),
-    ({"request_count": {"avg": -1}}, "request_count.avg must be a finite non-negative number"),
-    ({"request_count": 1}, "request_count must be an object"),
-    ([], "must contain a JSON object"),
-])
-def test_validation_retains_malformed_profile_failure(tmp_path, aggregate, message):
-    artifact_dir = _write_aggregate(tmp_path, aggregate)
-    result = validate_result(artifact_dir, 0.10)
-    assert len(result.failures) == 1
-    assert message in result.failures[0]

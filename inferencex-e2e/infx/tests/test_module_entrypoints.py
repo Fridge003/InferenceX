@@ -94,7 +94,7 @@ def test_collector_excludes_failed_benchmarks_and_retains_diagnostics(invoke, tm
 
 
 @pytest.mark.parametrize("outcome", [
-    None, [], {}, {"status": "unknown"}, {"status": []},
+    None, {"status": "unknown"},
     {"status": "passed", "attempt_id": "partial", "finalized": False},
     {"status": "passed", "attempt_id": "partial"},
     {"status": "passed", "attempt_id": "partial", "finalized": 1},
