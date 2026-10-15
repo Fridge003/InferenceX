@@ -90,7 +90,10 @@ def apply_patch(runtime: Runtime, patch: Path) -> None:
     digest = hashlib.sha256(patch.read_bytes()).hexdigest()
     site_packages = runtime.venv / "lib" / f"python{PYTHON_VERSION}" / "site-packages"
     print(f"Applying AgentX runtime patch {patch.name} sha256={digest}", flush=True)
-    if proc.call(["git", "apply", "-p2", str(patch.resolve())], cwd=site_packages):
+    if proc.call(
+        ["patch", "--batch", "--forward", "--fuzz=0", "-p2", "-i", str(patch.resolve())],
+        cwd=site_packages,
+    ):
         raise BenchError(f"AgentX runtime patch failed: {patch}")
 
 

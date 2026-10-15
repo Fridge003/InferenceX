@@ -1,6 +1,6 @@
 # AgentX runtime patches
 
-Recipes opt into a patch using `benchmark.env.AIPERF_RUNTIME_PATCH`. The AgentX bootstrap applies it to the isolated PyPI installation before starting the client. Source paths use the upstream `src/aiperf` layout (`git apply -p2`). Unselected recipes use the unmodified release.
+Recipes opt into a patch using `benchmark.env.AIPERF_RUNTIME_PATCH`. The AgentX bootstrap applies it to the isolated PyPI installation before starting the client. Source paths use the upstream `src/aiperf` layout (`patch -p2`). Unselected recipes use the unmodified release.
 
 | Patch | Source | Fix |
 | --- | --- | --- |

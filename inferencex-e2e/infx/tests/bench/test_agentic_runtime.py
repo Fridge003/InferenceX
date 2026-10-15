@@ -125,7 +125,7 @@ def test_unusable_runtime_fails_with_the_reason(tmp_path, tools, monkeypatch, fa
         bootstrap(Runtime(tmp_path / "runtime"))
 
 
-def test_runtime_patch_changes_installed_code_and_rejects_mismatch(tmp_path):
+def test_runtime_patch_changes_installed_code_and_rejects_mismatch(tmp_path, tools):
     runtime = Runtime(tmp_path / "runtime")
     site = runtime.venv / "lib" / "python3.11" / "site-packages"
     site.mkdir(parents=True)
@@ -141,5 +141,6 @@ def test_runtime_patch_changes_installed_code_and_rejects_mismatch(tmp_path):
     apply_patch(runtime, patch)
 
     assert installed.read_text() == "value = 2\n"
+    assert not (tmp_path / "forbidden").exists()
     with pytest.raises(BenchError, match="runtime patch failed"):
         apply_patch(runtime, patch)
