@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+
+import pytest
 from pathlib import Path
 
 from infx.results.agentic.validate_agentic_result import validate_result
@@ -27,7 +29,11 @@ def test_passes_when_request_error_rate_is_within_limit(tmp_path: Path):
         },
     )
 
-    assert validate_result(artifact_dir, 0.10) == []
+    result = validate_result(artifact_dir, 0.10)
+    assert result.failures == ()
+    assert (result.successes, result.errors, result.completed, result.failed_request_threshold) == (
+        90, 10, 100, 0.10,
+    )
 
 
 def test_fails_when_request_error_rate_exceeds_limit(tmp_path: Path):
@@ -40,11 +46,11 @@ def test_fails_when_request_error_rate_exceeds_limit(tmp_path: Path):
         },
     )
 
-    errors = validate_result(artifact_dir, 0.10)
-    assert errors == [
+    errors = validate_result(artifact_dir, 0.10).failures
+    assert errors == (
         "aiperf request error rate exceeded the benchmark limit: "
-        "65/67 = 97.015% > 10.000%"
-    ]
+        "65/67 = 97.015% > 10.000%",
+    )
 
 
 def test_treats_missing_error_count_as_zero(tmp_path: Path):
@@ -53,7 +59,9 @@ def test_treats_missing_error_count_as_zero(tmp_path: Path):
         {"request_count": {"avg": 12}},
     )
 
-    assert validate_result(artifact_dir, 0.10) == []
+    result = validate_result(artifact_dir, 0.10)
+    assert result.failures == ()
+    assert (result.successes, result.errors, result.completed) == (12, 0, 12)
 
 
 def test_supports_per_run_artifact_layout(tmp_path: Path):
@@ -63,7 +71,7 @@ def test_supports_per_run_artifact_layout(tmp_path: Path):
         per_run=True,
     )
 
-    assert validate_result(artifact_dir, 0.10) == []
+    assert validate_result(artifact_dir, 0.10).failures == ()
 
 
 def test_fails_when_aggregate_is_missing(tmp_path: Path):
@@ -71,7 +79,22 @@ def test_fails_when_aggregate_is_missing(tmp_path: Path):
     artifact_dir.mkdir()
     (artifact_dir / "profile_export.jsonl").write_text('{"partial": true}\n')
 
-    errors = validate_result(artifact_dir, 0.10)
+    errors = validate_result(artifact_dir, 0.10).failures
 
     assert len(errors) == 1
     assert errors[0].endswith("profile_export_aiperf.json not found")
+
+
+@pytest.mark.parametrize("aggregate,message", [
+    ({}, "request_count.avg is missing"),
+    ({"request_count": {"avg": 0}}, "aiperf completed zero requests"),
+    ({"request_count": {"avg": True}}, "request_count.avg must be numeric"),
+    ({"request_count": {"avg": -1}}, "request_count.avg must be a finite non-negative number"),
+    ({"request_count": 1}, "request_count must be an object"),
+    ([], "must contain a JSON object"),
+])
+def test_validation_retains_malformed_profile_failure(tmp_path, aggregate, message):
+    artifact_dir = _write_aggregate(tmp_path, aggregate)
+    result = validate_result(artifact_dir, 0.10)
+    assert len(result.failures) == 1
+    assert message in result.failures[0]
