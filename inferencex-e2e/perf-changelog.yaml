@@ -9764,6 +9764,76 @@
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3738
 
 - config-keys:
+  - dsv4-fp4-gb200-dynamo-vllm-agentic-dspark-agg
+  - dsv4-fp4-gb200-dynamo-vllm-agentic-dspark-disagg
+  scenario-type:
+  - agentic-coding
+  all-evals: true
+  description:
+  - Add GB200 vLLM DSpark AgentX recipes on 20ebb28, including C32 and C64.
+  - 新增使用 20ebb28 的 GB200 vLLM DSpark AgentX 配置，包含 C32 和 C64。
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3416
+
+- config-keys:
+  - dsv4-fp4-gb200-dynamo-vllm-agentic-dspark-agg
+  - dsv4-fp4-gb200-dynamo-vllm-agentic-dspark-disagg
+  scenario-type:
+  - agentic-coding
+  description:
+  - Include throughput runs for the GB200 DSpark AgentX recipes.
+  - 为 GB200 DSpark AgentX 配置添加吞吐量测试。
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3416
+
+- config-keys:
+  - dsv4-fp4-gb200-dynamo-vllm-agentic-dspark-agg
+  - dsv4-fp4-gb200-dynamo-vllm-agentic-dspark-disagg
+  scenario-type:
+  - agentic-coding
+  description:
+  - Select the staged DeepSeek-V4-Pro-0813 checkpoint for GB200 DSpark recipes.
+  - 为 GB200 DSpark 配置选择已部署的 DeepSeek-V4-Pro-0813 检查点。
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3416
+
+- config-keys:
+  - dsv4-fp4-gb200-dynamo-vllm-agentic-dspark-disagg
+  scenario-type:
+  - agentic-coding
+  description:
+  - Adjust C32 prefill memory headroom.
+  - 调整 C32 prefill 显存预留。
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3416
+
+- config-keys:
+  - dsv4-fp4-gb200-dynamo-vllm-agentic-dspark-agg
+  - dsv4-fp4-gb200-dynamo-vllm-agentic-dspark-disagg
+  scenario-type:
+  - agentic-coding
+  description:
+  - Refresh GB200 DSpark recipes for the current launcher and use K6 for TP8 C1/C4/C8.
+  - 更新 GB200 DSpark 配置以适配当前启动脚本，并在 TP8 C1/C4/C8 使用 K6。
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3416
+
+- config-keys:
+    - dsv41flash-fp4-gb300-dynamo-vllm-agentic-dspark-agg
+    - dsv41flash-fp4-gb300-dynamo-vllm-agentic-dspark-disagg
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Add GB300 DeepSeek-V4.1-Flash Dynamo + vLLM AgentX recipes: aggregated TP4 at conc 1 and 8, and disaggregated DEP2 prefill / DEP16 decode at 6P1D c2884 and 4P1D c1228."
+    - "Use master-config recipe selectors and composed AgentX fragments; preserve the dedicated frontend/client node and the c2884 and c1228 tuning."
+    - "Backport the vLLM Python sidecar reasoning-parser fix through the shared patch mechanism while retaining the main srt-slurm pin."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3941
+
+- config-keys:
+    - dsv41flash-fp4-gb300-dynamo-vllm-agentic-dspark-disagg
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Append the GB300 DeepSeek-V4.1-Flash Dynamo + vLLM AgentX 8P1D point at concurrency 4096 to the existing curve."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4071
+  append-only: true
+
+- config-keys:
     - qwen3.5-fp4-gb300-dynamo-trt-agentic-disagg
   scenario-type:
     - agentic-coding
