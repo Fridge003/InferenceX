@@ -830,7 +830,8 @@ jobs:
 
     calc-success-rate:
         name: calc-success-rate
-        needs: [setup, collect-results]
+        # Wait for evals so in-flight eval jobs are not counted as failures.
+        needs: [setup, collect-results, sweep-evals, sweep-agentic-evals, sweep-multi-node-evals, sweep-multi-node-agentic-evals]
         if: ${{ always() && needs.collect-results.result != 'skipped'}}
         runs-on: ubuntu-latest
         permissions:
