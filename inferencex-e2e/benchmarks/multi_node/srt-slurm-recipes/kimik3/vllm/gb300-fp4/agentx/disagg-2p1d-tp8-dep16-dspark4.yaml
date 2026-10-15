@@ -67,6 +67,7 @@ base:
       workers: 2
       gpus: 8
       env: &kimi_env
+        VLLM_ENABLE_GEMM_RS: '1'
         DYN_TCP_REQUEST_TIMEOUT: '120'
         VLLM_ALLREDUCE_USE_FLASHINFER: '1'
         DYN_REQUEST_PLANE: tcp
@@ -104,6 +105,7 @@ base:
         UCX_TLS: rc,cuda_copy,cuda_ipc,self
         VLLM_SSM_CONV_STATE_LAYOUT: DS
       args:
+        quantization-config: '{"targets":{"*.in_proj_qkvgfab":"mxfp8","*.fused_qkv_a_g_proj":"mxfp8","*.routed_expert_down_proj":"mxfp8","*.routed_expert_up_proj":"mxfp8"}}'
         max-num-seqs: 64
         kv-transfer-config: '{"kv_connector":"MultiConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"connectors":[{"kv_connector":"NixlConnector","kv_role":"kv_both","kv_load_failure_policy":"fail","kv_buffer_device":"cuda","kv_connector_extra_config":{"enforce_handshake_compat":false,"enable_cross_layers_blocks":false}},{"kv_connector":"MooncakeStoreConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"load_async":true,"lookup_async":true,"enable_cross_layers_blocks":false,"enable_offload":false}}]}}'
         served-model-name: moonshotai/Kimi-K3
@@ -132,7 +134,7 @@ base:
         <<: *kimi_env
         VLLM_ENABLE_GEMM_RS: '1'
       args:
-        quantization-config: '{"linear":"fp8_per_channel"}'
+        quantization-config: '{"targets":{"*.in_proj_qkvgfab":"mxfp8","*.fused_qkv_a_g_proj":"mxfp8","*.routed_expert_down_proj":"mxfp8","*.routed_expert_up_proj":"mxfp8","*.o_proj":"mxfp8","*.shared_experts.gate_up_proj":"mxfp8","*.shared_experts.down_proj":"mxfp8"}}'
         kv-transfer-config: '{"kv_connector":"MultiConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"connectors":[{"kv_connector":"NixlConnector","kv_role":"kv_both","kv_load_failure_policy":"fail","kv_buffer_device":"cuda","kv_connector_extra_config":{"enforce_handshake_compat":false,"enable_cross_layers_blocks":false}},{"kv_connector":"MooncakeStoreConnector","kv_role":"kv_consumer","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"load_async":true,"lookup_async":true,"enable_lookup":false,"enable_cross_layers_blocks":false,"enable_offload":false}}]}}'
         no-enable-prefix-caching: true
         served-model-name: moonshotai/Kimi-K3

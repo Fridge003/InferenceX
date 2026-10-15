@@ -74,6 +74,7 @@ base:
       workers: 1
       gpus: 8
       env: &kimi_env
+        VLLM_ENABLE_GEMM_RS: "1"
         DYN_TCP_REQUEST_TIMEOUT: "120"
         VLLM_ENGINE_READY_TIMEOUT_S: "3600"
         VLLM_USE_DIRECT_DCP_A2A: "1"
@@ -109,6 +110,7 @@ base:
         UCX_TCP_AF_PRIO: "inet"
         VLLM_SSM_CONV_STATE_LAYOUT: "DS"
       args:
+        quantization-config: '{"targets":{"*.in_proj_qkvgfab":"mxfp8","*.fused_qkv_a_g_proj":"mxfp8","*.routed_expert_down_proj":"mxfp8","*.routed_expert_up_proj":"mxfp8"}}'
         enable-expert-parallel: true
         moe-backend: deep_gemm_mega_moe
         max-num-seqs: 64
@@ -136,7 +138,9 @@ base:
       gpus: 8
       env:
         <<: *kimi_env
+        VLLM_ENABLE_GEMM_RS: "0"
       args:
+        quantization-config: '{"targets":{"*.in_proj_qkvgfab":"mxfp8","*.routed_expert_down_proj":"mxfp8","*.routed_expert_up_proj":"mxfp8"}}'
         kv-transfer-config: '{"kv_connector":"MultiConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"connectors":[{"kv_connector":"NixlConnector","kv_role":"kv_both","kv_load_failure_policy":"fail","kv_buffer_device":"cuda","kv_connector_extra_config":{"enforce_handshake_compat":false,"enable_cross_layers_blocks":false}},{"kv_connector":"MooncakeStoreConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"load_async":true,"lookup_async":true,"compact_group_io":true,"max_load_batch_keys":2,"enable_cross_layers_blocks":false,"enable_offload":false}}]}}'
         served-model-name: "moonshotai/Kimi-K3"
         prefix-match-unit: 128

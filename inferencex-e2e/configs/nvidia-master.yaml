@@ -7874,7 +7874,7 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
           num-worker: 1
           tp: 8
           dcp-size: 8
-          ep: 1
+          ep: 8
           dp-attn: false
         decode: { num-worker: 1, tp: 8, dcp-size: 8, ep: 1, dp-attn: false }
       - spec-decoding: mtp
@@ -7888,7 +7888,7 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
           num-worker: 1
           tp: 8
           dcp-size: 8
-          ep: 1
+          ep: 8
           dp-attn: false
         decode: { num-worker: 2, tp: 8, dcp-size: 8, ep: 1, dp-attn: false }
       - spec-decoding: mtp
@@ -7902,7 +7902,7 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
           num-worker: 1
           tp: 8
           dcp-size: 8
-          ep: 1
+          ep: 8
           dp-attn: false
         decode: { num-worker: 3, tp: 8, dcp-size: 8, ep: 1, dp-attn: false }
       - spec-decoding: mtp
@@ -7916,7 +7916,7 @@ kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg:
           num-worker: 1
           tp: 8
           dcp-size: 8
-          ep: 1
+          ep: 8
           dp-attn: false
         decode: { num-worker: 3, tp: 8, dcp-size: 8, ep: 1, dp-attn: false }
 
