@@ -9839,5 +9839,10 @@
     - agentic-coding
   description:
     - "Install Dynamo from the 1.6.0.dev20261010 wheel instead of the cquil11/dynamo source revision 2cbbdc863c336c2cfffa2a3668e2a6661801b259, and set the dynamo-router version to 1.6.0.dev20261010."
-    - "Replace publish_events_and_metrics: false with publish_metrics: true, so workers publish engine metrics with KV-cache events off. enable_iter_perf_stats stays true for prefill and decode."
+    - "Replace publish_events_and_metrics: false with publish_metrics: true, so workers publish engine metrics with KV-cache events off. enable_iter_perf_stats stays true for prefill and decode, and kv_cache_config.iteration_stats_interval is 1."
+    - "Replace the search space with eight points: 1P1D DEP1/TEP2 at conc 45 (b4) and 54 (b8) with decode colocated on the prefill node, 1P2D TEP4/TEP4 at conc 120, 1P2D TEP4/TEP8 at conc 80, 1P4D TEP4/TEP8 at conc 84, 2P3D TEP4/TEP8 at conc 210, 3P1D DEP4/DEP16 at conc 565 and 3P2D DEP4/DEP4 at conc 704. The 1P7D, 2P2D and 2P3D TEP2/TEP8 points are removed."
+    - "TEP4 prefill uses max_num_tokens 32768; 1P1D decode uses the TRTLLM MoE backend; 3P2D decode free_gpu_memory_fraction goes from 0.8 to 0.85."
+    - "Add ENROOT_ALLOW_DEV, TLLM_PROFILE_LOG_RANKS=all and TRTLLM_KV_TRANSFER_NUM_THREADS=8 to both roles, TRTLLM_SKIP_KV_CACHE_ESTIMATION=1 to prefill, TRT_LLM_DISABLE_LOAD_WEIGHTS_IN_PARALLEL=1 to 1P1D, and rc to UCX_TLS."
+    - "Set router-session-affinity-ttl-secs to 14400 and drop the explicit active-decode-blocks, active-prefill-tokens and active-prefill-tokens-frac thresholds on the frontend."
+    - "Pin the benchmark to semianalysis_cc_traces_weka_062126_256k with AIPERF_REQUIRED_SERVER_METRIC_PREFIX=trtllm_kv_cache_utilization; the colocated 1P1D points use dram-utilization 0.457143 for 3 ranks on one node."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3971
