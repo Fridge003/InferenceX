@@ -224,7 +224,9 @@ def _run_multinode_docker(
     owner = f"{os.getuid()}:{os.getgid()}"
     chown = ["docker", "run", "--rm", "--entrypoint", "chown", "-v", f"{run.workspace}:/w", image]
     first = ["--nodes=1", "--ntasks=1", f"--nodelist={hosts[0]}"]
-    argv = submit.apply_argv(run, checkout, config_file, [*arguments, "--json", "--yes"])
+    # DNM: h200 nodes have no timedatectl/chronyc/ntpq, so the NTP probe always fails.
+    no_clock = ["--set", "telemetry.clock_sync_check=false"]
+    argv = submit.apply_argv(run, checkout, config_file, [*arguments, *no_clock, "--json", "--yes"])
     env = {**run.env, "RUNNER_NAME": srtctl_job_name(run.request.runner_name)}
     step = cli.srun_argv(allocation, argv, extra=first)
     proc.echo(step, env)
