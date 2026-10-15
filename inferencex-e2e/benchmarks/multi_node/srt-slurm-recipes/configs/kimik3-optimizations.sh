@@ -10,7 +10,7 @@ flock 9
 for patch_name in \
     fc200bec9e-cute-prefill.patch \
     2454c49e76-online-routed-projection.patch \
-    92a227beef-online-kv-projection.patch \
+    kda-online-quant-padding.patch \
     60948-flashinfer-0.7.1.patch; do
     patch_file="$(mktemp)"
     awk '/^diff --git / {keep=($3 ~ /^a\/vllm\//)} keep' "$patch_dir/$patch_name" > "$patch_file"
