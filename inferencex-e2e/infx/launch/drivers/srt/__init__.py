@@ -222,7 +222,10 @@ def _run_multinode_docker(
         return 1
     # Containers run as root: hand their outputs back so the runner can clean its workspace.
     owner = f"{os.getuid()}:{os.getgid()}"
-    chown = ["docker", "run", "--rm", "--entrypoint", "chown", "-v", f"{run.workspace}:/w", image]
+    chown = ["docker", "run", "--rm", "--user", "0:0", "--entrypoint", "chown"]
+    chown += ["-v", f"{run.workspace}:/w", image]
+    # srtctl removes its containers when it exits; a killed srtctl leaves them on the nodes.
+    leftovers = "docker ps -aq --filter label=srtctl.job | xargs -r docker rm -f"
     first = ["--nodes=1", "--ntasks=1", f"--nodelist={hosts[0]}"]
     # DNM: h200 nodes have no timedatectl/chronyc/ntpq, so the NTP probe always fails.
     no_clock = ["--set", "telemetry.clock_sync_check=false"]
@@ -236,6 +239,7 @@ def _run_multinode_docker(
                 step, env=env, cwd=checkout.root, stdout=handle, check=False
             ).returncode
     finally:
+        cli.srun(allocation, ["bash", "-c", leftovers], extra=["--ntasks-per-node=1"])
         cli.srun(allocation, [*chown, "-R", owner, "/w"], extra=first)
     outputs = Path(rendered.get("output_dir", checkout.root / "outputs"))
     jobs = sorted(outputs.glob("docker-*"), key=lambda path: path.stat().st_mtime)

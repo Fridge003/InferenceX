@@ -173,6 +173,7 @@ def use_docker(config: dict[str, Any], env: Mapping[str, str]) -> None:
     config["launcher"] = "docker"
     config["docker_args"] = [
         "-w", "/infmax-workspace", *(arg for name in names for arg in ("-e", name)),
+        *config.get("docker_args", ()),  # the cluster's own (srt-slurm.extra), e.g. RDMA devices
     ]  # fmt: skip
 
 
