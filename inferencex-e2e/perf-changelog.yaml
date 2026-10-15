@@ -9838,6 +9838,7 @@
     - glm5.2-fp8-h200-dynamo-sglang-agentic-mtp-2p2d
     - glm5.2-fp8-h200-dynamo-sglang-agentic-mtp-agg
     - kimik3-fp4-h200-vllm-agentic-latency
+    - kimik3-fp4-h200-vllm-agentic-simple
   scenario-type:
     - agentic-coding
   no-evals: true
@@ -9847,6 +9848,7 @@
 
 - config-keys:
     - dsr1-fp8-h200-dynamo-sglang
+    - dsr1-fp8-h200-dynamo-trt
   scenario-type:
     - fixed-seq-len
   description:
