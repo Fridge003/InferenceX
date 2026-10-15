@@ -11,6 +11,7 @@ for patch_name in \
     fc200bec9e-cute-prefill.patch \
     2454c49e76-online-routed-projection.patch \
     kda-online-quant-padding.patch \
+    quantized-latent-moe-tail.patch \
     60948-flashinfer-0.7.1.patch; do
     patch_file="$(mktemp)"
     awk '/^diff --git / {keep=($3 ~ /^a\/vllm\//)} keep' "$patch_dir/$patch_name" > "$patch_file"
@@ -24,7 +25,7 @@ for patch_name in \
     rm "$patch_file"
 done
 
-uv pip install --system --no-deps tokenspeed-mla==2.0.3 flashinfer-python==0.7.1
+uv pip install --system --no-deps tokenspeed-mla==2.0.3 flashinfer-python==0.7.1 nixl==1.5.0 nixl-cu13==1.5.0
 uv pip install --system --no-deps flashinfer-cubin==0.7.1 --index-url https://flashinfer.ai/whl/
 uv pip install --system flashinfer-jit-cache==0.7.1 --index-url https://flashinfer.ai/whl/cu130
 python3 - <<'PY'
@@ -32,6 +33,8 @@ import importlib.metadata as metadata
 
 for name, expected in (
     ("tokenspeed-mla", "2.0.3"),
+    ("nixl", "1.5.0"),
+    ("nixl-cu13", "1.5.0"),
     ("flashinfer-python", "0.7.1"),
     ("flashinfer-cubin", "0.7.1"),
     ("flashinfer-jit-cache", "0.7.1"),
