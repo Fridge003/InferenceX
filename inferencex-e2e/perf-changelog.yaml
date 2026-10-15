@@ -9840,5 +9840,4 @@
   description:
     - "Install Dynamo from the 1.6.0.dev20261010 wheel instead of the cquil11/dynamo source revision 2cbbdc863c336c2cfffa2a3668e2a6661801b259, and set the dynamo-router version to 1.6.0.dev20261010."
     - "Replace publish_events_and_metrics: false with publish_metrics: true, so workers publish engine metrics with KV-cache events off. enable_iter_perf_stats stays true for prefill and decode."
-    - "Set DYN_ROUTER_MODE: least-loaded in the decode worker env so decode workers advertise least-loaded routing; the frontend keeps router-mode: kv."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/3971
