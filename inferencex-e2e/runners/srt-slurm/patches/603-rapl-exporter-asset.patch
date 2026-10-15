@@ -1,0 +1,26 @@
+diff --git a/Makefile b/Makefile
+index b2aefb1e..4a22074a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -8,6 +8,8 @@ LOGS_DIR ?= logs
+ ARCH ?= $(shell uname -m)
+ TACHOMETER_RELEASE ?= latest
+ CPU_POWER_EXPORTER_RELEASE ?= latest
++# Test-only: a prebuilt cpu-power-exporter on the cluster filesystem wins over the release download.
++CPU_POWER_EXPORTER_LOCAL ?= /home/ext-wgao/rapl603/cpu-power-exporter-x86_64-unknown-linux-musl
+ 
+ default: check
+ 
+@@ -84,6 +86,12 @@ cpu-power-exporter:
+ 
+ cpu-power-exporter-download:
+ 	@set -eu; \
++	if [ -f "$(CPU_POWER_EXPORTER_LOCAL)" ]; then \
++		install -Dm755 "$(CPU_POWER_EXPORTER_LOCAL)" bin/cpu-power-exporter; \
++		rm -f bin/.cpu-power-exporter.release; \
++		echo "Installed cpu-power-exporter from $(CPU_POWER_EXPORTER_LOCAL)"; \
++		exit 0; \
++	fi; \
+ 	case "$(ARCH)" in \
+ 		x86_64)  asset="cpu-power-exporter-x86_64-unknown-linux-musl"; file_pattern="x86-64" ;; \
+ 		aarch64) asset="cpu-power-exporter-aarch64-unknown-linux-musl"; file_pattern="aarch64" ;; \

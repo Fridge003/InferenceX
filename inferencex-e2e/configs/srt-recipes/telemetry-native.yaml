@@ -5,3 +5,8 @@ telemetry:
   storage_subdir: power
   # Cold AMD exporter image pulls can outlast srtctl's default readiness timeout.
   startup_timeout_seconds: 300
+  # x86 hosts report per-socket CPU package power from the RAPL energy counters.
+  # The counters are root-only; the AMD host-setup hook opens them to the job user.
+  cpu_power_exporter:
+    port: 9405
+    source: rapl

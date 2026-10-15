@@ -755,6 +755,8 @@ clusters:
         single-node-time-limit: 480
         gpus-per-node-directive: true
         segment-directive: false
+        host-setup:
+          script: runners/srt-slurm/hooks/mi325x-amd/setup.sh
         mounts:
           /dev/kfd: /dev/kfd
           /dev/dri: /dev/dri
