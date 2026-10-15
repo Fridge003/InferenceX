@@ -209,7 +209,7 @@ override_10p1d_dep2_dep16_c6656:
   benchmark:
     env:
       AIPERF_RUNTIME_PATCH: /infmax-workspace/infx/bench/agentic/patches/52-spawn-worker-pinning.patch
-      AIPERF_METRICS_LIST_BACKEND: tdigest
+      AIPERF_METRICS_LIST_BACKEND: ragged
   roles:
     prefill:
       nodes: 5
@@ -225,7 +225,7 @@ override_8p1d_dep2_dep16_c5120:
   benchmark:
     env:
       AIPERF_RUNTIME_PATCH: /infmax-workspace/infx/bench/agentic/patches/52-spawn-worker-pinning.patch
-      AIPERF_METRICS_LIST_BACKEND: tdigest
+      AIPERF_METRICS_LIST_BACKEND: ragged
   roles:
     prefill:
       nodes: 4
