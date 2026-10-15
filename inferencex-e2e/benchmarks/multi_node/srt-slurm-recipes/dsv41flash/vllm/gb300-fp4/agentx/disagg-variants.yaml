@@ -208,7 +208,6 @@ override_10p1d_dep2_dep16_c6656:
   name: "dsv41flash-fp4-gb300-dynamo-vllm-agentx-disagg-10p1d-dep2-dep16-c6656"
   benchmark:
     env:
-      AIPERF_RUNTIME_PATCH: /infmax-workspace/infx/bench/agentic/patches/52-spawn-worker-pinning.patch
       AIPERF_METRICS_LIST_BACKEND: tdigest
   roles:
     prefill:
@@ -224,7 +223,6 @@ override_8p1d_dep2_dep16_c5120:
   name: "dsv41flash-fp4-gb300-dynamo-vllm-agentx-disagg-8p1d-dep2-dep16-c5120"
   benchmark:
     env:
-      AIPERF_RUNTIME_PATCH: /infmax-workspace/infx/bench/agentic/patches/52-spawn-worker-pinning.patch
       AIPERF_METRICS_LIST_BACKEND: tdigest
   roles:
     prefill:
