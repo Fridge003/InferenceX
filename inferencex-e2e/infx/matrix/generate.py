@@ -434,6 +434,16 @@ def multinode_worker_pair(benchmark: dict, disagg: bool) -> tuple[dict, dict]:
     return prefill, decode
 
 
+def worker_replica_gpus(worker: dict) -> int:
+    """Return GPUs one worker replica allocates; EP and DCP reuse its TP GPUs."""
+    return (
+        worker[Fields.TP.value]
+        * worker.get(Fields.PP.value, 1)
+        * worker.get(Fields.PCP_SIZE.value, 1)
+        * worker.get(Fields.DWDP_SIZE.value, 1)
+    )
+
+
 def worker_gpus_per_node(worker: dict, gpus_per_node: int) -> int:
     """Return GPUs a single worker replica occupies on one node.
 
@@ -449,12 +459,7 @@ def worker_gpus_per_node(worker: dict, gpus_per_node: int) -> int:
     * A replica within one node must divide it evenly so co-located replicas of
       the same role tile the node without overlap.
     """
-    gpus_per_replica = (
-        worker[Fields.TP.value]
-        * worker.get(Fields.PP.value, 1)
-        * worker.get(Fields.PCP_SIZE.value, 1)
-        * worker.get(Fields.DWDP_SIZE.value, 1)
-    )
+    gpus_per_replica = worker_replica_gpus(worker)
     factors = f"{Fields.TP.value}*{Fields.PP.value}*{Fields.PCP_SIZE.value}"
     if worker.get(Fields.DWDP_SIZE.value, 1) > 1:
         factors += f"*{Fields.DWDP_SIZE.value}"
@@ -475,18 +480,27 @@ def worker_gpus_per_node(worker: dict, gpus_per_node: int) -> int:
     return gpus_per_replica
 
 
+def worker_pool_gpus(worker: dict, gpus_per_node: int) -> int:
+    """Return GPUs all of a worker pool's replicas allocate, across every node they span."""
+    worker_gpus_per_node(worker, gpus_per_node)  # same node-tiling rules as a replica
+    return worker[Fields.NUM_WORKER.value] * worker_replica_gpus(worker)
+
+
 def agentic_dram_offload_gb(
     agentic_config: dict, benchmark: dict, runner: str, runner_data: dict
 ) -> int:
-    """Return the DRAM offload budget (GB) for one agentic server node.
+    """Return the DRAM offload budget (GB) of one agentic offload pool.
 
     The budget scales the node's (MAX-capped) available CPU DRAM by the
-    utilization and by the fraction of the node's GPUs in use:
+    utilization and by the GPUs that claim it, as a fraction of a node's GPUs:
 
     * Single-node entries use the TP/PP/PCP topology, which must fit one node.
-    * Disaggregated multinode entries use the prefill worker's per-node GPU
-      footprint, since only prefill offloads KV to CPU DRAM today (decode can be
-      budgeted separately if it ever gains its own pool).
+    * Disaggregated multinode entries default to the prefill worker's per-node GPU
+      footprint, for pools only prefill workers own.
+    * dram-budget-scope 'all-workers' budgets one pool that prefill reaches on
+      every worker's node, such as a Mooncake Store with owners beside decode: each
+      prefill and decode GPU claims its node share, the GPUs that normalize
+      per-GPU throughput. The total may span nodes.
     """
     kv_offloading = benchmark.get(Fields.KV_OFFLOADING.value, "none")
     if kv_offloading != "dram":
@@ -501,6 +515,10 @@ def agentic_dram_offload_gb(
 
     if Fields.WORKER.value in benchmark:
         gpu_count = worker_gpus_per_node(benchmark[Fields.WORKER.value], gpus_per_node)
+    elif agentic_config.get(Fields.DRAM_BUDGET_SCOPE.value, "prefill") == "all-workers":
+        gpu_count = worker_pool_gpus(
+            benchmark[Fields.PREFILL.value], gpus_per_node
+        ) + worker_pool_gpus(benchmark[Fields.DECODE.value], gpus_per_node)
     elif Fields.PREFILL.value in benchmark:
         gpu_count = worker_gpus_per_node(benchmark[Fields.PREFILL.value], gpus_per_node)
     else:

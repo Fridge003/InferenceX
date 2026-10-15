@@ -77,6 +77,7 @@ class Fields(Enum):
     TOTAL_CPU_DRAM_GB = "total-cpu-dram-gb"
     AVAILABLE_CPU_DRAM_MIB = "available-cpu-dram-mib"
     DRAM_UTILIZATION = "dram-utilization"
+    DRAM_BUDGET_SCOPE = "dram-budget-scope"
     GPUS_PER_NODE = "gpus-per-node"
     NUM_NODES = "num-nodes"
     NODE_COUNT = "node-count"
@@ -778,6 +779,9 @@ class AgenticCodingConfig(BaseModel):
     dram_utilization: float | None = Field(
         default=None, alias=Fields.DRAM_UTILIZATION.value, gt=0, le=1
     )
+    dram_budget_scope: Literal["prefill", "all-workers"] = Field(
+        default="prefill", alias=Fields.DRAM_BUDGET_SCOPE.value
+    )
 
     @model_validator(mode="after")
     def validate_dram_offload_capacity(self) -> Self:
@@ -788,6 +792,19 @@ class AgenticCodingConfig(BaseModel):
                 raise ValueError(
                     f"{Fields.KV_OFFLOADING.value}='dram' requires "
                     f"{Fields.DRAM_UTILIZATION.value} with runner hardware metadata"
+                )
+            if self.dram_budget_scope != "all-workers":
+                continue
+            if entry.prefill is None or entry.decode is None:
+                raise ValueError(
+                    f"{Fields.DRAM_BUDGET_SCOPE.value}='all-workers' requires "
+                    f"'{Fields.PREFILL.value}' and '{Fields.DECODE.value}' workers"
+                )
+            # The budget reads one runner's node DRAM for both roles.
+            if entry.prefill.hardware is not None:
+                raise ValueError(
+                    f"{Fields.DRAM_BUDGET_SCOPE.value}='all-workers' does not support "
+                    f"per-worker '{Fields.HARDWARE.value}'"
                 )
         return self
 

@@ -428,6 +428,36 @@ class TestAgenticMatrixEntries:
                 }],
             })
 
+    @pytest.mark.parametrize(
+        ("entry", "match"),
+        [
+            (
+                {"tp": 4, "kv-offloading": "dram", "kv-offload-backend": {"name": "native"}},
+                "requires 'prefill' and 'decode' workers",
+            ),
+            (
+                {
+                    "kv-offloading": "dram",
+                    "kv-offload-backend": {"name": "mooncake"},
+                    "prefill": {
+                        "hardware": "gb200", "num-worker": 1, "tp": 4, "ep": 1, "dp-attn": False,
+                    },
+                    "decode": {
+                        "hardware": "h100", "num-worker": 1, "tp": 4, "ep": 1, "dp-attn": False,
+                    },
+                },
+                "per-worker 'hardware'",
+            ),
+        ],
+    )
+    def test_all_workers_dram_budget_rejects_unsupported_entries(self, entry, match):
+        with pytest.raises(ValidationError, match=match):
+            AgenticCodingConfig(**{
+                "dram-utilization": 0.80,
+                "dram-budget-scope": "all-workers",
+                "search-space": [{**entry, "conc-list": [16]}],
+            })
+
     def test_agentic_search_space_rejects_total_cpu_dram_gb(self):
         with pytest.raises(ValidationError, match="total-cpu-dram-gb"):
             AgenticCodingSearchSpaceEntry(**{

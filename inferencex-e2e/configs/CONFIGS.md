@@ -117,6 +117,8 @@ The below list describes what each field is:
   - `agentic-coding`: Agentic trace replay benchmarks using real conversation traces. Each entry must have:
     - `trace-source`: Identifier for the trace dataset to use.
     - `search-space`: Same structure as `fixed-seq-len` search-space entries.
+    - `dram-utilization`: Required when a search-space entry sets `kv-offloading: dram`; a fraction in (0, 1]. `total-cpu-dram-gb` is this fraction of the node's available CPU DRAM, capped at the AgentX ceiling, times the share of the node's GPUs that claim it.
+    - (Optional) `dram-budget-scope`: Which GPUs of a disaggregated entry claim that share. `prefill` (default) counts one prefill replica's GPUs on its node, for a pool only prefill workers own. `all-workers` counts every prefill and decode GPU of the deployment, the GPUs that normalize per-GPU throughput, for one pool that prefill reaches on every worker's node, such as a Mooncake Store with owners beside decode. That total may span nodes; each node holds at most the share of the deployment's GPUs on it. `all-workers` requires `prefill` and `decode` workers without per-worker `hardware`.
 
 `router` and `kv-p2p-transfer` may be omitted independently. Router metadata
 requires non-empty `name` and `version` strings. Its `version` must be the

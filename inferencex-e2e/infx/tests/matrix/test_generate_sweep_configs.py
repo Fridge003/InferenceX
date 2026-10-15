@@ -2867,6 +2867,63 @@ class TestAgenticGeneration:
         assert len(result) == 1
         assert result[0]["total-cpu-dram-gb"] == 2399
 
+    @pytest.mark.parametrize(
+        ("prefill", "decode", "budget"),
+        [
+            # DCP reuses decode's TP GPUs: 4 + 4 GPUs claim one whole node.
+            (
+                {"num-worker": 1, "tp": 1, "pp": 4, "ep": 1, "dp-attn": False},
+                {"num-worker": 1, "tp": 4, "dcp-size": 4, "ep": 1, "dp-attn": False},
+                2399,
+            ),
+            # Each decode replica claims its own share: 4 + 2 * 4 GPUs.
+            (
+                {"num-worker": 1, "tp": 4, "ep": 1, "dp-attn": False},
+                {"num-worker": 2, "tp": 4, "ep": 1, "dp-attn": False},
+                3599,
+            ),
+            # A prefill replica spanning two nodes claims both: 16 + 8 GPUs.
+            (
+                {"num-worker": 1, "tp": 8, "pp": 2, "ep": 1, "dp-attn": False},
+                {"num-worker": 1, "tp": 8, "ep": 1, "dp-attn": False},
+                7199,
+            ),
+        ],
+    )
+    def test_multinode_agentic_all_workers_budget_counts_decode_gpus(
+        self, sample_runner_config, generate_agentic_sweep, prefill, decode, budget
+    ):
+        config = {
+            "dsv4-agentic-shared-pool": {
+                "image": "sglang-rocm",
+                "model": "deepseek-ai/DeepSeek-V4-Pro",
+                "model-prefix": "dsv4",
+                "precision": "fp4",
+                "framework": "sglang-disagg",
+                "runner": "cluster:mi355x-amds",
+                "multinode": True,
+                "disagg": True,
+                "kv-p2p-transfer": "mooncake",
+                "scenarios": {
+                    "agentic-coding": [{
+                        "dram-utilization": 0.80,
+                        "dram-budget-scope": "all-workers",
+                        "search-space": [{
+                            "conc-list": [16],
+                            "kv-offloading": "dram",
+                            "kv-offload-backend": {"name": "mooncake", "version": "0.3.13"},
+                            "prefill": prefill,
+                            "decode": decode,
+                        }],
+                    }],
+                },
+            },
+        }
+
+        result = generate_agentic_sweep(config, sample_runner_config)
+
+        assert [entry["total-cpu-dram-gb"] for entry in result] == [budget]
+
     def test_multinode_agentic_rejects_node_misaligned_prefill(
         self, sample_runner_config, generate_agentic_sweep
     ):
