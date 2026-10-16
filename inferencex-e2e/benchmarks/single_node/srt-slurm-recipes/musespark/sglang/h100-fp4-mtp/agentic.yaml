@@ -78,6 +78,9 @@ zip_override_tp8_hicache:
         cuda-graph-max-bs-decode: [2, 4, 8, 8]
         enable-hierarchical-cache: true
         hicache-size: 160
+        # HiCache consumed the ~1 GB of free memory left at 0.97, which OOMed at c4;
+        # the host pool backs the smaller GPU KV pool.
+        mem-fraction-static: 0.95
   benchmark:
     env:
       CONC: ['1', '2', '4', '8']
