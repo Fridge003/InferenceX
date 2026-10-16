@@ -10020,8 +10020,8 @@
   scenario-type:
     - agentic-coding
   description:
-    - "Add HiCache host-DRAM KV offload to the GB300 single-node SGLang DFlash2 config: 120 GB per rank, max-running-requests and decode graphs at twice the concurrency, concurrency extended to 40 and 48."
-    - "Add Muse Spark Open GB300 prefill/decode disaggregation through Dynamo SGLang (ai-dynamo 1.6.0.dev20261010 wheel, KV router) with Mooncake KV transfer over MNNVL, following the Dynamo disagg-gb300-agentic recipe layout."
-    - "Prefill and decode are TP4/EP4 with DFlash2 (8-token verification block); prefill keeps layernorm SP with MegaMoE and 120 GB of HiCache per rank. 1P1D at concurrency 16, 24, 32 and 48, and 1P2D at 48, 64 and 96."
+    - "Add HiCache host-DRAM KV offload to the GB300 single-node SGLang DFlash2 config: 120 GB per rank, max-running-requests and decode graphs at twice the concurrency, concurrency extended to 40, 48 and 64."
+    - "Add Muse Spark Open GB300 prefill/decode disaggregation through Dynamo SGLang (ai-dynamo 1.6.0.dev20260930, the build in the image; KV router) with Mooncake KV transfer over MNNVL, following the Dynamo disagg-gb300-agentic recipe layout."
+    - "Prefill and decode are TP4/EP4 with DFlash2 (8-token verification block) and 120 GB of HiCache per rank: prefill keeps session prefixes in it, decode uses it as the host pool for KV that no longer fits in HBM. Prefill keeps layernorm SP with MegaMoE."
     - "Synthetic acceptance follows the committed musespark_dflash golden curve: AL 4.05 at 7 draft tokens, thinking_on."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4184
