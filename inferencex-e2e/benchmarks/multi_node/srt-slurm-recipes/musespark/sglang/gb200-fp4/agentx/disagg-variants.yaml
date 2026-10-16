@@ -13,7 +13,7 @@ base:
       enabled: false
   engine: sglang
   roles:
-    # Decode follows the cookbook's PD decode cell: no layernorm SP, MegaMoE prefill or HiCache.
+    # Decode follows the cookbook's PD decode cell: no layernorm SP or MegaMoE prefill.
     decode:
       nodes: 1
       workers: 1
@@ -50,7 +50,10 @@ base:
         tool-call-parser: muse
         disaggregation-mode: decode
         disaggregation-transfer-backend: mooncake
-        mem-fraction-static: 0.9
+        mem-fraction-static: 0.88
+        # 120 GB/rank of host KV: prefill's HiCache prefix store, and on decode the
+        # host pool that holds retracted requests' KV when HBM runs out.
+        hicache-size: 120
         watchdog-timeout: 3600
         enable-metrics: true
     # Prefill keeps the aggregated recipe's prefill path and its 120 GB/rank HiCache prefix store.
@@ -64,11 +67,9 @@ base:
         disaggregation-mode: prefill
         enable-layernorm-sp: true
         enable-megamoe-for-layernorm-sp: true
-        mem-fraction-static: 0.88
         disable-prefill-cuda-graph: true
         cuda-graph-max-bs-decode: 8
         enable-hierarchical-cache: true
-        hicache-size: 120
   health_check:
     max_attempts: 1440
     interval_seconds: 10
@@ -88,8 +89,8 @@ override_1p1d_p-tp4_d-tp4_c16:
   roles:
     decode:
       args:
-        max-running-requests: 32
-        cuda-graph-max-bs-decode: 32
+        max-running-requests: 64
+        cuda-graph-max-bs-decode: 64
 
 override_1p1d_p-tp4_d-tp8_c32:
   roles:
@@ -99,5 +100,5 @@ override_1p1d_p-tp4_d-tp8_c32:
       args:
         tensor-parallel-size: 8
         expert-parallel-size: 8
-        max-running-requests: 64
-        cuda-graph-max-bs-decode: 64
+        max-running-requests: 128
+        cuda-graph-max-bs-decode: 128
