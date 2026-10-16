@@ -91,6 +91,24 @@ index 2f58f207..b38b5966 100644
  
  `samples.csv` carries one row per sensor reading, with columns `schema_version, timestamp_unix, hostname, source, sensor, socket_id, power_w, total_power_w`. In ACPI mode, `total_power_w` is **not** a sum of the `cpu`- and `sysio`-kind rails; whenever a `grace`-kind channel exists for a socket, that channel alone is the node-level total (real hardware traces show `grace` at roughly 93-104W against `cpu`+`sysio` combined at roughly 53-58W for the same socket, i.e. `grace` measures the whole Grace SoC power boundary, not literally `cpu + sysio`). When no `grace` channel is present for a scrape, `total_power_w` is left blank for that row rather than guessed from the component rails; per-socket `power_w` values are always populated regardless. In DCGM mode, `total_power_w` is the single already-aggregate value DCGM reports per socket.
  
+diff --git a/docs/power-telemetry.md b/docs/power-telemetry.md
+index 1cadd10b..9752c963 100644
+--- a/docs/power-telemetry.md
++++ b/docs/power-telemetry.md
+@@ -68,9 +68,10 @@ telemetry:
+ ```
+ 
+ `dcgm-power` needs **only** `dcgm_exporter`. A recipe that sets
+-`telemetry.enabled: true` with no `dcgm_exporter` and no CPU leg inherits the
+-cluster's `default_gpu_exporter` block from `srtslurm.yaml`, so one recipe can
+-measure power on clusters with different GPUs. An inherited `command` replaces the
++`telemetry.enabled: true` with no `dcgm_exporter` inherits the cluster's
++`default_gpu_exporter` block from `srtslurm.yaml`, so one recipe can measure
++power on clusters with different GPUs. A CPU power leg (`cpu_power_exporter` or
++`cpu_power`) runs alongside it and does not opt out. An inherited `command` replaces the
+ built-in 100 ms DCGM command, so the exporter samples at whatever rate it sets. There is no `provider` key, and it does
+ not require the top-level `container_image` or a `node_exporter`, because the
+ collector runs inside srtctl. Config loading validates the block and rejects
 diff --git a/docs/schema-reference.md b/docs/schema-reference.md
 index f47c9390..6c1878a8 100644
 --- a/docs/schema-reference.md
@@ -576,6 +594,33 @@ index ca9063d4..ebca3362 100644
  
          let listener = TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
              .await
+diff --git a/src/srtctl/core/config.py b/src/srtctl/core/config.py
+index 235f2a4f..42041499 100755
+--- a/src/srtctl/core/config.py
++++ b/src/srtctl/core/config.py
+@@ -289,10 +289,10 @@ def resolve_config_with_defaults(user_config: dict[str, Any], cluster_config: di
+         tachometer.setdefault("default_gpu_exporter", copy.deepcopy(cluster_config["default_gpu_exporter"]))
+ 
+     # The same cluster exporter serves GPU power telemetry: a recipe that enables
+-    # telemetry without naming any collector inherits it (image, port, command and
++    # telemetry without naming a GPU exporter inherits it (image, port, command and
+     # power metrics), so one recipe measures power on NVIDIA and AMD clusters alike.
+-    # Recipes that name a GPU exporter, or that enable a CPU leg, are untouched;
+-    # without this the inherited case was the "nothing to collect" validation error.
++    # Recipes that name a GPU exporter are untouched; the CPU power legs are
++    # independent of the GPU exporter, so adding one keeps the inheritance.
+     telemetry = config.get("telemetry")
+     cluster_gpu_exporter = cluster_config.get("default_gpu_exporter")
+     if (
+@@ -300,8 +300,6 @@ def resolve_config_with_defaults(user_config: dict[str, Any], cluster_config: di
+         and telemetry.get("enabled")
+         and isinstance(cluster_gpu_exporter, dict)
+         and "dcgm_exporter" not in telemetry
+-        and telemetry.get("cpu_power_exporter") is None
+-        and not (telemetry.get("cpu_power") or {}).get("enabled")
+     ):
+         telemetry["dcgm_exporter"] = copy.deepcopy(cluster_gpu_exporter)
+         logger.debug("Applied cluster default_gpu_exporter to telemetry.dcgm_exporter")
 diff --git a/src/srtctl/core/power/cpu_parser.py b/src/srtctl/core/power/cpu_parser.py
 index fab1fec6..9958abc6 100644
 --- a/src/srtctl/core/power/cpu_parser.py
@@ -864,6 +909,48 @@ index 1d4c26a2..cd45e2a2 100644
  def test_every_acpi_kind_has_a_sensor_suffix():
 -    assert set(SENSOR_SUFFIXES) == ACPI_RAIL_KINDS | {cpu_rails.DCGM_KIND}
 +    assert set(SENSOR_SUFFIXES) == ACPI_RAIL_KINDS | {cpu_rails.DCGM_KIND, cpu_rails.PACKAGE_KIND}
+diff --git a/tests/test_power_mapping.py b/tests/test_power_mapping.py
+index c6b40315..ef1a7dd8 100644
+--- a/tests/test_power_mapping.py
++++ b/tests/test_power_mapping.py
+@@ -399,25 +399,26 @@ class TestClusterDefaultFlowsIntoPowerTelemetry:
+         )
+         assert resolved["telemetry"]["dcgm_exporter"] == recipe_exporter
+ 
++    def test_disabled_telemetry_is_untouched(self):
++        resolved = resolve_config_with_defaults(
++            _recipe({"enabled": False}), {"default_gpu_exporter": AMD_CLUSTER_EXPORTER}
++        )
++        assert "dcgm_exporter" not in resolved["telemetry"]
++
+     @pytest.mark.parametrize(
+         "telemetry",
+         [
+-            {"enabled": True, "cpu_power_exporter": {"port": 9405}},
++            {"enabled": True, "cpu_power_exporter": {"port": 9405, "source": "rapl"}},
+             {"enabled": True, "cpu_power": {"enabled": True}},
+-            {"enabled": False},
++            {"enabled": True, "cpu_power": {"enabled": False}},
+         ],
+-        ids=["cpu-exporter-leg", "cpu-host-leg", "disabled"],
++        ids=["cpu-exporter-leg", "cpu-host-leg", "cpu-host-leg-off"],
+     )
+-    def test_cpu_only_and_disabled_telemetry_are_untouched(self, telemetry):
++    def test_a_cpu_leg_still_inherits_the_gpu_exporter(self, telemetry):
+         resolved = resolve_config_with_defaults(_recipe(telemetry), {"default_gpu_exporter": AMD_CLUSTER_EXPORTER})
+-        assert "dcgm_exporter" not in resolved["telemetry"]
+-
+-    def test_a_disabled_cpu_leg_still_inherits_the_gpu_exporter(self):
+-        resolved = resolve_config_with_defaults(
+-            _recipe({"enabled": True, "cpu_power": {"enabled": False}}),
+-            {"default_gpu_exporter": AMD_CLUSTER_EXPORTER},
+-        )
+         assert resolved["telemetry"]["dcgm_exporter"]["kind"] == "custom"
++        config = SrtConfig.Schema().load(resolved)
++        assert config.telemetry.dcgm_exporter is not None
+ 
+     def test_a_cluster_without_a_gpu_exporter_leaves_the_original_validation_error(self):
+         resolved = resolve_config_with_defaults(_recipe({"enabled": True}), {"default_gpu_exporter": None})
 diff --git a/tests/test_schema_docs.py b/tests/test_schema_docs.py
 index 10dceb55..bb2b29e5 100644
 --- a/tests/test_schema_docs.py
