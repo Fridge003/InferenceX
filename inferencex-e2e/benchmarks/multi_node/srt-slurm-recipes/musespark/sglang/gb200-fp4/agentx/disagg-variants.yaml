@@ -146,3 +146,70 @@ override_3p2d_p-tp4_d-tp4:
       args:
         max-running-requests: 64
         cuda-graph-max-bs-decode: 64
+
+# Prefill prefix capacity bounds sessions per pair, and decode nodes' host DRAM is
+# mostly idle. Mooncake stores on the decode nodes give prefill an L3 HiCache tier
+# behind its 120 GB/rank host tier; decode keeps a smaller host pool for retraction.
+override_1p1d_p-tp8_d-tp8_l3:
+  services:
+    - name: mooncake-master
+      type: mooncake-master
+    - &store
+      name: store-decode-0
+      type: mooncake-store
+      placement:
+        node: decode
+      args: ["--port", "8800"]
+      env:
+        MOONCAKE_PROTOCOL: rdma
+        MOONCAKE_DEVICE: "@fabric.rdma-devices"
+        MOONCAKE_GLOBAL_SEGMENT_SIZE: 110gb
+        MC_TCP_BIND_ADDRESS: "{node_ip}"
+      preamble: |
+        ulimit -n 1048576
+        ulimit -l unlimited
+      readiness:
+        port: 8800
+        timeout_seconds: 600
+    - <<: *store
+      name: store-decode-1
+      args: ["--port", "8801"]
+      readiness:
+        port: 8801
+        timeout_seconds: 600
+    - <<: *store
+      name: store-decode-2
+      args: ["--port", "8802"]
+      readiness:
+        port: 8802
+        timeout_seconds: 600
+    - <<: *store
+      name: store-decode-3
+      args: ["--port", "8803"]
+      readiness:
+        port: 8803
+        timeout_seconds: 600
+  roles:
+    prefill:
+      nodes: 2
+      gpus: 8
+      env:
+        MOONCAKE_PROTOCOL: rdma
+        MOONCAKE_DEVICE: "@fabric.rdma-devices"
+        MOONCAKE_GLOBAL_SEGMENT_SIZE: '0'
+        MC_TCP_BIND_ADDRESS: "{node}"
+      args:
+        tensor-parallel-size: 8
+        expert-parallel-size: 8
+        max-total-tokens: 10000000
+        hicache-storage-backend: mooncake
+    decode:
+      nodes: 2
+      gpus: 8
+      args:
+        tensor-parallel-size: 8
+        expert-parallel-size: 8
+        max-total-tokens: 10000000
+        max-running-requests: 192
+        cuda-graph-max-bs-decode: 192
+        hicache-size: 40
