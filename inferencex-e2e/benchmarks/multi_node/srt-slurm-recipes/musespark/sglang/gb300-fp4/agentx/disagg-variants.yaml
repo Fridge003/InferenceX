@@ -98,9 +98,9 @@ base:
         moe-runner-backend: flashinfer_trtllm
         kv-cache-dtype: fp8_e4m3
         # Decode sizes SWA by running requests, so the full pool takes the rest, and the
-        # bf16 DFlash2 draft pool matches it token for token; above 0.70 graph capture and
-        # the first batches run out of HBM.
-        mem-fraction-static: 0.70
+        # bf16 DFlash2 draft pool matches it token for token; 0.80 runs out of HBM after
+        # graph capture.
+        mem-fraction-static: 0.75
         swa-full-tokens-ratio: 0.1
         # DFlash2 verifies 8 tokens per step: the current token plus 7 drafts.
         speculative-algorithm: DFLASH
@@ -109,9 +109,10 @@ base:
         speculative-num-draft-tokens: 8
         mm-feature-transport: cpu
         # Decode keeps no radix cache, so its HiCache tier is the host pool that holds
-        # the KV of requests retracted when HBM fills.
+        # the KV of requests retracted when HBM fills. The draft's host sidecar comes on
+        # top of it; 120 GB per rank exceeded free host memory.
         disaggregation-decode-retraction-backup: host_pool
-        hicache-size: 120
+        hicache-size: 64
         disaggregation-transfer-backend: mooncake
         watchdog-timeout: 3600
         enable-metrics: true
