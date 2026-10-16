@@ -18,6 +18,18 @@ def replays():
     return getattr(_replays, "n", 0)
 
 
+def replayed(graph, call):
+    """Run call() as a replay of the captured torch graph `graph`."""
+    import torch
+
+    _replays.n = getattr(_replays, "n", 0) + 1
+    gid = getattr(graph, "_infx_id", None)
+    if gid is None or not runtime.profiling():
+        return call()
+    with torch.autograd.profiler.record_function(f"infx_graph_replay#{gid}"):
+        return call()
+
+
 def patch_cuda_graph(graphs_module):
     import torch
 
@@ -68,12 +80,7 @@ def patch_cuda_graph(graphs_module):
                     runtime.write_error("after capture")
 
     def replay(self, *args, **kwargs):
-        _replays.n = getattr(_replays, "n", 0) + 1
-        gid = getattr(self, "_infx_id", None)
-        if gid is None or not runtime.profiling():
-            return orig_replay(self, *args, **kwargs)
-        with torch.autograd.profiler.record_function(f"infx_graph_replay#{gid}"):
-            return orig_replay(self, *args, **kwargs)
+        return replayed(self, lambda: orig_replay(self, *args, **kwargs))
 
     cls.capture_begin = capture_begin
     cls.capture_end = capture_end

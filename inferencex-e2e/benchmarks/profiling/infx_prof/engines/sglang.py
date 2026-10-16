@@ -251,6 +251,21 @@ def _is_target(runner):
     return model_runner is not None and not getattr(model_runner, "is_draft_worker", False)
 
 
+def patch_deduped_graphs(module):
+    """Deduplicated CUDA graphs launch through cuda-python, past CUDAGraph.replay."""
+    cls = getattr(module, "DedupedCudaGraphRegistry", None)
+    orig = vars(cls).get("replay") if cls is not None else None
+    if orig is None or getattr(orig, "_infx_patched", False):
+        return
+
+    @functools.wraps(orig)
+    def replay(self, graph, *args, **kwargs):
+        return graphs.replayed(getattr(graph, "original_graph", None), lambda: orig(self, graph, *args, **kwargs))
+
+    replay._infx_patched = True
+    cls.replay = replay
+
+
 def patch_graph_runners(module):
     """Graph runner classes: capture inside the core capture session; replays label the step."""
     for name, cls in list(vars(module).items()):
@@ -429,6 +444,7 @@ class SglangEngine(Engine):
         registry.on("sglang.srt.layers.moe.topk", patch_topk)
         registry.on("sglang.srt.layers.moe.hash_topk", patch_topk)
         registry.on("flashinfer.fused_moe.core", patch_routed_moe)
+        registry.on("sglang.srt.model_executor.runner_backend.cuda_graph_dedup_mixin", patch_deduped_graphs)
         registry.on_package("sglang.srt.model_executor", patch_graph_runners)
         registry.on_package("sglang.srt.speculative", patch_graph_runners)
 
