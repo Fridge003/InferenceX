@@ -39,6 +39,9 @@ base:
         speculative-draft-attention-backend: fa4
         speculative-num-draft-tokens: 8
         mm-feature-transport: cpu
+        # 120 GB of pinned host KV per rank (480 GB per node); 180 GB per rank hit host OOM.
+        enable-hierarchical-cache: true
+        hicache-size: 120
         reasoning-parser: muse
         tool-call-parser: muse
         watchdog-timeout: 3600
@@ -64,7 +67,8 @@ zip_override_tp4:
   roles:
     agg:
       args:
-        max-running-requests: [1, 2, 3, 4, 6, 8, 10, 12, 16, 20, 24, 32]
+        max-running-requests: [2, 4, 6, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96]
+        cuda-graph-max-bs-decode: [2, 4, 6, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96]
   benchmark:
     env:
-      CONC: ['1', '2', '3', '4', '6', '8', '10', '12', '16', '20', '24', '32']
+      CONC: ['1', '2', '3', '4', '6', '8', '10', '12', '16', '20', '24', '32', '40', '48']
