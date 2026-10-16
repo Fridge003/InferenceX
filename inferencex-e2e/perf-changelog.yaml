@@ -10007,4 +10007,4 @@
     - "Disaggregated: add dsv41flash-fp4-gb300-dynamo-sglang-agentic-dspark-disagg with 4x DEP2 prefill (2 nodes) and one DEP16 decode (4 nodes) at c1228, and 6x DEP2 prefill (3 nodes) and one DEP16 decode at c2884. MegaMoE all-to-all, FlashMLA attention, DSpark block size 5, Mooncake KV transfer, prefill HiCache write-back (ratio 1.02 at c1228, 1.1 at c2884), 8 decode gateway workers and NCCL DP-batch sync. One CPU node hosts etcd, NATS, the frontend and the AgentX client."
     - "Remove dsv41flash-fp4-gb300-dynamo-sglang-agentic-disagg (six TP2/EP2 1PxD points, c16 to c256, on the 20260928 image)."
     - "The Dynamo frontend renders the chat template, so the AgentX client sends thinking=true, reasoning_effort=high and temperature 1 with every request."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4180
