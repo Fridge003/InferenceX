@@ -65,6 +65,35 @@ def test_scheduler_record_errors_carry_the_record_name():
     assert error["loc"] == ("clusters", "alpha", "slurm", "gres")
 
 
+def test_runner_partition_resolution_preserves_cluster_and_shared_profile():
+    data = inventory(alpha=with_change(
+        "slurm.partitions", ["batch", "batch_1", "batch_3"]
+    ))
+    data["labels"].update({"partition:batch_1": ["alpha_0"], "partition:batch_3": ["alpha_1"]})
+    loaded = load_inventory(data)
+    first = loaded.cluster_for("alpha_0")
+    third = loaded.cluster_for("alpha_1")
+    assert first.id == third.id == "alpha"
+    assert first.scheduler_settings.partition == "batch_1"
+    assert third.scheduler_settings.partition == "batch_3"
+    assert loaded.clusters["alpha"].scheduler_settings.partition == "batch"
+    assert loaded.cluster_for("alpha_0").scheduler_settings.partition == "batch_1"
+    assert str(third.scheduler_settings.squash.dir) == "/shared/squash"
+
+
+@pytest.mark.parametrize("labels", [
+    {"partition:batch_1": ["alpha_0"]},
+    {"partition:batch_1": ["alpha_0", "alpha_1"], "partition:batch_3": ["alpha_1"]},
+    {"partition:unknown": ["alpha_0", "alpha_1"]},
+    {"partition:batch_1,batch_3": ["alpha_0", "alpha_1"]},
+])
+def test_partition_routes_reject_incomplete_unknown_or_multi_partition_targets(labels):
+    data = inventory(alpha=with_change("slurm.partitions", ["batch", "batch_1", "batch_3"]))
+    data["labels"].update(labels)
+    with pytest.raises(ValidationError):
+        load_inventory(data)
+
+
 def test_a_registered_scheduler_parses_its_own_record_and_volumes(monkeypatch):
     monkeypatch.setitem(SCHEDULERS, "fake", FakeSettings)
     fake = {
@@ -126,7 +155,12 @@ def test_inventory_rejects_inconsistent_labels(runner_config, message):
         ("models.entries", {"Kimi-K3": {"root": "scratch", "dir": "../Kimi-K3"}}, "relative to its root"),
         ("models.download-root", "writable", "unknown volume 'writable'"),
         ("models.download-root", "scratch", "must be a shared volume"),
+        ("slurm.srt-slurm.fabric", {"rdma-devices": "mlx5_0,mlx5_1"}, "valid tuple"),
+        ("slurm.srt-slurm.fabric", {"rdma-devices": ["mlx5_0,mlx5_1"]}, "should match pattern"),
         ("slurm.srt-slurm.volume-mounts", {"hf-hub-cache": "/hf_hub_cache"}, "unknown volumes"),
+        ("env", {"MORI_RDMA_TC": "@fabric.rdma-tc"}, "env.MORI_RDMA_TC: this cluster sets no srt-slurm.fabric.rdma-tc"),
+        ("slurm.srt-slurm.host-setup", {"script": "setup.sh", "env": {"IBDEVICES": "@fabric.rdma-devices"}},
+         "host-setup.env.IBDEVICES: this cluster sets no srt-slurm.fabric.rdma-devices"),
         ("slurm.srt-slurm.host-setup", {"script": "/opt/setup.sh"}, "repository-relative"),
         ("partition", "batch", "Extra inputs"),
     ],
@@ -134,3 +168,23 @@ def test_inventory_rejects_inconsistent_labels(runner_config, message):
 def test_invalid_cluster_is_rejected(path, value, message):
     with pytest.raises(ValidationError, match=message):
         load_inventory(inventory(alpha=with_change(path, value)))
+
+
+def test_env_and_host_setup_env_take_the_clusters_fabric_by_reference():
+    record = with_change("slurm.srt-slurm", {
+        "network-interface": "",
+        "fabric": {"rdma-devices": ["rdma0", "rdma1"], "rdma-tc": 104},
+        "host-setup": {"script": "setup.sh", "env": {"IBDEVICES": "@fabric.rdma-devices"}},
+    })  # fmt: skip
+    record["env"] = {"MORI_RDMA_TC": "@fabric.rdma-tc", "KEEP": "literal"}
+
+    cluster = load_inventory(inventory(alpha=record)).clusters["alpha"]
+    assert cluster.env == {"MORI_RDMA_TC": "104", "KEEP": "literal"}
+    assert cluster.scheduler_settings.srt_slurm.host_setup.env == {"IBDEVICES": "rdma0,rdma1"}
+
+
+def test_a_list_fabric_field_cannot_become_a_cluster_env_value():
+    record = with_change("slurm.srt-slurm.fabric", {"rdma-devices": ["mlx5_0", "mlx5_1"]})
+    record["env"] = {"NCCL_IB_HCA": "@fabric.rdma-devices"}
+    with pytest.raises(ValidationError, match="cannot contain ','"):
+        load_inventory(inventory(alpha=record))

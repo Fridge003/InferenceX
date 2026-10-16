@@ -22,8 +22,9 @@ from pydantic import (
 )
 
 from infx.clusters.base import Record, SchedulerSettings
-from infx.clusters.slurm import SlurmSettings
+from infx.clusters.slurm import Fabric, SlurmSettings
 from infx.config import RUNNER_CONFIG, repository_root
+from infx.srt_slurm.workload import resolve_fabric
 
 CLUSTER_LABEL_PREFIX = "cluster:"
 
@@ -112,6 +113,10 @@ class Cluster(Record):
             settings = SCHEDULERS[scheduler].model_validate(data.pop(scheduler))
         except ValidationError as error:
             raise _relocated(error, scheduler) from None
+        srt = getattr(settings, "srt_slurm", None)
+        fabric = srt.fabric if srt is not None else Fabric()
+        if "env" in data:
+            data["env"] = resolve_fabric(data["env"], fabric.rendered(), "env")
         return {**data, "scheduler_settings": settings}
 
     @model_validator(mode="after")
@@ -160,6 +165,12 @@ class RunnerInventory(Record):
         if orphans:
             raise ValueError(f"runners without a cluster:<id> label: {orphans}")
         for cluster_id, cluster in self.clusters.items():
+            settings = cluster.scheduler_settings
+            if isinstance(settings, SlurmSettings) and settings.partitions:
+                if settings.partition not in settings.partitions:
+                    raise ValueError(f"cluster {cluster_id!r} default partition is not allowed")
+                for runner in cluster_labels[cluster_id]:
+                    self.partition_for(runner, settings.partitions)
             cluster.bind_id(cluster_id)
         return self
 
@@ -174,6 +185,29 @@ class RunnerInventory(Record):
             found = [cluster.id for cluster in matches]
             raise ValueError(
                 f"runner {runner_name!r} must be in exactly one cluster label, found {found}"
+            )
+        cluster = matches[0]
+        settings = cluster.scheduler_settings
+        if isinstance(settings, SlurmSettings) and settings.partitions:
+            cluster = cluster.model_copy(
+                update={
+                    "scheduler_settings": settings.model_copy(
+                        update={"partition": self.partition_for(runner_name, settings.partitions)}
+                    )
+                }
+            )
+        return cluster
+
+    def partition_for(self, runner_name: str, allowed: tuple[str, ...]) -> str:
+        """Resolve exactly one allowed partition from the runner's inventory labels."""
+        matches = [
+            label.removeprefix("partition:")
+            for label, runners in self.labels.items()
+            if label.startswith("partition:") and runner_name in runners
+        ]
+        if len(matches) != 1 or matches[0] not in allowed:
+            raise ValueError(
+                f"runner {runner_name!r} needs exactly one allowed partition label; found {matches}"
             )
         return matches[0]
 
