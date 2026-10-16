@@ -1,6 +1,9 @@
 schema: 2
 
 base:
+  setup_script: kimik3-optimizations.sh
+  environment:
+    TOKENSPEED_MLA_VERSION: "2.0.3"
   identity:
     model: {}
     container: {}
@@ -110,7 +113,6 @@ base:
       args:
         enable-expert-parallel: true
         moe-backend: deep_gemm_mega_moe
-        max-num-seqs: 64
         kv-transfer-config: '{"kv_connector":"MultiConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"connectors":[{"kv_connector":"NixlConnector","kv_role":"kv_both","kv_load_failure_policy":"fail","kv_buffer_device":"cuda","kv_connector_extra_config":{"enforce_handshake_compat":false,"enable_cross_layers_blocks":false}},{"kv_connector":"MooncakeStoreConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"load_async":true,"lookup_async":true,"compact_group_io":true,"max_load_batch_keys":2,"enable_cross_layers_blocks":false,"enable_offload":false}}]}}'
         served-model-name: "moonshotai/Kimi-K3"
         prefix-match-unit: 128
@@ -128,7 +130,7 @@ base:
         stream-interval: 10
         language-model-only: true
         attention-backend: "TOKENSPEED_MLA"
-        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true}'
+        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true,"trtllm_ragged_backend":"cute-dsl"}'
         enable-prefix-caching: true
       kv_events: true
     decode:
@@ -210,7 +212,12 @@ override_1p2d_dcp8_dcp8_dspark4:
 override_1p3d_dcp8_dcp8_dspark7:
   roles:
     prefill: &1p3d_dcp8_dcp8_dspark7_prefill
+      env:
+        VLLM_ENABLE_GEMM_RS: "0"
       args: &1p3d_dcp8_dcp8_dspark7_prefill_args
+        enable-expert-parallel: false
+        moe-backend: auto
+        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true}'
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":7,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
     decode: &1p3d_dcp8_dcp8_dspark7_decode
       nodes: 6
