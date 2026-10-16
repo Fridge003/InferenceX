@@ -10052,3 +10052,13 @@
     - "Offload every Muse Spark Open H200 point to host DRAM with SGLang HiCache (120 GB per rank so the target and DFlash draft host pools fit the node cgroup, dram-utilization 0.80), keeping the concurrency 1-64 sweep."
     - "Keep the GPU-resident settings unchanged: mem-fraction-static 0.85, matching running-request and decode-graph caps."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4199
+
+- config-keys:
+    - musespark-fp4-b200-sglang-agentic-dflash
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Set swa-full-tokens-ratio to 0.1 for every Muse Spark Open B200 SGLang AgentX concurrency point."
+    - "Raise concurrency 48 to 16384 MegaMoE tokens per rank and 180 GB of HiCache per rank."
+    - "Add TP8/EP8 concurrency 64 with layernorm sequence parallelism, MegaMoE, and HiCache DRAM offload, using 16384 MegaMoE tokens per rank and 180 GB of HiCache per rank."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
