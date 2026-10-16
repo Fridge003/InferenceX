@@ -34,6 +34,9 @@ base:
       PIP_BREAK_SYSTEM_PACKAGES: "1"
       DYN_NATS_REQUEST_TIMEOUT_SECS: "1800"
     args:
+      # The Rust preprocessor's Jinja rejects the checkpoint template's generation tag;
+      # render chat templates with SGLang as the single-node server does.
+      dyn-chat-processor: sglang
       router-mode: kv
       router-session-affinity-ttl-secs: "3600"
       active-decode-blocks-threshold: "None"
@@ -59,7 +62,6 @@ base:
         NCCL_CUMEM_ENABLE: "1"
       args:
         served-model-name: meta-models/Muse-Spark-Open-816B-A42B-NVFP4
-        custom-jinja-template: /model/chat_template.jinja
         trust-remote-code: true
         tensor-parallel-size: 4
         expert-parallel-size: 4
@@ -89,7 +91,6 @@ base:
       env: *env
       args:
         served-model-name: meta-models/Muse-Spark-Open-816B-A42B-NVFP4
-        custom-jinja-template: /model/chat_template.jinja
         trust-remote-code: true
         tensor-parallel-size: 4
         expert-parallel-size: 4
