@@ -9923,4 +9923,4 @@
     - "Use GPU-resident KV at concurrency 1, 2, 4 and 8; enable layernorm SP, MegaMoE and HiCache at 16, 24, 32, 48, 64 and 128, with 120 GB per rank at 16 and 216 GB per rank above 16."
     - "Enable block verification and breakable prefill CUDA graphs; use mem-fraction-static 0.9, SWA/full ratio 0.4, admission 192 and decode graph batch 128."
     - "Keep the NVFP4 target, pinned SGLang image, published DFlash2 draft precision and acceptance selected from the committed golden curve."
-  pr-link: ""
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4156
