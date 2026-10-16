@@ -221,3 +221,65 @@ override_1p1d_p-tp8_d-tp8_l3:
         max-running-requests: 96
         cuda-graph-max-bs-decode: 96
         hicache-size: 40
+
+override_1p1d_p-tp4_d-tp4_l3:
+  services:
+    - name: mooncake-master
+      type: mooncake-master
+    - &store-tp4
+      name: store-decode-0
+      type: mooncake-store
+      placement:
+        node: decode
+      args: ["--port", "8800"]
+      env:
+        MOONCAKE_PROTOCOL: rdma
+        MOONCAKE_DEVICE: "@fabric.rdma-devices"
+        MOONCAKE_GLOBAL_SEGMENT_SIZE: 100gb
+        MC_TCP_BIND_ADDRESS: "{node_ip}"
+      preamble: |
+        ulimit -n 1048576
+        ulimit -l unlimited
+      readiness:
+        port: 8800
+        timeout_seconds: 600
+    - <<: *store-tp4
+      name: store-decode-1
+      args: ["--port", "8801"]
+      readiness:
+        port: 8801
+        timeout_seconds: 600
+    - <<: *store-tp4
+      name: store-decode-2
+      args: ["--port", "8802"]
+      readiness:
+        port: 8802
+        timeout_seconds: 600
+    - <<: *store-tp4
+      name: store-decode-3
+      args: ["--port", "8803"]
+      readiness:
+        port: 8803
+        timeout_seconds: 600
+  roles:
+    prefill:
+      env:
+        MOONCAKE_PROTOCOL: rdma
+        # The store registers host buffers on RDMA only; name the NICs so same-rack
+        # peers are not reached over NVLink.
+        MOONCAKE_DEVICE: "@fabric.rdma-devices"
+        # Each prefill rank contributes a small local segment (the client's warmup
+        # put lands there); the decode-node stores hold the bulk of the tier.
+        MOONCAKE_GLOBAL_SEGMENT_SIZE: 16gb
+        MOONCAKE_STANDALONE_STORAGE: '0'
+        MC_ENABLE_DEST_DEVICE_AFFINITY: '1'
+        MC_TCP_BIND_ADDRESS: "{node}"
+      args:
+        hicache-size: 100
+        hicache-storage-backend: mooncake
+    decode:
+      args:
+        swa-full-tokens-ratio: 0.05
+        max-running-requests: 24
+        cuda-graph-max-bs-decode: 24
+        hicache-size: 40
