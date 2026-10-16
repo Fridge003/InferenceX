@@ -135,7 +135,7 @@ base:
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: 'sglang:'
 
 override_tp2_c10:
-  name: agg-gb300-tp2-c10-b1-mtp-hicache-src
+  name: agg-gb300-tp2-c10-b1-mtp-hicache
   roles:
     agg:
       env:
@@ -150,7 +150,7 @@ override_tp2_c10:
         prefill-decode-interval: 0
 
 override_tp8_c7:
-  name: agg-gb300-tp8-c7-b1-mtp-hicache-src
+  name: agg-gb300-tp8-c7-b1-mtp-hicache
   resources:
     gpus_per_node: 4
   roles:
@@ -177,7 +177,7 @@ override_tp8_c7:
         enable-symm-mem: true
 
 override_tp4_c7:
-  name: agg-gb300-tp4-c7-b1-mtp-hicache-src
+  name: agg-gb300-tp4-c7-b1-mtp-hicache
   resources:
     gpus_per_node: 4
   roles:

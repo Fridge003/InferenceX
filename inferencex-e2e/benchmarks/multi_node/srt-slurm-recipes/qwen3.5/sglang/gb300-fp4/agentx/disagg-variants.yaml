@@ -199,7 +199,7 @@ base:
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: 'sglang:'
 
 override_3p1d_c704:
-  name: disagg-gb300-3p1d-pp4-dep8-c704-mtp-hicache-src
+  name: disagg-gb300-3p1d-pp4-dep8-c704-mtp-hicache
   roles:
     prefill:
       nodes: 3
@@ -248,7 +248,7 @@ override_3p1d_c704:
         max-total-tokens: 12000000
 
 override_1p1d_b10_c56:
-  name: disagg-gb300-1p1d-tp1-tp2-b10-c56-mtp-hicache-src
+  name: disagg-gb300-1p1d-tp1-tp2-b10-c56-mtp-hicache
   roles:
     prefill:
       nodes: 1
@@ -315,7 +315,7 @@ override_1p1d_b10_c56:
         pp-max-micro-batch-size: 10
 
 override_1p1d_b6_c38:
-  name: disagg-gb300-1p1d-tp1-tp2-b6-c38-mtp-hicache-src
+  name: disagg-gb300-1p1d-tp1-tp2-b6-c38-mtp-hicache
   roles:
     prefill:
       nodes: 1
