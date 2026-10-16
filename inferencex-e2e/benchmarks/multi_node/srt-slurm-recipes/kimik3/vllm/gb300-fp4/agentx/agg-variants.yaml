@@ -7,8 +7,6 @@ base:
     frameworks:
       dynamo: "ffbbaaa6c44370e798687881317535ac17d66a76"
 
-  setup_script: kimik3-optimizations.sh
-
   dynamo:
     install: true
     source:
@@ -91,7 +89,6 @@ base:
         MC_MAX_MR_SIZE: "4294967296"
         WITH_NVIDIA_PEERMEM: "0"
       args:
-        quantization-config: '{"targets":{"*.in_proj_qkvgfab":"mxfp8"}}'
         kv-transfer-config: '{"kv_connector":"MooncakeStoreConnector","kv_role":"kv_both","kv_load_failure_policy":"recompute","kv_connector_extra_config":{"load_async":true,"lookup_async":true,"compact_group_io":true,"max_load_batch_keys":2,"enable_offload":false}}'
         served-model-name: "moonshotai/Kimi-K3"
         load-format: "fastsafetensors"
@@ -108,7 +105,7 @@ base:
         moe-backend: "auto"
         enable-flashinfer-autotune: true
         attention-backend: "TOKENSPEED_MLA"
-        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true,"use_cute_dsl_prefill_context":true}'
+        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true}'
         enable-prefix-caching: true
         prefix-match-unit: 128
 
@@ -153,3 +150,33 @@ override_dcp8_dspark7_maxseq2_eval:
         dyn-tool-call-parser: kimi_k3
         dyn-reasoning-parser: kimi_k3
         dyn-enable-structural-tag: true
+
+override_dcp8_dspark4:
+  roles:
+    agg: &dcp8_dspark4_agg
+      env:
+        PYTHONNOUSERSITE: "1"
+        TORCH_CUDA_ARCH_LIST: "10.0"
+        PYTHONHASHSEED: "42"
+        VLLM_HTTP_TIMEOUT_KEEP_ALIVE: "900"
+      args: &dcp8_dspark4_agg_args
+        max-num-batched-tokens: 16384
+        speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
+  benchmark: &dcp8_dspark4_benchmark
+    env:
+      AIPERF_TRACE_IDLE_GAP_CAP_SECONDS: "300"
+      AIPERF_LIVE_FAILED_REQUEST_THRESHOLD: "0.25"
+      AIPERF_REQUIRED_SERVER_METRIC_PREFIX: "vllm:"
+      AIPERF_HTTP_TCP_USER_TIMEOUT: "900000"
+
+override_dcp8_dspark4_eval:
+  roles:
+    agg:
+      <<: *dcp8_dspark4_agg
+      args:
+        <<: *dcp8_dspark4_agg_args
+        reasoning-parser: kimi_k3
+        dyn-tool-call-parser: kimi_k3
+        dyn-reasoning-parser: kimi_k3
+        dyn-enable-structural-tag: true
+  benchmark: *dcp8_dspark4_benchmark
