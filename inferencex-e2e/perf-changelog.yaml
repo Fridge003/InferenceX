@@ -10034,3 +10034,12 @@
     - "TP4 c1 admits one request at a time, enables decoder SWA bounded replay and disables the prefill CUDA graph."
     - "Add DEP2 c160 with the c128 settings, a prefill-decode interval of 8, mem-fraction-static 0.85, 256 max running requests and a 128 decode graph batch."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4033
+
+- config-keys:
+    - kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-agg
+    - kimik3-fp4-gb300-dynamo-vllm-agentic-dspark-mooncake-dcp8-disagg
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Move the complete GB300 Kimi-K3 AgentX curve to vLLM nightly-49cb2bbf and add low-latency megakernel points with probabilistic DSpark sampling."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX

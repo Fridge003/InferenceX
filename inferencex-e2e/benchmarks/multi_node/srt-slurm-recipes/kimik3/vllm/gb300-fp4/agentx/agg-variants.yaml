@@ -5,6 +5,7 @@ base:
     model: {}
     container: {}
     frameworks:
+      vllm: "49cb2bbf71cfd36ee5aa33d1e184b1cddff55294"
       dynamo: "ba83080ecd31c1ce918559e576d3c5bc9e092ff1"
 
   dynamo:
