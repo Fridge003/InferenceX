@@ -10022,3 +10022,12 @@
     - "Run every point with HiCache host-DRAM KV offload at 160 GB per rank, sweeping concurrency 1, 2, 4 and 8; drop the GPU-resident arm and the concurrency 16 queueing point."
     - "Keep the batch-8 cap on running requests and decode graphs, and lower mem-fraction-static from 0.97 to 0.965: with HiCache attached, 0.97 ran out of GPU memory in the MoE at concurrency 4, while 0.95 shrank the GPU KV pool to 98k tokens and rejected the trace's ~196k-token inputs."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4182
+
+- config-keys:
+    - dsv41flash-fp4-gb300-dynamo-vllm-agentic-dspark-disagg
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Append GB300 DeepSeek-V4.1-Flash Dynamo + vLLM AgentX c5120 (8P1D) and c6656 (10P1D) points using the agentx-harness 1.0.10 release already pinned on main."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4126
+  append-only: true
