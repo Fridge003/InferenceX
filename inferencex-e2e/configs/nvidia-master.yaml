@@ -9032,6 +9032,8 @@ dsv41flash-fp4-gb300-dynamo-sglang-agentic-dspark-disagg:
       - spec-decoding: mtp
         conc-list: [1228]
         srt-recipe: disagg-variants.yaml:override_4p1d_dep2_dep16_c1228
+        kv-offloading: dram
+        kv-offload-backend: { name: hicache }
         prefill:
           num-worker: 4
           tp: 2
@@ -9045,6 +9047,8 @@ dsv41flash-fp4-gb300-dynamo-sglang-agentic-dspark-disagg:
       - spec-decoding: mtp
         conc-list: [2884]
         srt-recipe: disagg-variants.yaml:override_6p1d_dep2_dep16_c2884
+        kv-offloading: dram
+        kv-offload-backend: { name: hicache }
         prefill:
           num-worker: 6
           tp: 2

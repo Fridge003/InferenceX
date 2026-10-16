@@ -7,14 +7,14 @@ base:
     frameworks:
       dynamo: "1.6.0.dev20261014"
       sglang: "0.0.0.dev1+ga6a8c5601"
-  # The image ships ai-dynamo 1.6.0.dev20261014 (includes ai-dynamo/dynamo#16005).
   dynamo:
     install: false
     request_plane: tcp
+  # gb300-nv serves this model from the Hub; read it from the shared mounted cache.
   environment:
-    HF_HOME: /hf_hub_cache
     HF_HUB_CACHE: /hf_hub_cache
-    HF_DATASETS_CACHE: /hf_hub_cache/datasets
+  # Tachometer's per-node exporters slow decode steps and add head-node host memory;
+  # InferenceX does not read its output.
   observability:
     tachometer:
       enabled: false
@@ -36,6 +36,7 @@ base:
       type: nats
       placement:
         node: infra
+    # Disables Dynamo's per-request lifecycle span export; InferenceX does not read it.
     - name: otel-collector
       type: otel-collector
       enabled: false
@@ -65,13 +66,6 @@ base:
       env:
         PYTHONNOUSERSITE: "1"
         PYTHONUNBUFFERED: "1"
-        SGLANG_TIMEOUT_KEEP_ALIVE: "900"
-        SGLANG_DEFAULT_THINKING: "1"
-        SGLANG_DSV41_REASONING_EFFORT: high
-        SGLANG_DSPARK_OPT_MARKOV_W2_BF16: "True"
-        # AUTO leaves DSpark draft sampling eager for V4.1 TP shards, which leaves c1
-        # decode launch-bound; fold it into the draft CUDA graph.
-        SGLANG_DSPARK_FOLDED_SAMPLING: "2"
       args:
         served-model-name: deepseek-ai/DeepSeek-V4.1-Flash
         trust-remote-code: true
@@ -97,10 +91,8 @@ base:
       AIPERF_HTTP_X_DYNAMO_SESSION_ID_FROM_CORRELATION_ID: "true"
       AIPERF_USE_DYNAMO_CONV_AWARE_ROUTING: "0"
       AIPERF_REQUIRED_SERVER_METRIC_PREFIX: "sglang:"
-      AIPERF_HTTP_TCP_USER_TIMEOUT: "900000"
       # The client splits this value on whitespace, so it has none.
       AIPERF_EXTRA_INPUTS: '{"chat_template_kwargs":{"reasoning_effort":"high","thinking":true},"temperature":1}'
-      AGENTIC_WARMUP_GRACE_PERIOD: "1800"
 
 override_tp2_c16:
   name: dsv41flash-fp4-gb300-dynamo-sglang-agentx-agg-tp2ep2-c16
@@ -130,13 +122,9 @@ override_tp4_c1:
         tensor-parallel-size: 4
         expert-parallel-size: 1
         prefill-decode-interval: 0
-        # A subagent prefill waits instead of stalling the running decode.
         max-running-requests: 1
         enable-decoder-swa-bounded-replay: true
         cuda-graph-backend-prefill: disabled
-      env:
-        SGLANG_ENABLE_DSV41_ENGRAM_HOST_TABLE: "0"
-        SGLANG_RAGGED_VERIFY_MODE: static
 
 override_tp4_c4:
   name: dsv41flash-fp4-gb300-dynamo-sglang-agentx-agg-tp4ep1-c4
@@ -153,7 +141,6 @@ override_tp4_c4:
       env:
         SGLANG_ENABLE_DSV41_ENGRAM_HOST_TABLE: "1"
         SGLANG_DSV41_ENGRAM_HOST_TABLE_LAYOUT: per_rank
-        SGLANG_RAGGED_VERIFY_MODE: static
 
 override_tp4_c16:
   name: dsv41flash-fp4-gb300-dynamo-sglang-agentx-agg-tp4ep1-c16
@@ -171,4 +158,3 @@ override_tp4_c16:
         SGLANG_ENABLE_DSV41_ENGRAM_HOST_TABLE: "1"
         SGLANG_DSV41_ENGRAM_HOST_TABLE_LAYOUT: per_rank
         SGLANG_NUMA_BIND_V2: "0"
-        SGLANG_RAGGED_VERIFY_MODE: static
