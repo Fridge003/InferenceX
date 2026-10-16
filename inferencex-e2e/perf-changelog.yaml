@@ -9938,10 +9938,10 @@
   scenario-type:
     - agentic-coding
   description:
-    - "Add nine Qwen3.5-397B-A17B NVFP4 GB300 AgentX points on lmsysorg/sglang:dev-qwen35-agentx-gb300-ccebaceeeca3. The image is built from SGLang commit ccebacee (sgl-project/sglang branch nvidia/qwen35-agentx-gb300); its torch, FlashInfer, sgl-kernel and Triton versions equal those of lmsysorg/sglang:nightly-dev-cu13-20261015-a6a8c560."
+    - "Add nine Qwen3.5-397B-A17B NVFP4 GB300 AgentX points on lmsysorg/sglang:dev-qwen35-agentx-gb300-ccebaceeeca3 (SGLang ccebacee)."
     - "Disaggregated: concurrency 704 on three PP4 prefill workers and one DEP8 decode worker (20 GPUs); concurrency 56 and 38 on one node with a TP1 prefill worker and a colocated TP2 decode worker (3 GPUs), with decode max-running-requests 10 and 6 and prefill hicache-ratio 12 and 6."
     - "Aggregated: TP2 at concurrency 5, 7 and 10, TP4 at concurrency 7 and TP8 across two nodes at concurrency 7 and 10, all with max-running-requests 1."
-    - "The branch's optimizations are default-off SGLANG_Q35MF_* switches; each point sets only the switches in its recipe."
+    - "SGLANG_Q35MF_* switches are off by default; each point enables only the switches listed in its recipe."
     - "MTP runs six draft steps with the checkpoint's shipped BF16 draft head: no speculative-draft-model-quantization and no SGLANG_NVFP4_CKPT_FP8_NEXTN_MOE."
     - "The disaggregated points build Dynamo at b208989fbe. It includes e18e53fa3c, which registers every attention-DP rank with this SGLang version; e18e53fa3c itself pins an unpublished crate and does not build from source."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4162
