@@ -476,6 +476,7 @@ jobs:
             ${{ env.INFERENCEX_E2E_ROOT }}/srt-single-node-submission.json
             ${{ env.INFERENCEX_E2E_ROOT }}/srt-slurm-sha.txt
             ${{ env.INFERENCEX_E2E_ROOT }}/srt-setup.log
+            ${{ env.INFERENCEX_E2E_ROOT }}/srt-bind.log
           if-no-files-found: ignore
 
       - name: Upload power audit bundle

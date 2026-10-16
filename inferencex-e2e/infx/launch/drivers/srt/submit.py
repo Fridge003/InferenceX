@@ -7,6 +7,7 @@ import fnmatch
 import json
 import re
 import subprocess
+import sys
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
@@ -14,7 +15,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from infx.bench.proc import echo
-from infx.launch import proc
 from infx.launch.backends.slurm import srtctl_job_name
 from infx.launch.context import LaunchError
 from infx.srt_slurm.single_node import submission_fields
@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 SINGLE_NODE_SUBMISSION = "srt-single-node-submission.json"
 MULTINODE_SUBMISSION = "srt-submission.json"
 ACCEPTANCE_RECORD = "golden-acceptance.json"
+BIND_LOG = "srt-bind.log"
 MULTINODE_EVAL_COMMAND = (
     '["env", "HF_HUB_OFFLINE=0", "HF_DATASETS_OFFLINE=0", "TRANSFORMERS_OFFLINE=0", '
     '"MODEL_PATH=/model", "bash", "{infmax_workspace}/benchmarks/multi_node/srt_eval.sh", "{endpoint}", '
@@ -71,7 +72,7 @@ def bind_point(run: SrtRun, checkout: Checkout, arguments: Path) -> int:
         str(checkout.venv / "bin/python"), "-m", "infx.srt_slurm.single_node", "prepare",
         f"{run.workspace}/{run.request.srt_recipe}", str(arguments), *_fabric(run),
     ]  # fmt: skip
-    return proc.run(prepare, env=run.env, cwd=checkout.root).returncode
+    return _bind(run, prepare, checkout.root)
 
 
 def bound_arguments(arguments: Path) -> tuple[str, str, list[str]]:
@@ -98,7 +99,32 @@ def bind_recipe(
     for name, value in client_env.items():
         bind += ["--client-env", f"{name}={value}"]
     bind += _fabric(run)
-    return proc.run(bind, env=run.env, cwd=checkout.root).returncode
+    return _bind(run, bind, checkout.root)
+
+
+def _bind(run: SrtRun, argv: list[str], cwd: Path) -> int:
+    """Run a recipe binder, its stderr streamed to the job log and kept in BIND_LOG.
+
+    A failure is recorded as ``RecipeBindFailed`` with the binder's last line, its error.
+    """
+    log = run.workspace / BIND_LOG
+    echo(argv, run.env)
+    with (
+        log.open("w") as kept,
+        subprocess.Popen(
+            argv, env=run.env, cwd=cwd, stderr=subprocess.PIPE, text=True, errors="replace"
+        ) as binder,
+    ):
+        for line in binder.stderr or ():
+            sys.stderr.write(line)
+            kept.write(line)
+    if binder.returncode:
+        event = run.life.event
+        event.evidence(log)
+        lines = [line for line in log.read_text(errors="replace").splitlines() if line.strip()]
+        message = lines[-1] if lines else f"recipe binder exited {binder.returncode}"
+        event.fail("RecipeBindFailed", message, report=False)
+    return binder.returncode
 
 
 def _fabric(run: SrtRun) -> list[str]:

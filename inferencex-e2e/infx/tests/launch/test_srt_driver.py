@@ -284,6 +284,24 @@ def test_single_node_failed_allocation_fails_the_launch(harness):
     assert annotation in result.stderr
 
 
+@pytest.mark.parametrize("shape", ["single", "multi"])
+def test_a_recipe_the_binder_rejects_fails_the_point_with_the_binders_error(harness, shape):
+    if shape == "single":
+        env = single_node_env(harness, "h100-cw", CONC="3")
+        line = "single_node.py: error: Expected exactly one matching single-node SRT recipe; "
+    else:
+        env = lane_env(harness, "h200-dgxc", "roles: [prefill]\n", MODEL_PREFIX="dsr1", PRECISION="fp8",
+                       FRAMEWORK="dynamo-sglang", MODEL="deepseek-ai/DeepSeek-R1-0528")  # fmt: skip
+        line = "AttributeError: 'list' object has no attribute 'values'"
+    result = launch(env, harness.config, harness.workspace)
+    assert result.returncode != 0
+    error = job_event(harness.workspace)["error"]
+    assert (error["stage"], error["type"], error["evidence"]) == ("prepare", "RecipeBindFailed", "srt-bind.log")
+    assert error["message"].startswith(line) and error["message"] in result.stderr
+    assert error["detail"].split("\n")[0] == error["message"]
+    assert srtctl_calls(harness.logs) == []
+
+
 @pytest.mark.parametrize(("dram", "exclusive", "step", "job"), [
     (8000, True, {}, {"mem": "0"}),
     (8000, False, {"mem": "4000M"}, {"mem": "4000M"}),

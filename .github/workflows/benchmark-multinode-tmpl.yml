@@ -463,6 +463,7 @@ jobs:
           path: |
             ${{ env.INFERENCEX_E2E_ROOT }}/multinode_server_logs.tar.gz
             ${{ env.INFERENCEX_E2E_ROOT }}/srt-setup.log
+            ${{ env.INFERENCEX_E2E_ROOT }}/srt-bind.log
           if-no-files-found: ignore
 
       - name: Upload job event
