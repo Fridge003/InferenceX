@@ -10013,3 +10013,9 @@
     - "Add a HiCache host-DRAM KV offload arm at concurrency 2, 4 and 8 with 160 GB per rank, alongside the GPU-resident sweep; the few-GB GPU KV pool left by 67 GB of weights per H100 evicts agentic prefixes between turns."
     - "Keep the batch-8 cap on running requests and decode graphs from the GPU-resident sweep."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4181
+
+- config-keys:
+    - dsr1-fp8-mi355x-atom
+  description:
+    - "Update the ATOM image from nightly_202610080328 (v0.1.7) to nightly_202610161458 (0.1.8.dev75)."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4192
