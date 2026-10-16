@@ -125,3 +125,18 @@ override_2p1d_p-tp4_d-tp8:
         max-total-tokens: 10000000
         max-running-requests: 256
         cuda-graph-max-bs-decode: 256
+
+override_3p1d_p-tp4_d-tp8:
+  roles:
+    prefill:
+      nodes: 3
+      workers: 3
+    decode:
+      nodes: 2
+      gpus: 8
+      args:
+        tensor-parallel-size: 8
+        expert-parallel-size: 8
+        max-total-tokens: 10000000
+        max-running-requests: 256
+        cuda-graph-max-bs-decode: 256
