@@ -33,7 +33,6 @@ base:
       workers: 1
       gpus: 16
       env:
-        VLLM_ENABLE_K3_LATENT_MOE_TAIL_FUSION: "1"
         MC_GID_INDEX: "@fabric.rdma-gid-index"
         MC_STORE_MEMCPY: "1"
         MC_ENABLE_DEST_DEVICE_AFFINITY: "1"

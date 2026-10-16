@@ -37,10 +37,6 @@ resources:
 services:
   - name: etcd
     type: etcd
-  - name: nats
-    type: nats
-    options:
-      max_payload_mb: 32
   - name: mooncake-master
     type: mooncake-master
     args:
