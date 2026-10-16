@@ -30,8 +30,9 @@ base:
         attention-backend: trtllm_mha
         page-size: 128
         mem-fraction-static: 0.9
+        # c128 admits ~150 agentic requests; DFlash staging breaks past the largest decode graph.
         max-running-requests: 192
-        cuda-graph-max-bs-decode: 128
+        cuda-graph-max-bs-decode: 192
         cuda-graph-backend-prefill: breakable
         swa-full-tokens-ratio: 0.4
         # DFlash2 verifies 8 tokens per step: the current token plus 7 drafts.
@@ -57,6 +58,7 @@ base:
         TVM_FFI_CUDA_ARCH_LIST: 10.3a
         SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN: '1'
         SGLANG_UNIFIED_RADIX_TREE_CORE_BACKEND: python
+        SGLANG_DFLASH_EAGER_DRAFT_SAMPLER: '1'
   # Cold 533 GB weight loads from shared storage plus graph capture outlast the default.
   health_check:
     max_attempts: 1440
