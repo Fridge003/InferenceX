@@ -8366,6 +8366,20 @@ musespark-fp4-gb200-dynamo-sglang-agentic-dflash-disagg:
     - dram-utilization: 0.80
       search-space:
       - spec-decoding: draft_model
+        conc-list: [64, 96]
+        kv-offloading: dram
+        kv-offload-backend: { name: hicache }
+        srt-recipe: disagg-variants.yaml:override_2p1d_p-tp4_d-tp4
+        prefill: { num-worker: 2, tp: 4, ep: 4, dp-attn: false }
+        decode: { num-worker: 1, tp: 4, ep: 4, dp-attn: false }
+      - spec-decoding: draft_model
+        conc-list: [96, 128]
+        kv-offloading: dram
+        kv-offload-backend: { name: hicache }
+        srt-recipe: disagg-variants.yaml:override_3p1d_p-tp4_d-tp4
+        prefill: { num-worker: 3, tp: 4, ep: 4, dp-attn: false }
+        decode: { num-worker: 1, tp: 4, ep: 4, dp-attn: false }
+      - spec-decoding: draft_model
         conc-list: [48, 64]
         kv-offloading: dram
         kv-offload-backend: { name: hicache }

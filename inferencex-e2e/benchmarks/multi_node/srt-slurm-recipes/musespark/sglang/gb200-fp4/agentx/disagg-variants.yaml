@@ -106,6 +106,26 @@ override_1p2d_p-tp4_d-tp4:
         max-running-requests: 64
         cuda-graph-max-bs-decode: 64
 
+override_2p1d_p-tp4_d-tp4:
+  roles:
+    prefill:
+      nodes: 2
+      workers: 2
+    decode:
+      args:
+        max-running-requests: 64
+        cuda-graph-max-bs-decode: 64
+
+override_3p1d_p-tp4_d-tp4:
+  roles:
+    prefill:
+      nodes: 3
+      workers: 3
+    decode:
+      args:
+        max-running-requests: 64
+        cuda-graph-max-bs-decode: 64
+
 override_2p2d_p-tp4_d-tp4:
   roles:
     prefill:
