@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -11,11 +12,15 @@ from urllib.parse import urlencode
 
 from . import claims, github
 from .github import VerificationError
-from .models import CandidateOutcome, OwnedCandidate, Ownership, utc
+from .models import CandidateOutcome, OwnedCandidate, Ownership, identity, utc
 from .reporting import translated
 from .validation import verify_sweep
 
 BOT = "Klaud-Cold"
+COMMITTER = "github-actions[bot]"
+ACTIVE_STATUSES = ("requested", "waiting", "pending", "queued", "in_progress")
+CANDIDATE_ID = r"[0-9a-f]{16}-[0-9a-f]{16}"
+RECONCILE_JOB = "Reconcile interrupted candidates"
 SWEEP_LABELS = {
     "full-sweep-enabled",
     "non-canary-full-sweep-enabled",
@@ -55,7 +60,9 @@ class Session:
             from .reporting import baseline_for, check_baseline_coverage
 
             evidence = verify_sweep(self.repository, run, self.candidate.family)
-            check_baseline_coverage(evidence[0], baseline_for(self, self.pulls()[0]))
+            check_baseline_coverage(
+                self.repository, self.candidate, evidence[0], baseline_for(self, self.pulls()[0])
+            )
             self.validations[key] = evidence
         return self.validations[key]
 
@@ -85,7 +92,8 @@ class Session:
         return pulls
 
     def runs(self) -> list[dict]:
-        query = {"per_page": 100, "created": ">=" + self.parent["created_at"]}
+        end = self.parent["updated_at"] if terminal(self.parent) else "*"
+        query = {"per_page": 100, "created": f"{self.parent['created_at']}..{end}"}
         targeted = github.items(
             self.repository,
             "actions/workflows/e2e-tests.yml/runs?"
@@ -103,7 +111,14 @@ class Session:
         sweeps = github.items(
             self.repository,
             "actions/workflows/run-sweep.yml/runs?"
-            + urlencode({**query, "event": "pull_request", "branch": self.branch}),
+            + urlencode(
+                {
+                    "per_page": 100,
+                    "created": ">=" + self.parent["created_at"],
+                    "event": "pull_request",
+                    "branch": self.branch,
+                }
+            ),
             "workflow_runs",
         )
         pulls = self.pulls()
@@ -287,7 +302,6 @@ class Session:
             }
         )
         if outcome.outcome == "validated" and pull:
-            # Reviews start at this transition: prove AND publish results first.
             self.verify(outcome, require_report=False, require_ready=False)
             from .reporting import publish_final
 
@@ -361,7 +375,6 @@ class Session:
                         {"state": "closed"},
                     )
                 self.delete_branch(pull)
-        # PR transitions can enqueue skipped runs. Wait for them before reporting completion.
         outcome = outcome.model_copy(update={"run_ids": sorted(run["id"] for run in self.runs())})
         self.verify(outcome, require_report=False)
         if pull:
@@ -466,7 +479,6 @@ def reconcile(session: Session) -> bool:
     if not pull and not runs:
         return False
     pending = session.pending(pull) if pull else None
-    # Preserve a completed successful sweep even if the agent died before reporting.
     final = [
         run
         for run in runs
@@ -476,8 +488,6 @@ def reconcile(session: Session) -> bool:
         and run["conclusion"] != "skipped"
     ]
     if not pending and any(not terminal(run) for run in runs):
-        # An interruption is not permission to stop healthy child work or block planning.
-        # The durable ownership receipt keeps this family excluded until a later pass.
         raise PendingCleanup("Owned work is still running; retained for the next recovery pass")
     validated = bool(
         final
@@ -488,9 +498,6 @@ def reconcile(session: Session) -> bool:
         try:
             session.validation(max(final, key=lambda r: r["created_at"]))
         except VerificationError:
-            # A completed but uncertifiable run is a terminal inspection outcome,
-            # not an indefinitely open draft. API/ownership uncertainty still bubbles
-            # up and preserves work; no incompatibility is inferred from this failure.
             validated = False
     outcome = pending or CandidateOutcome(
         outcome="validated" if validated else "unexpected-error",
@@ -499,8 +506,6 @@ def reconcile(session: Session) -> bool:
         run_ids=[r["id"] for r in runs],
         repairs_used=None,
     )
-    # Unknown interruption is terminal once owned work has ended; finish records
-    # the evidence, closes the PR, deletes the unchanged branch and releases the family.
     session.finish(outcome)
     return True
 
@@ -510,8 +515,6 @@ def recover() -> None:
     inventory = github.items(
         repository, "actions/artifacts?name=klaud-ownership&per_page=100", "artifacts"
     )
-    # Refs cover a crash before artifact upload; artifacts cover legacy sessions.
-    # Validate the entire inventory before mutating any owned work.
     owners = [(owner, None) for owner in claims.family_owners(repository)]
     for artifact in inventory:
         if artifact["expired"]:
@@ -541,6 +544,7 @@ def recover() -> None:
         raise VerificationError("Untrusted ownership parent")
     results = {}
     blocked = set()
+    live = set()
     for owner, _ in sorted(owners, key=lambda pair: pair[0].run_id, reverse=True):
         parent = parents[owner.run_id]
         for candidate in owner.candidates:
@@ -550,11 +554,13 @@ def recover() -> None:
             results[key] = False
             if not terminal(parent):
                 blocked.add(candidate.family)
+                live.add(candidate.id)
                 continue
             session = Session(repository, parent, candidate, recovering=True)
             try:
                 if not claims.recovery_lease(repository, parent["id"], candidate):
                     blocked.add(candidate.family)
+                    live.add(candidate.id)
                     continue
                 changed = reconcile(session)
                 claims.release_family(repository, candidate, parent["id"])
@@ -592,7 +598,136 @@ def recover() -> None:
             current = github.read(repository, f"actions/runs/{owner.run_id}")
             if terminal(current) and current["run_attempt"] == parents[owner.run_id]["run_attempt"]:
                 github.write(repository, f"actions/artifacts/{artifact['id']}", "DELETE")
-    # Candidate failures are isolated, but their entire families remain unavailable.
+    try:
+        live |= sweep_abandoned(repository, live)
+    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
+        print(f"::warning::Klaud abandoned-work sweep skipped: {type(error).__name__}")
+    else:
+        prefixes = {candidate.split("-", 1)[0] for candidate in live}
+        blocked = {family for family in blocked if identity(family)[:16] in prefixes}
     (Path(os.environ["RUNNER_TEMP"]) / "klaud-recovery.json").write_text(
         json.dumps(sorted(blocked))
     )
+
+
+def owned_activity(repository: str) -> tuple[set[str], dict[str, list[int]], set[int]]:
+    live: set[str] = set()
+    targeted: dict[str, list[int]] = {}
+    planners: set[int] = set()
+    for status in ACTIVE_STATUSES:
+        query = urlencode({"status": status, "per_page": 100})
+        for run in github.items(
+            repository, f"actions/workflows/e2e-tests.yml/runs?{query}", "workflow_runs"
+        ):
+            match = re.fullmatch(rf"e2e Test - klaud-\d+-({CANDIDATE_ID})", run["display_title"])
+            if match and run["actor"]["login"] == BOT:
+                targeted.setdefault(match[1], []).append(run["id"])
+        for run in github.items(
+            repository, f"actions/workflows/run-sweep.yml/runs?{query}", "workflow_runs"
+        ):
+            if match := re.fullmatch(rf"klaud/auto-({CANDIDATE_ID})", run["head_branch"] or ""):
+                live.add(match[1])
+        for run in github.items(
+            repository, f"actions/workflows/klaud-plan.yml/runs?{query}", "workflow_runs"
+        ):
+            for job in github.items(
+                repository, f"actions/runs/{run['id']}/jobs?per_page=100", "jobs"
+            ):
+                if match := re.search(rf"Run candidate ({CANDIDATE_ID})", job["name"]):
+                    live.add(match[1])
+                elif job["name"] == RECONCILE_JOB and job["status"] != "completed":
+                    planners.add(run["id"])
+    return live, targeted, planners
+
+
+def bot_committed(commits: list[dict]) -> bool:
+    return bool(commits) and all(
+        (commit.get("committer") or {}).get("login") == COMMITTER for commit in commits
+    )
+
+
+def sweep_abandoned(repository: str, live: set[str]) -> set[str]:
+    sessions, targeted, planners = owned_activity(repository)
+    live = live | sessions
+    pulls = github.items(repository, "pulls?state=open&per_page=100")
+    abandoned = []
+    for pull in pulls:
+        match = re.fullmatch(rf"klaud/auto-({CANDIDATE_ID})", pull["head"]["ref"])
+        if not match or match[1] in live:
+            continue
+        if (
+            pull["draft"]
+            and pull["user"]["login"] == BOT
+            and (pull["head"]["repo"] or {}).get("full_name") == repository
+            and not any(label["name"] == "klaud-handoff" for label in pull["labels"])
+            and bot_committed(
+                github.items(repository, f"pulls/{pull['number']}/commits?per_page=100")
+            )
+        ):
+            abandoned.append(pull)
+        else:
+            live.add(match[1])
+    for candidate, runs in targeted.items():
+        if candidate not in live:
+            for run in runs:
+                github.write(repository, f"actions/runs/{run}/cancel", "POST")
+    for owner in claims.family_owners(repository):
+        candidate = owner.candidates[0]
+        if candidate.id not in live and terminal(
+            github.read(repository, f"actions/runs/{owner.run_id}")
+        ):
+            claims.release_family(repository, candidate, owner.run_id)
+    if planners <= {int(os.environ.get("GITHUB_RUN_ID", "0"))}:
+        finished: dict[int, bool] = {}
+        for lease in github.items(repository, "git/matching-refs/heads/klaud/recovery-"):
+            match = re.fullmatch(rf"refs/heads/klaud/recovery-(\d+)-({CANDIDATE_ID})", lease["ref"])
+            if not match or match[2] in live:
+                continue
+            parent = int(match[1])
+            if parent not in finished:
+                finished[parent] = terminal(github.read(repository, f"actions/runs/{parent}"))
+            if finished[parent]:
+                github.write(repository, "git/" + lease["ref"], "DELETE")
+    for pull in abandoned:
+        github.write(
+            repository,
+            f"issues/{pull['number']}/comments",
+            "POST",
+            {
+                "body": translated(
+                    "**abandoned** · The owning Klaud session ended without cleanup. Closed, "
+                    "with any leftover smoke runs cancelled, so a new candidate can take this "
+                    "family.",
+                    "**abandoned** · 所属 Klaud 会话已结束但未完成清理。已关闭并取消残留的冒烟运行，"
+                    "新的候选可以接手该配置族。",
+                )
+            },
+        )
+        github.write(repository, f"pulls/{pull['number']}", "PATCH", {"state": "closed"})
+        github.write(repository, f"git/refs/heads/{pull['head']['ref']}", "DELETE")
+    open_heads = {pull["head"]["ref"] for pull in pulls}
+    for ref in github.items(repository, "git/matching-refs/heads/klaud/auto-"):
+        branch = ref["ref"].removeprefix("refs/heads/")
+        match = re.fullmatch(rf"klaud/auto-({CANDIDATE_ID})", branch)
+        if not match or match[1] in live or branch in open_heads:
+            continue
+        history = github.items(
+            repository,
+            "pulls?"
+            + urlencode(
+                {
+                    "state": "all",
+                    "head": repository.split("/", maxsplit=1)[0] + ":" + branch,
+                    "per_page": 100,
+                }
+            ),
+        )
+        if history:
+            latest = max(history, key=lambda pull: pull["created_at"])
+            closer = github.read(repository, f"issues/{latest['number']}").get("closed_by") or {}
+            if latest["user"]["login"] != BOT or closer.get("login") != BOT:
+                continue
+        elif not bot_committed([github.read(repository, f"commits/{ref['object']['sha']}")]):
+            continue
+        github.write(repository, f"git/refs/heads/{branch}", "DELETE")
+    return live
