@@ -254,13 +254,11 @@ override_dep8_c384:
       CONC: '384'
 
 override_dep8_c512:
-  frontend: *dep8_frontend_cache_aware
+  frontend: *dep8_frontend
   roles:
     agg:
       args:
         <<: *dep8_args
-        enable-prefill-delayer: null
-        prefill-decode-interval: 30
         max-running-requests: 1024
         mem-fraction-static: 0.86
       env: *dep8_env
