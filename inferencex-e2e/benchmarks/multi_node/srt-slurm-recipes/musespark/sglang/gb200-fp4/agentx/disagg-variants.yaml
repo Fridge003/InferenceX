@@ -119,7 +119,8 @@ override_2p2d_p-tp4_d-tp4:
         cuda-graph-max-bs-decode: 64
 
 # KV moves between equal TP sizes only. TP8 halves the weights per GPU; SGLang sizes
-# the target KV pool without the matching DFlash draft pool, so decode caps it at 10M tokens.
+# the target KV pool without the matching DFlash draft pool or the cross-node MegaMoE
+# buffer, so both roles cap it at 10M tokens.
 override_1p1d_p-tp8_d-tp8:
   roles:
     prefill:
@@ -128,6 +129,7 @@ override_1p1d_p-tp8_d-tp8:
       args:
         tensor-parallel-size: 8
         expert-parallel-size: 8
+        max-total-tokens: 10000000
     decode:
       nodes: 2
       gpus: 8
