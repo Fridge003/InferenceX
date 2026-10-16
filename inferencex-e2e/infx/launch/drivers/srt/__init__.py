@@ -222,7 +222,9 @@ def _run_multinode_docker(
     rendered["docker_hosts"] = hosts
     config.write(checkout.root / "srtslurm.yaml", rendered)
     image = run.request.image.replace("#", "/", 1)
-    if cli.srun(allocation, ["docker", "pull", "--quiet", image], extra=["--ntasks-per-node=1"]):
+    # One task on every node: without --nodes, srun puts its single task on one.
+    every = [f"--nodes={len(hosts)}", "--ntasks-per-node=1"]
+    if cli.srun(allocation, ["docker", "pull", "--quiet", image], extra=every):
         return 1
     # Containers run as root: hand their outputs back so the runner can clean its workspace.
     owner = f"{os.getuid()}:{os.getgid()}"
@@ -243,7 +245,7 @@ def _run_multinode_docker(
                 step, env=env, cwd=checkout.root, stdout=handle, check=False
             ).returncode
     finally:
-        cli.srun(allocation, ["bash", "-c", leftovers], extra=["--ntasks-per-node=1"])
+        cli.srun(allocation, ["bash", "-c", leftovers], extra=every)
         cli.srun(allocation, [*chown, "-R", owner, "/w"], extra=first)
     outputs = Path(rendered.get("output_dir", checkout.root / "outputs"))
     jobs = sorted(outputs.glob("docker-*"), key=lambda path: path.stat().st_mtime)
