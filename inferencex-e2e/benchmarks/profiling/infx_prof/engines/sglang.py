@@ -160,7 +160,7 @@ def mark_draft(model, draft):
             pass
 
 
-_EXPERTS_NAME = re.compile(r"layers\.(\d+)\.mlp\.experts$")
+_EXPERTS_NAME = re.compile(r"layers\.(\d+)\.mlp(?:\.experts)?$")
 
 
 def tag_experts_layers(model):
@@ -173,7 +173,8 @@ def tag_experts_layers(model):
         if match is None or (fused and isinstance(mod, fused)):
             continue
         mod._infx_layer = int(match.group(1))
-        bound[mod._infx_layer] = name
+        if name.endswith(".experts") or mod._infx_layer not in bound:
+            bound[mod._infx_layer] = name
         cls = type(mod)
         if vars(cls).get("_infx_experts_patched"):
             continue
@@ -183,11 +184,11 @@ def tag_experts_layers(model):
             layer = getattr(self, "_infx_layer", None)
             if layer is None:
                 return _orig(self, *args, **kwargs)
-            _tls.experts_layer = layer
+            outer, _tls.experts_layer = getattr(_tls, "experts_layer", None), layer
             try:
                 return _orig(self, *args, **kwargs)
             finally:
-                _tls.experts_layer = None
+                _tls.experts_layer = outer
 
         cls.forward = runtime.keep_signature(forward, orig)
         cls._infx_experts_patched = True
@@ -212,6 +213,27 @@ def capture_routed_moe(args, kwargs):
         ids = ids >> 16
     if isinstance(ids, torch.Tensor) and ids.dim() == 2:
         routing.capture(layer, ids)
+
+
+def patch_muse_routing(module):
+    """Muse Spark's fused router returns (topk_weights, topk_ids, ...) with global expert ids."""
+    orig = vars(module).get("fused_muse_spark_routing")
+    if orig is None or getattr(orig, "_infx_routed", False):
+        return
+
+    @functools.wraps(orig)
+    def wrapped(*args, **kwargs):
+        result = orig(*args, **kwargs)
+        try:
+            layer = getattr(_tls, "experts_layer", None)
+            if layer is not None and routing.active() and isinstance(result, tuple) and len(result) > 1:
+                routing.capture(layer, result[1])
+        except Exception:
+            runtime.write_error("sglang muse routing capture")
+        return result
+
+    wrapped._infx_routed = True
+    module.fused_muse_spark_routing = wrapped
 
 
 def patch_routed_moe(module):
@@ -444,6 +466,9 @@ class SglangEngine(Engine):
         registry.on("sglang.srt.layers.moe.topk", patch_topk)
         registry.on("sglang.srt.layers.moe.hash_topk", patch_topk)
         registry.on("flashinfer.fused_moe.core", patch_routed_moe)
+        for name in ("sglang.kernels.ops.muse_spark_v12.routing", "sglang.kernels.ops.muse_spark_v12.fused_muse_spark_routing",
+                     "sglang.srt.rocm_muse_spark.fused_muse_spark_routing"):
+            registry.on(name, patch_muse_routing)
         registry.on("sglang.srt.model_executor.runner_backend.cuda_graph_dedup_mixin", patch_deduped_graphs)
         registry.on_package("sglang.srt.model_executor", patch_graph_runners)
         registry.on_package("sglang.srt.speculative", patch_graph_runners)
