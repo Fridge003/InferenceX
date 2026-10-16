@@ -96,7 +96,9 @@ base:
         quantization: modelopt_fp4
         moe-runner-backend: flashinfer_trtllm
         kv-cache-dtype: fp8_e4m3
-        mem-fraction-static: 0.85
+        # Decode sizes SWA by running requests, so the full pool takes the rest; the DFlash2
+        # draft pool, allocated after it and sized from it, OOMs at 0.85.
+        mem-fraction-static: 0.80
         swa-full-tokens-ratio: 0.1
         # DFlash2 verifies 8 tokens per step: the current token plus 7 drafts.
         speculative-algorithm: DFLASH
