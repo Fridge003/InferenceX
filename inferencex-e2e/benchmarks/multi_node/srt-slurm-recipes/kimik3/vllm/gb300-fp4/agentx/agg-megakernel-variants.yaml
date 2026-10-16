@@ -60,7 +60,7 @@ base:
         prefix-match-unit: 128
         max-num-seqs: 8
         max-num-batched-tokens: 16384
-        additional-config: '{"decode_backend":"cute"}'
+        additional-config: '{"decode_backend":"latency_specialized"}'
   sbatch_directives:
     mem: '0'
     cpus-per-task: '72'
