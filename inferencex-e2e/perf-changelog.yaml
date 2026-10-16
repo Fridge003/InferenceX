@@ -10042,4 +10042,4 @@
     - agentic-coding
   description:
     - "Move the complete GB300 Kimi-K3 AgentX curve to vLLM nightly-49cb2bbf and add low-latency megakernel points with probabilistic DSpark sampling."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4208
