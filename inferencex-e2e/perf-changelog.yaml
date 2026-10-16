@@ -9852,5 +9852,5 @@
   scenario-type:
     - fixed-seq-len
   description:
-    - "DNM: fixed-sequence multi-node disaggregated point through srt-slurm launcher: docker on h200-dgxc."
+    - "DNM: fixed-sequence multi-node disaggregated points through srt-slurm launcher: docker on h200-dgxc."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4043
