@@ -189,6 +189,8 @@ override_1p1d_dcp8_dcp8_dspark4:
       nodes: 2
       workers: 1
       args: &1p1d_dcp8_dcp8_dspark4_decode_args
+        max-num-seqs: 128
+        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true,"tokenspeed_mla_min_split_kv":8}'
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
 
 override_1p2d_dcp8_dcp8_dspark4:
@@ -201,6 +203,8 @@ override_1p2d_dcp8_dcp8_dspark4:
       nodes: 4
       workers: 2
       args: &1p2d_dcp8_dcp8_dspark4_decode_args
+        max-num-seqs: 128
+        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true,"tokenspeed_mla_min_split_kv":8}'
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
 
 override_1p3d_dcp8_dcp8_dspark7:
@@ -225,6 +229,8 @@ override_1p3d_dcp8_dcp8_dspark4:
       nodes: 6
       workers: 3
       args: &1p3d_dcp8_dcp8_dspark4_decode_args
+        max-num-seqs: 128
+        attention-config: '{"mla_prefill_backend":"TRTLLM_RAGGED","use_prefill_query_quantization":true,"tokenspeed_mla_min_split_kv":8}'
         speculative-config: '{"model":"Inferact/Kimi-K3-DSpark","attention_backend":"TOKENSPEED_MLA","method":"dspark","num_speculative_tokens":4,"draft_sample_method":"probabilistic","rejection_sample_method":"block"}'
 
 override_1p1d_dcp8_dcp8_dspark4_eval:
