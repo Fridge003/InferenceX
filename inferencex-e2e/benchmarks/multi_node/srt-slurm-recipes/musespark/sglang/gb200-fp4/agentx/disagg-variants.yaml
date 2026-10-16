@@ -196,13 +196,20 @@ override_1p1d_p-tp8_d-tp8_l3:
       gpus: 8
       env:
         MOONCAKE_PROTOCOL: rdma
+        # The store registers host buffers on RDMA only; name the NICs so same-rack
+        # peers are not reached over NVLink.
         MOONCAKE_DEVICE: "@fabric.rdma-devices"
-        MOONCAKE_GLOBAL_SEGMENT_SIZE: '0'
+        # Each prefill rank contributes a small local segment (the client's warmup
+        # put lands there); the decode-node stores hold the bulk of the tier.
+        MOONCAKE_GLOBAL_SEGMENT_SIZE: 16gb
+        MOONCAKE_STANDALONE_STORAGE: '0'
+        MC_ENABLE_DEST_DEVICE_AFFINITY: '1'
         MC_TCP_BIND_ADDRESS: "{node}"
       args:
         tensor-parallel-size: 8
         expert-parallel-size: 8
         max-total-tokens: 10000000
+        hicache-size: 100
         hicache-storage-backend: mooncake
     decode:
       nodes: 2
