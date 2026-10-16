@@ -10013,3 +10013,14 @@
     - "Add a HiCache host-DRAM KV offload arm at concurrency 2, 4 and 8 with 160 GB per rank, alongside the GPU-resident sweep; the few-GB GPU KV pool left by 67 GB of weights per H100 evicts agentic prefixes between turns."
     - "Keep the batch-8 cap on running requests and decode graphs from the GPU-resident sweep."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4181
+
+- config-keys:
+    - musespark-fp4-gb200-dynamo-sglang-agentic-dflash-disagg
+  scenario-type:
+    - agentic-coding
+  description:
+    - "Add disaggregated prefill/decode Muse Spark Open (meta-models/Muse-Spark-Open-816B-A42B-NVFP4) agentic coding on GB200 via SGLang (lmsysorg/sglang:dev-muse-spark-open, multiarch digest sha256:8cfc5a72cb296771f5f8a4a4688cb6d05685610a830cbb616fa4ab0eb7bb2b0a) behind the SGLang Model Gateway in PD mode (prefill cache-aware routing), with Mooncake KV transfer over MNNVL."
+    - "TP4/EP4 workers on both roles; KV moves only between equal TP sizes. Layouts are sized to concurrency: one TP4 prefill worker per ~32 sessions and one TP4 decode worker per ~64."
+    - "Prefill keeps the aggregated recipe's path (layernorm SP with MegaMoE, prefill CUDA graphs off, mem-fraction-static 0.88) and its HiCache prefix store at 120 GB/rank. Decode follows the cookbook's PD decode cell and backs retracted requests' KV with a 120 GB/rank HiCache host pool."
+    - "DFlash2 (RadixArk/Muse-Spark-Open-DFlash2, 8 verify tokens, fa4 draft attention) on both roles; synthetic acceptance follows the committed musespark_dflash golden curve: AL 4.05 at 7 draft tokens, thinking_on."
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4183
