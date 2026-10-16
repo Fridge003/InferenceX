@@ -84,14 +84,17 @@ each as it lands. Never declare success from absence of output.
 Read a failed job's launch record before its logs. Every `python -m infx.launch run` writes
 `job_event.json` ([schema](../../../inferencex-e2e/infx/launch/event.py)), uploaded as
 `job_event_<RESULT_FILENAME>`. Once every benchmark and eval job has finished,
-`collect-job-events.yml` joins the records into `events.jsonl` in the `job_events` artifact;
-a cancelled run keeps only the per-job artifacts. A failure's `error` names the first failing
-stage and type, marks likely infrastructure faults `retriable` (a hint, not a diagnosis), and
-points `evidence` at the log to open first.
+`collect-job-events.yml` joins the records into `events.jsonl` in the `job_events` artifact,
+adds each job's GitHub `conclusion` and `failed_step`, and synthesizes a `NoLauncherRecord`
+record for every benchmark or eval job that wrote none (runner setup, checkout, node prep); a
+cancelled run keeps only the per-job artifacts. A failure's `error` names the first failing
+stage and type, marks likely infrastructure faults `retriable` (a hint, not a diagnosis),
+points `evidence` at the log to open first, and quotes that log's likeliest cause line and
+last lines in `detail`.
 
 ```bash
 gh run download "$RUN_ID" --repo SemiAnalysisAI/InferenceX -n job_events
-jq -r 'select(.outcome == "failure") | [.error.stage, .error.type, .result_filename, .error.evidence] | @tsv' events.jsonl
+jq -r 'select(.outcome == "failure") | [.error.stage, .error.type, .result_filename, (.error.detail // "" | split("\n")[0])] | @tsv' events.jsonl
 gh run view "$RUN_ID" --repo SemiAnalysisAI/InferenceX --json jobs \
   --jq '.jobs[] | select(.conclusion=="failure") | "\(.databaseId)\t\(.name)"'
 gh run view "$RUN_ID" --repo SemiAnalysisAI/InferenceX --log-failed > /tmp/sweep_failed.txt

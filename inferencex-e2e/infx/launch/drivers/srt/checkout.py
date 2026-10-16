@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import os
 import shutil
@@ -9,6 +10,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
+from importlib import metadata
 from pathlib import Path
 
 from infx.bench.proc import echo
@@ -89,6 +91,7 @@ def prepare_checkout(run: SrtRun, destination: Path, *, power: bool) -> Checkout
     if head != commit:
         raise LaunchError(f"srt-slurm checkout is at {head}, expected {commit}")
     print(f"Using srt-slurm revision {commit}", flush=True)
+    run.life.event.set_versions(srt_slurm_sha=head)
     sha_file = run.workspace / "srt-slurm-sha.txt"
     sha_file.write_text(f"{head}\n")
     if power:
@@ -144,6 +147,16 @@ def install_srtctl(run: SrtRun, checkout: Checkout, *, python: str | None = None
     run.prepend_path(venv / "bin")
     if shutil.which("srtctl", path=run.env["PATH"]) is None:
         raise LaunchError("Failed to install srtctl")
+    run.life.event.set_versions(srtctl_version=_installed_version(venv, "srtctl"))
+
+
+def _installed_version(venv: Path, name: str) -> str | None:
+    """The version of ``name`` installed in ``venv``, read from its metadata."""
+    paths = [str(path) for path in venv.glob("lib/python*/site-packages")]
+    with contextlib.suppress(OSError):
+        for distribution in metadata.distributions(name=name, path=paths):
+            return distribution.version
+    return None
 
 
 def _run_logged(argv: list[str], log: Path, *, env: dict[str, str], cwd: Path) -> int:

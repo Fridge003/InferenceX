@@ -9,8 +9,9 @@ import re
 import subprocess
 import sys
 import time
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field, replace
+from datetime import UTC, datetime
 from pathlib import Path
 
 from infx.bench.proc import echo
@@ -167,9 +168,9 @@ def cancel_named(names: Sequence[str]) -> None:
         time.sleep(5)
 
 
-def _query(argv: list[str]) -> str:
+def _query(argv: list[str], env: Mapping[str, str] | None = None) -> str:
     try:
-        result = proc.run(argv, capture=True)
+        result = proc.run(argv, env=env, capture=True)
     except FileNotFoundError:
         return ""
     return result.stdout if result.returncode == 0 else ""
@@ -182,23 +183,47 @@ def default_account() -> str | None:
     return account.splitlines()[0] if account else None
 
 
-def _observe(job: Job) -> tuple[str, str, str]:
-    """One (state, exit code, nodes) reading: allocation accounting, else the controller's."""
-    accounting = _query(
-        ["sacct", "-X", "-n", "-P", "-j", job.id, "--format=State,ExitCode,NodeList"]
-    )
+def _time(text: str) -> datetime | None:
+    """A ``SLURM_TIME_FORMAT=%s`` timestamp; unset ones read ``Unknown``, ``None`` or 0."""
+    text = text.strip()
+    if not (text.isascii() and text.isdecimal()) or int(text) == 0:
+        return None
+    try:
+        return datetime.fromtimestamp(int(text), UTC)
+    except (OverflowError, OSError, ValueError):
+        return None
+
+
+def observe(job: Job) -> JobStatus:
+    """One reading of the allocation: accounting (``sacct -X``), else the controller's record.
+
+    Never raises; a job neither knows reads as ``UNKNOWN``.
+    """
+    env = {**os.environ, "SLURM_TIME_FORMAT": "%s"}
+    argv = ["sacct", "-X", "-n", "-P", "-j", job.id]
+    accounting = _query([*argv, "--format=State,ExitCode,NodeList,Submit,Start,End"], env)
     first = accounting.splitlines()[0] if accounting.strip() else ""
-    state, exit_code, nodes = [*first.split("|"), "", ""][:3]
-    if state.strip():
-        return state.strip(), exit_code.strip(), nodes.strip()
-    fields = dict(
-        item.split("=", 1)
-        for item in _query(["scontrol", "show", "job", "-o", job.id]).split()
-        if "=" in item
+    state, exit_code, nodes, submitted, started, ended = [*first.split("|"), *[""] * 6][:6]
+    if not state.strip():
+        fields = dict(
+            item.split("=", 1)
+            for item in _query(["scontrol", "show", "job", "-o", job.id], env).split()
+            if "=" in item
+        )
+        if fields.get("JobId") != job.id:
+            fields = {}
+        state, exit_code, nodes, submitted, started, ended = (
+            fields.get(name, "")
+            for name in ("JobState", "ExitCode", "NodeList", "SubmitTime", "StartTime", "EndTime")
+        )
+    nodes = nodes.strip()
+    return replace(
+        job_status(state.strip(), exit_code.strip()),
+        nodes=None if nodes in {"", "None assigned", "(null)"} else nodes,
+        submitted_at=_time(submitted),
+        started_at=_time(started),
+        ended_at=_time(ended),
     )
-    if fields.get("JobId") != job.id:
-        return "", "", ""
-    return fields.get("JobState", ""), fields.get("ExitCode", ""), fields.get("NodeList", "")
 
 
 def job_status(state: str, exit_code: str) -> JobStatus:
@@ -228,15 +253,13 @@ def final_status(job: Job, *, attempts: int = 10, delay_s: float = 1.0) -> JobSt
     Accounting lags, so unsettled readings are retried; after ``attempts`` the last one is
     returned.
     """
-    state, exit_code, nodes = "", "", ""
-    for attempt in range(attempts):
-        state, exit_code, nodes = _observe(job)
-        if job_status(state, exit_code).state not in _UNSETTLED:
+    status = observe(job)
+    for _ in range(attempts - 1):
+        if status.state not in _UNSETTLED:
             break
-        if attempt + 1 < attempts:
-            time.sleep(delay_s)
-    unassigned = {"", "None assigned", "(null)"}
-    return replace(job_status(state, exit_code), nodes=None if nodes in unassigned else nodes)
+        time.sleep(delay_s)
+        status = observe(job)
+    return status
 
 
 def wait_for_log(job: Job, path: Path, *, wait_s: float = 5.0) -> None:

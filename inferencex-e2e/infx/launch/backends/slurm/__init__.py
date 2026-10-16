@@ -16,7 +16,7 @@ import subprocess
 import sys
 import time
 from collections.abc import Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, override
 
@@ -160,16 +160,16 @@ class SlurmBackend(Backend):
         elif job.log is None:
             raise BackendError(f"Slurm job {job.id} has no log to follow")
         else:
-            with event.stage("queue_wait"):
-                cli.wait_for_log(job, job.log)
             with event.stage("run"):
+                cli.wait_for_log(job, job.log)
                 cli.follow_log(job, job.log)
 
     @override
     def state(self, job: Job) -> JobStatus:
         """A container step's exit code; other jobs from squeue while listed, then accounting.
 
-        An ended job's failure is reported and recorded as the launch's.
+        An ended job's failure is reported and recorded as the launch's, with the allocation's
+        accounting times.
         """
         job = _slurm_job(job)
         if job.step is not None:
@@ -177,7 +177,8 @@ class SlurmBackend(Backend):
             if rc is None:
                 return JobStatus(JobState.RUNNING, "srun step running")
             state = JobState.SUCCEEDED if rc == 0 else JobState.FAILED
-            status = JobStatus(state, f"srun exit {rc}", rc if rc >= 0 else 128 - rc)
+            code = rc if rc >= 0 else 128 - rc
+            status = replace(cli.observe(job), state=state, raw=f"srun exit {rc}", exit_code=code)
         elif (queued := cli.queue_state(job)) is not None:
             pending = queued in {"PENDING", "CONFIGURING"}
             return JobStatus(JobState.PENDING if pending else JobState.RUNNING, queued)
@@ -188,8 +189,15 @@ class SlurmBackend(Backend):
 
     def _record_end(self, job: SlurmJob, status: JobStatus) -> None:
         event = self.life.event
-        if status.nodes:
-            event.set(nodes=status.nodes)
+        known = {
+            "nodes": status.nodes,
+            "slurm_submitted_at": status.submitted_at,
+            "slurm_started_at": status.started_at,
+            "slurm_ended_at": status.ended_at,
+        }
+        if status.submitted_at and status.started_at and status.started_at >= status.submitted_at:
+            known["queue_s"] = (status.started_at - status.submitted_at).total_seconds()
+        event.set(**{name: value for name, value in known.items() if value is not None})
         if status.succeeded:
             return
         if job.step is not None:

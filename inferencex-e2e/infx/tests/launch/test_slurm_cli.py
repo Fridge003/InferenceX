@@ -3,6 +3,7 @@
 import json
 import subprocess
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -86,7 +87,16 @@ def test_final_status_maps_allocation_accounting(fake_bin, tmp_path, record, sta
     fake_bin("sacct", f"{recorder(log)}\necho '{record}'")
     status = final_status(Job("42"), delay_s=0)
     assert (status.state, status.exit_code, status.nodes) == (state, exit_code, nodes)
-    assert calls(log) == [["-X", "-n", "-P", "-j", "42", "--format=State,ExitCode,NodeList"]]
+    assert calls(log) == [["-X", "-n", "-P", "-j", "42", "--format=State,ExitCode,NodeList,Submit,Start,End"]]
+
+
+def test_final_status_reads_the_accounting_times_as_epoch_seconds(fake_bin):
+    fake_bin("sacct", 'if [ "$SLURM_TIME_FORMAT" = "%s" ]; then echo "FAILED|1:0|gpu03|1791547200|1791548100|Unknown"; '
+             'else echo "FAILED|1:0|gpu03|2026-10-09T12:00:00|2026-10-09T12:15:00|Unknown"; fi')
+    status = final_status(Job("42"), delay_s=0)
+    assert (status.submitted_at, status.started_at, status.ended_at) == (
+        datetime(2026, 10, 9, 12, 0, tzinfo=UTC), datetime(2026, 10, 9, 12, 15, tzinfo=UTC), None,
+    )
 
 
 @pytest.mark.parametrize("readings,state", [

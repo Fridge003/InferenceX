@@ -135,7 +135,11 @@ def job_event(workspace: Path) -> dict:
 
 def test_single_node_point_stages_workflow_artifacts(harness):
     workspace = harness.workspace
-    env = single_node_env(harness, "h100-cw")
+    env = single_node_env(
+        harness, "h100-cw", FAKE_STATE="COMPLETED|0:0|gpu-01|1791547200|1791548100|1791551700",
+        GITHUB_SERVER_URL="https://github.com", GITHUB_REPOSITORY="o/r", JOB_CHECK_RUN_ID="117051802632",
+        GITHUB_EVENT_NAME="workflow_dispatch", TEST_NAME="wide event", BENCHMARK_REF="feat/x",
+    )  # fmt: skip
     records = yaml.safe_load(harness.config.read_text())
     records["clusters"]["h100-cw"]["slurm"]["srt-slurm"]["fabric"] = {"socket-ifname": ["eth9"]}
     harness.config.write_text(yaml.safe_dump(records))
@@ -170,7 +174,20 @@ def test_single_node_point_stages_workflow_artifacts(harness):
         "slurm_job_id": "42", "outcome": "success", "error": None,
     }  # fmt: skip
     assert {key: event[key] for key in expected} == expected
-    assert list(event["stages"]) == ["prepare", "submit", "queue_wait", "run", "collect"]
+    assert list(event["stages"]) == ["prepare", "submit", "run", "collect"]
+    assert (event["slurm_submitted_at"], event["slurm_started_at"], event["slurm_ended_at"]) == (
+        "2026-10-09T12:00:00Z", "2026-10-09T12:15:00Z", "2026-10-09T13:15:00Z",
+    )
+    assert (event["queue_s"], event["nodes"]) == (900.0, "gpu-01")
+    assert event["versions"]["srt_slurm_sha"] == harness.env["FAKE_SRT_COMMIT"]
+    assert {key: event["topology"][key] for key in ("tp", "ep", "pp", "dp_attn", "gpu_count")} == {
+        "tp": 4, "ep": 1, "pp": 1, "dp_attn": False, "gpu_count": 4,
+    }
+    github = {key: event["github"][key] for key in ("job_url", "event_name", "test_name", "ref")}
+    assert github == {
+        "job_url": "https://github.com/o/r/actions/runs/9001/job/117051802632",
+        "event_name": "workflow_dispatch", "test_name": "wide event", "ref": "feat/x",
+    }
     assert {"point-identity.json", "srt-single-node-logs.tar.gz", "srt-setup.log"} <= set(event["artifacts"])
     assert "recipe.yaml" not in event["artifacts"]
 
@@ -228,8 +245,22 @@ def test_single_node_eval_requires_a_successful_eval(harness):
     assert exit_file.read_text() == "0\n"
 
 
+PIP_FAILURE = (
+    "ERROR: Could not install packages due to an OSError: ('Connection broken: IncompleteRead(0 bytes "
+    "read, 1 more expected)', IncompleteRead(0 bytes read, 1 more expected))"
+)
+SWEEP_LOG = (
+    "[srtctl] INFO Starting sweep job 42\nCollecting sglang-router==0.2.1\n"
+    "WARNING: Retrying (Retry(total=4)) after connection broken by 'ProtocolError('Connection broken')'\n"
+    f"\x1b[31m{PIP_FAILURE}\x1b[0m\n[srtctl] ERROR Worker agg_0 exited with code 1\n"
+    "Traceback (most recent call last):\n  File \"do_sweep.py\", line 412, in run\n"
+    "RuntimeError: worker setup failed\nsrun: error: gpu-01: task 0: Exited with exit code 1\n"
+)
+
+
 def test_single_node_failed_allocation_fails_the_launch(harness):
-    env = single_node_env(harness, "h100-cw", FAKE_STATE="FAILED|1:0|gpu-[01-02]", GITHUB_ACTIONS="true")
+    env = single_node_env(harness, "h100-cw", FAKE_STATE="FAILED|1:0|gpu-[01-02]", GITHUB_ACTIONS="true",
+                          FAKE_SWEEP_LOG=SWEEP_LOG)  # fmt: skip
     result = launch(env, harness.config, harness.workspace)
     assert result.returncode == 1
     assert (harness.workspace / "point-identity.json").is_file()
@@ -243,7 +274,13 @@ def test_single_node_failed_allocation_fails_the_launch(harness):
     }  # fmt: skip
     assert error["evidence"].startswith("srt-single.")
     assert error["evidence"].endswith("/outputs/42/logs/sweep_42.log")
-    annotation = "::error title=run::JobFailed: Slurm job 42 ended with state=FAILED exit_code=1:0\n"
+    cause, heading, *tail = error["detail"].split("\n")
+    assert (cause, heading) == (PIP_FAILURE, "--- last 9 lines ---")
+    assert tail[-1] == "srun: error: gpu-01: task 0: Exited with exit code 1"
+    annotation = (
+        "::error title=run::JobFailed: Slurm job 42 ended with state=FAILED exit_code=1:0%0A"
+        + PIP_FAILURE.replace("%", "%25") + "\n"
+    )
     assert annotation in result.stderr
 
 
@@ -528,7 +565,7 @@ def test_b300_flash_agentx_reenters_inside_a_batch_allocation(harness):
     assert list((harness.tmp / "runner-temp").glob("srt-batch.*.sh")) == []
     event = job_event(harness.workspace)
     assert (event["launch_path"], event["slurm_job_id"], event["batch_job_id"]) == ("srt-batch", "42", "4242")
-    assert {"batch_submit", "batch_queue_wait", "batch_run", "submit", "run"} <= set(event["stages"])
+    assert set(event["stages"]) == {"batch_submit", "batch_run", "prepare", "submit", "run", "collect"}
 
 
 def test_a_failed_batch_wrapped_point_reports_the_wrapped_failure_once(harness):

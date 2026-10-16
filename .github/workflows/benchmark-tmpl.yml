@@ -80,6 +80,16 @@ on:
         type: boolean
         required: false
         default: false
+      pr-number:
+        description: "Pull request whose sweep runs this job; empty for other triggers"
+        required: false
+        type: string
+        default: ""
+      test-name:
+        description: "Name of the dispatched test run; empty for other triggers"
+        required: false
+        type: string
+        default: ""
 env:
   PYTHONPATH: ${{ github.workspace }}/inferencex-e2e
   INFERENCEX_E2E_ROOT: ${{ github.workspace }}
@@ -137,6 +147,9 @@ env:
   RESULT_DIR: /workspace/results
   PYTHONDONTWRITEBYTECODE: '1'
   PYTHONPYCACHEPREFIX: /tmp/inferencex-pycache
+  BENCHMARK_REF: ${{ inputs.ref || github.sha }}
+  PR_NUMBER: ${{ inputs.pr-number }}
+  TEST_NAME: ${{ inputs.test-name }}
 
 permissions:
   contents: read
@@ -257,6 +270,7 @@ jobs:
         env:
           RUNNER_NAME: ${{ runner.name }}
           RUNNER_TYPE: ${{ inputs.runner }}
+          JOB_CHECK_RUN_ID: ${{ job.check_run_id }}
           RESULT_FILENAME_BASE: ${{ env.EXP_NAME }}_${{ env.PRECISION }}_${{ env.FRAMEWORK }}_tp${{ env.TP }}-pp${{ env.PP_SIZE }}-dcp${{ env.DCP_SIZE }}-pcp${{ env.PCP_SIZE }}-ep${{ env.EP_SIZE }}-dpa${{ env.DP_ATTENTION }}_disagg-${{ env.DISAGG }}_spec-${{ env.SPEC_DECODING }}_conc${{ env.CONC }}_${{ runner.name }}
           # Suppress per-job eval markdown from being appended to the step summary.
           # We'll publish a single combined eval table in the collection job instead.

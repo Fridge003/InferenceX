@@ -14,6 +14,9 @@ jobs:
   collect-job-events:
     name: collect-job-events
     runs-on: ubuntu-latest
+    permissions:
+      actions: read # List the run's jobs to record the jobs that wrote no event.
+      contents: read
 
     steps:
       - name: Checkout code
@@ -34,7 +37,10 @@ jobs:
         continue-on-error: true
         env:
           PYTHONPATH: ${{ github.workspace }}/inferencex-e2e
-        run: python3 -m infx.results.collect_events job_events/ events.jsonl
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 -m infx.results.collect_events job_events/ events.jsonl
+          --run "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
 
       - name: Upload job events
         continue-on-error: true

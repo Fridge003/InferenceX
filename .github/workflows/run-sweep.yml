@@ -384,6 +384,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with:
             config: ${{ toJSON(matrix.config) }}
+            pr-number: &pr-number ${{ github.event.pull_request.number }}
             # Only same-repository PRs owned by Klaud receive background priority.
             klaud-run: &klaud-run ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login == 'Klaud-Cold' && (startsWith(github.head_ref, 'klaud/auto-') || startsWith(github.head_ref, 'klaude/auto-')) }}
             runner: ${{ matrix.config.runner }}
@@ -408,6 +409,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with:
             config: ${{ toJSON(matrix.config) }}
+            pr-number: *pr-number
             klaud-run: *klaud-run
             runner: ${{ matrix.config.runner }}
             node-count: ${{ matrix.config.node-count }}
@@ -441,6 +443,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with: &multi-node-inputs
             config: ${{ toJSON(matrix.config) }}
+            pr-number: *pr-number
             klaud-run: *klaud-run
             runner: ${{ matrix.config.runner }}
             node-count: ${{ matrix.config.node-count }}
@@ -491,6 +494,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with: &single-node-inputs
             config: ${{ toJSON(matrix.config) }}
+            pr-number: *pr-number
             klaud-run: *klaud-run
             runner: ${{ matrix.config.runner }}
             priority: ${{ matrix.config.priority }}
@@ -540,6 +544,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with:
             config: ${{ toJSON(matrix.config) }}
+            pr-number: *pr-number
             klaud-run: *klaud-run
             runner: ${{ matrix.config.runner }}
             priority: ${{ matrix.config.priority }}
@@ -571,6 +576,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with:
             config: ${{ toJSON(matrix.config) }}
+            pr-number: *pr-number
             klaud-run: *klaud-run
             runner: ${{ matrix.config.runner }}
             node-count: ${{ matrix.config.node-count }}
@@ -605,6 +611,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with:
             config: ${{ toJSON(matrix.config) }}
+            pr-number: *pr-number
             klaud-run: *klaud-run
             runner: ${{ matrix.config.runner }}
             priority: ${{ matrix.config.priority }}
@@ -639,6 +646,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with:
             config: ${{ toJSON(matrix.config) }}
+            pr-number: *pr-number
             klaud-run: *klaud-run
             runner: ${{ matrix.config.runner }}
             priority: ${{ matrix.config.priority }}
@@ -672,6 +680,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with:
             config: ${{ toJSON(matrix.config) }}
+            pr-number: *pr-number
             klaud-run: *klaud-run
             runner: ${{ matrix.config.runner }}
             node-count: ${{ matrix.config.node-count }}
@@ -711,6 +720,7 @@ jobs:
             INFERENCEX_OFFICIAL_RO_HF_TOKEN: ${{ secrets.INFERENCEX_OFFICIAL_RO_HF_TOKEN }}
         with:
             config: ${{ toJSON(matrix.config) }}
+            pr-number: *pr-number
             klaud-run: *klaud-run
             runner: ${{ matrix.config.runner }}
             node-count: ${{ matrix.config.node-count }}
@@ -786,6 +796,9 @@ jobs:
                 sweep-multi-node-agentic-evals,
             ]
         if: ${{ !cancelled() && needs.setup.result == 'success' }}
+        permissions:
+            actions: read # List the run's jobs to record the jobs that wrote no event.
+            contents: read
         uses: $/.github/workflows/collect-job-events.yml
         with:
             tooling-ref: ${{ needs.setup.outputs.tooling-ref }}
