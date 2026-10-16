@@ -912,7 +912,7 @@ def extract_replay(trace, captured, rank, window, step_log, copies, clocks, rout
         key = step_key(row.get("marks") or {})
         row["step"] = list(key) if key else None
         by_step[key].append(row)
-    place_by_device_time(by_step)
+    placed = place_by_device_time(by_step)
 
     rank_dir = os.path.join(out_dir, f"window{window}", str(rank))
     os.makedirs(rank_dir, exist_ok=True)
@@ -948,7 +948,7 @@ def extract_replay(trace, captured, rank, window, step_log, copies, clocks, rout
         })
     entry = {
         "trace": os.path.basename(trace.path), "rank": rank, "window": window,
-        "device_activities": len(rows), "unattributed": unattributed,
+        "device_activities": len(rows), "unattributed": unattributed, "unattributed_in_steps": placed,
         "graph_replays": dict(graph_checks),
         "sources": dict(collections.Counter(r["source"] for r in rows)),
         "steps": sum(1 for k in by_step if k is not None),
@@ -964,7 +964,7 @@ def place_by_device_time(by_step):
     spans = sorted((min(r["ts_us"] for r in rows), max(r["ts_us"] + r["dur_us"] for r in rows), key)
                    for key, rows in by_step.items() if key is not None and rows)
     if not loose or not spans:
-        return
+        return 0
     starts = [s for s, _, _ in spans]
     kept = []
     for row in loose:
@@ -978,6 +978,7 @@ def place_by_device_time(by_step):
     by_step[None] = kept
     if not kept:
         del by_step[None]
+    return len(loose) - len(kept)
 
 
 def stream_successors(trace):
