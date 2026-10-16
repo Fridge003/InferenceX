@@ -23,6 +23,8 @@ class Step:
 
                 self.rf = torch.autograd.profiler.record_function(f"infx_{self.kind}#{self.k}")
                 self.rf.__enter__()
+                if self.kind == "step":
+                    routing.reset()
             except Exception:
                 self.rf = None
         return self.record

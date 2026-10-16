@@ -95,6 +95,16 @@ def capture(layer_id, topk_ids):
         _copy(buf, topk_ids, layer_id)
 
 
+def reset():
+    """Clear the buffer before a step, so a step never reports rows an earlier one wrote."""
+    if _s.buffer is None or not _s.write:
+        return
+    import torch
+
+    with torch.autograd.profiler.record_function("infx_routing_reset"):
+        _s.buffer.fill_(-1)
+
+
 def snapshot(step, num_tokens, t0_ns):
     """Queue this step's routing rows for the host (asynchronous)."""
     if _s.buffer is None or not _s.write or not num_tokens:
@@ -130,7 +140,9 @@ def flush():
         for layer in range(ids.shape[1]):
             valid = ids[:, layer][ids[:, layer] >= 0]
             counts[layer] = np.bincount(valid, minlength=experts)[:experts]
-        arrays = {"counts": counts, "t0_ns": np.array(t0_ns), "tokens": np.array(num_tokens)}
+        valid_rows = int((ids >= 0).any(axis=(1, 2)).sum())
+        arrays = {"counts": counts, "t0_ns": np.array(t0_ns), "tokens": np.array(num_tokens),
+                  "valid_rows": np.array(valid_rows)}
         if num_tokens <= IDS_MAX_TOKENS:
             arrays["ids"] = ids.astype(np.int16)
         np.savez_compressed(os.path.join(out_dir, f"step{step:06d}.npz"), **arrays)

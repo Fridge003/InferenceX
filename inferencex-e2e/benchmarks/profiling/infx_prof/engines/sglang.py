@@ -343,6 +343,9 @@ def setup_routing(runner, bound=None):
         attn_tp_rank = int(getattr(runner, "tp_rank", 0) or 0)
     extra = {"source": "sglang TopK outputs; bypassed routing recomputed with select_experts"}
     write = attn_tp_rank == 0
+    if getattr(args, "enable_layernorm_sp", False):
+        write = True
+        extra["token_shards"] = True
     gathered = bool(getattr(args, "enable_dp_attention", False)) and getattr(args, "moe_a2a_backend", "none") in (
         None, "none")
     if gathered:

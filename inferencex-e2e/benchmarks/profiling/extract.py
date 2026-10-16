@@ -334,6 +334,11 @@ def load_routing(profile_dir):
         with open(meta_path) as f:
             meta = json.load(f)
         found[meta["rank"]] = (os.path.dirname(meta_path), meta)
+    for rank, (path, meta) in found.items():
+        if meta.get("token_shards"):
+            group = re.sub(r"_tp\d+$", "", rank)
+            meta["_shard_paths"] = sorted(p for r, (p, m) in found.items()
+                                          if m.get("token_shards") and re.sub(r"_tp\d+$", "", r) == group)
     routing = {}
     for rank, (path, meta) in found.items():
         source = rank if meta.get("write") else re.sub(r"_tp\d+$", "_tp0", rank)
@@ -352,6 +357,19 @@ def step_routing(routing, step, out_dir):
         return None
     arrays = read_npz(npz)
     (layers, experts), counts = arrays["counts"]
+    tokens = arrays["tokens"][1][0]
+    valid = arrays["valid_rows"][1][0] if "valid_rows" in arrays else tokens
+    shards = 1
+    if meta.get("_shard_paths") and valid < tokens:
+        counts = list(counts)
+        for other in meta["_shard_paths"]:
+            other_npz = os.path.join(other, f"step{step:06d}.npz")
+            if other == path or not os.path.exists(other_npz):
+                continue
+            (_, other_experts), other_counts = read_npz(other_npz)["counts"]
+            if other_experts == experts:
+                counts = [a + b for a, b in zip(counts, other_counts)]
+                shards += 1
     names = meta.get("bound", {})
     per_layer = {}
     for layer in range(layers):
@@ -362,7 +380,7 @@ def step_routing(routing, step, out_dir):
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     if not os.path.exists(dest):
         shutil.copyfile(npz, dest)
-    return {"source_rank": source, "tokens": arrays["tokens"][1][0], "topk": meta.get("topk"),
+    return {"source_rank": source, "tokens": tokens, "token_shards": shards, "topk": meta.get("topk"),
             "num_experts": meta.get("num_experts"), "has_ids": "ids" in arrays,
             "file": os.path.relpath(dest, out_dir), "expert_tokens": per_layer}
 
@@ -628,7 +646,7 @@ def energy_check(track):
     return out
 
 
-PROFILER_MARKERS = ("infx_routing_copy",)
+PROFILER_MARKERS = ("infx_routing",)
 COPY_LAUNCHER = "vllm.v1.simple_kv_offload.copy_backend.DmaCopyBackend.launch_copy"
 COPY_MAX_LAG_US = 60e6
 COPY_MAX_SPLIT = 8
