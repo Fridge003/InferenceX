@@ -12,6 +12,7 @@ for patch_name in \
     2454c49e76-online-routed-projection.patch \
     kda-online-quant-padding.patch \
     quantized-latent-moe-tail.patch \
+    mooncake-speculative-save-boundary.patch \
     60948-flashinfer-0.7.1.patch; do
     patch_file="$(mktemp)"
     awk '/^diff --git / {keep=($3 ~ /^a\/vllm\//)} keep' "$patch_dir/$patch_name" > "$patch_file"
