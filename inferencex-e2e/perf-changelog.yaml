@@ -9944,4 +9944,4 @@
     - "The branch's optimizations are default-off SGLANG_Q35MF_* switches; each point sets only the switches in its recipe."
     - "MTP runs six draft steps with the checkpoint's shipped BF16 draft head: no speculative-draft-model-quantization and no SGLANG_NVFP4_CKPT_FP8_NEXTN_MOE."
     - "The disaggregated points build Dynamo at b208989fbe. It includes e18e53fa3c, which registers every attention-DP rank with this SGLang version; e18e53fa3c itself pins an unpublished crate and does not build from source."
-  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/XXX
+  pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4162
