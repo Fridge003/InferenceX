@@ -224,14 +224,21 @@ def _run_multinode_docker(
     image = run.request.image.replace("#", "/", 1)
     # One task on every node: without --nodes, srun puts its single task on one.
     every = [f"--nodes={len(hosts)}", "--ntasks-per-node=1"]
+    # srtctl removes its containers when it exits, but a killed srtctl leaves them running past
+    # the allocation, so clear them over ssh (as srtctl reaches the nodes), not through srun.
+    leftovers = "docker ps -aq --filter label=srtctl.job | xargs -r docker rm -f"
+
+    def clear() -> None:
+        for host in hosts:
+            subprocess.run(["ssh", "-n", "-o", "BatchMode=yes", host, leftovers], check=False)
+
+    clear()
     if cli.srun(allocation, ["docker", "pull", "--quiet", image], extra=every):
         return 1
     # Containers run as root: hand their outputs back so the runner can clean its workspace.
     owner = f"{os.getuid()}:{os.getgid()}"
     chown = ["docker", "run", "--rm", "--user", "0:0", "--entrypoint", "chown"]
     chown += ["-v", f"{run.workspace}:/w", image]
-    # srtctl removes its containers when it exits; a killed srtctl leaves them on the nodes.
-    leftovers = "docker ps -aq --filter label=srtctl.job | xargs -r docker rm -f"
     first = ["--nodes=1", "--ntasks=1", f"--nodelist={hosts[0]}"]
     # DNM: h200 nodes have no timedatectl/chronyc/ntpq, so the NTP probe always fails.
     no_clock = ["--set", "telemetry.clock_sync_check=false"]
@@ -245,7 +252,7 @@ def _run_multinode_docker(
                 step, env=env, cwd=checkout.root, stdout=handle, check=False
             ).returncode
     finally:
-        cli.srun(allocation, ["bash", "-c", leftovers], extra=every)
+        clear()
         cli.srun(allocation, [*chown, "-R", owner, "/w"], extra=first)
     outputs = Path(rendered.get("output_dir", checkout.root / "outputs"))
     jobs = sorted(outputs.glob("docker-*"), key=lambda path: path.stat().st_mtime)
