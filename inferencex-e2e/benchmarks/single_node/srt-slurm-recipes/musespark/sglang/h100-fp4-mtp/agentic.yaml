@@ -78,9 +78,10 @@ zip_override_tp8_hicache:
         cuda-graph-max-bs-decode: [2, 4, 8, 8]
         enable-hierarchical-cache: true
         hicache-size: 160
-        # HiCache consumed the ~1 GB of free memory left at 0.97, which OOMed at c4;
-        # the host pool backs the smaller GPU KV pool.
-        mem-fraction-static: 0.95
+        # 0.97 left ~1.3 GB free and HiCache's serving buffers OOMed it at c4; 0.95
+        # shrank the GPU KV pool to ~98k tokens, below the trace's ~196k-token
+        # inputs. 0.965 keeps ~1.8 GB free and a ~250k-token pool.
+        mem-fraction-static: 0.965
   benchmark:
     env:
       CONC: ['1', '2', '4', '8']

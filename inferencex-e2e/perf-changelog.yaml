@@ -10020,5 +10020,5 @@
     - agentic-coding
   description:
     - "Run every point with HiCache host-DRAM KV offload at 160 GB per rank, sweeping concurrency 1, 2, 4 and 8; drop the GPU-resident arm and the concurrency 16 queueing point."
-    - "Keep the batch-8 cap on running requests and decode graphs, and lower mem-fraction-static from 0.97 to 0.95: with HiCache attached, concurrency 4 ran out of GPU memory in the MoE during warmup once free memory fell from 0.88 GiB to 0.02 GiB."
+    - "Keep the batch-8 cap on running requests and decode graphs, and lower mem-fraction-static from 0.97 to 0.965: with HiCache attached, 0.97 ran out of GPU memory in the MoE at concurrency 4, while 0.95 shrank the GPU KV pool to 98k tokens and rejected the trace's ~196k-token inputs."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4182
