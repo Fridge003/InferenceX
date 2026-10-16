@@ -92,12 +92,38 @@ base:
 
 # One TP4 prefill worker keeps about 32 sessions' prefixes hot; one TP4 decode
 # worker's KV pool holds about 64 sessions. Size the P:D ratio to the concurrency.
+# A 1P1D pair is decode-KV bound from c32. Smaller decode graphs and a smaller SWA pool
+# (40 running requests need ~90K window tokens) leave more of HBM to full-attention KV.
 override_1p1d_p-tp4_d-tp4:
   roles:
     decode:
       args:
-        max-running-requests: 64
-        cuda-graph-max-bs-decode: 64
+        mem-fraction-static: 0.895
+        swa-full-tokens-ratio: 0.05
+        max-running-requests: 40
+        cuda-graph-max-bs-decode: 40
+
+# KV moves between equal TP sizes only. TP8 halves the weights per GPU; SGLang sizes
+# the target KV pool without the matching DFlash draft pool or the cross-node MegaMoE
+# buffer, so both roles cap it at 10M tokens.
+override_1p1d_p-tp8_d-tp8:
+  roles:
+    prefill:
+      nodes: 2
+      gpus: 8
+      args:
+        tensor-parallel-size: 8
+        expert-parallel-size: 8
+        max-total-tokens: 10000000
+    decode:
+      nodes: 2
+      gpus: 8
+      args:
+        tensor-parallel-size: 8
+        expert-parallel-size: 8
+        max-total-tokens: 10000000
+        max-running-requests: 160
+        cuda-graph-max-bs-decode: 160
 
 override_2p1d_p-tp4_d-tp4:
   roles:
