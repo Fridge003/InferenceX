@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-source /infmax-workspace/benchmarks/check_env.sh
-check_env_vars TOKENSPEED_MLA_VERSION
-
 patch_dir="$(dirname "$(readlink -f "$0")")/kimik3-optimizations"
 package_root="$(python3 -c 'import importlib.util; from pathlib import Path; print(Path(importlib.util.find_spec("vllm").origin).resolve().parent.parent)')"
 cd "$package_root"
@@ -26,4 +23,4 @@ for patch_name in \
     fi
 done
 
-uv pip install --system --no-deps "tokenspeed-mla==$TOKENSPEED_MLA_VERSION"
+uv pip install --system --no-deps tokenspeed-mla==2.0.3

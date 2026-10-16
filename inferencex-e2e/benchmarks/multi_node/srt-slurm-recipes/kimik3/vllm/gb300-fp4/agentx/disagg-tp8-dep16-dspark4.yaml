@@ -7,8 +7,6 @@ base:
     frameworks:
       dynamo: ffbbaaa6c44370e798687881317535ac17d66a76
   setup_script: kimik3-optimizations.sh
-  environment:
-    TOKENSPEED_MLA_VERSION: "2.0.3"
 
   dynamo:
     install: true
