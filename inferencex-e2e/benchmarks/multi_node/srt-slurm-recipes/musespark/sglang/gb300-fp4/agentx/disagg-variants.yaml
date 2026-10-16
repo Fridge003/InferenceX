@@ -104,8 +104,9 @@ base:
         speculative-draft-attention-backend: fa4
         speculative-num-draft-tokens: 8
         mm-feature-transport: cpu
-        # Host pool for KV that no longer fits in HBM (retracted requests swap here).
-        enable-hierarchical-cache: true
+        # Decode keeps no radix cache, so its HiCache tier is the host pool that holds
+        # the KV of requests retracted when HBM fills.
+        disaggregation-decode-retraction-backup: host_pool
         hicache-size: 120
         disaggregation-transfer-backend: mooncake
         watchdog-timeout: 3600
