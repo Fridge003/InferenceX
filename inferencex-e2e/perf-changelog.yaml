@@ -10059,6 +10059,6 @@
     - agentic-coding
   description:
     - "Set swa-full-tokens-ratio to 0.1 for every Muse Spark Open B200 SGLang AgentX concurrency point."
-    - "Raise concurrency 48 to 16384 MegaMoE tokens per rank and 180 GB of HiCache per rank."
-    - "Add TP8/EP8 concurrency 64 with layernorm sequence parallelism, MegaMoE, and HiCache DRAM offload, using 16384 MegaMoE tokens per rank and 180 GB of HiCache per rank."
+    - "Raise concurrency 48 to 16384 MegaMoE tokens per rank, keeping HiCache at 160 GB per rank."
+    - "Add TP8/EP8 concurrency 64 with layernorm sequence parallelism, MegaMoE, and HiCache DRAM offload, using 16384 MegaMoE tokens per rank and 160 GB of HiCache per rank."
   pr-link: https://github.com/SemiAnalysisAI/InferenceX/pull/4221
