@@ -31,7 +31,7 @@ base:
         max-running-requests: 192
         cuda-graph-max-bs-decode: 128
         cuda-graph-backend-prefill: breakable
-        swa-full-tokens-ratio: 0.1
+        swa-full-tokens-ratio: 0.2
         # DFlash2 verifies 8 tokens per step: the current token plus 7 drafts.
         speculative-algorithm: DFLASH
         speculative-draft-model-path: RadixArk/Muse-Spark-Open-DFlash2
